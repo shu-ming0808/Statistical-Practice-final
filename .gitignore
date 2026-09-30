@@ -3,7 +3,37 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ipynb_checkpoints/
+.csv
 .env
 .env.*
 !.env.example
 /data/臺北捷運每日分時各站OD流量統計資料_201701.csv
+
+# SQL files, database exports and local credentials stay private
+*.sql
+*.sql.gz
+*.sql.zip
+*.dump
+*.dump.gz
+*.sqlite
+*.sqlite3
+*.db
+*.dpapi
+/backups/
+/data/private/
+
+# Local source data, generated analysis artifacts and verified migration backup
+/.local/
+/data/original_data/*.csv
+/data/original_data/qsearch/
+/data/original_data/threads/
+/results/threads/
+/data/original_data/ptt/
+/results/ptt/
+/data/interim/*
+!/data/interim/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/data/trends/
+/results/pdf/
+/results/preprocessing/
