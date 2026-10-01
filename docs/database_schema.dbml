@@ -1,0 +1,384 @@
+// 整份貼到 https://dbdiagram.io 的 DBML 編輯區。
+// VIEW 以 Table 方框顯示並另行分組，沒有虛構 PK/FK；關係線只代表實際 FK。
+// MySQL 生成欄位、ON UPDATE 與字元排序規則以註記呈現；實際重建仍以 SQL 為準。
+
+Project taipei_metro_analysis {
+  database_type: 'MySQL'
+  Note: '大稻埕活動、北捷原始 OD、分析表、Google Trends 與氣象資料。11 張實體資料表及 2 張檢視表。'
+}
+
+Enum dadaocheng_fireworks_events_event_status_enum {
+  "held"
+  "cancelled"
+  "postponed"
+}
+
+Enum dadaocheng_fireworks_events_transfer_type_enum {
+  "rescheduled"
+  "merged"
+}
+
+Enum event_weather_station_station_role_enum {
+  "primary"
+  "robustness"
+}
+
+Enum google_trends_imports_time_basis_enum {
+  "UTC"
+  "Asia/Taipei"
+}
+
+Enum google_trends_imports_source_kind_enum {
+  "explore_csv"
+  "explore_web_json"
+}
+
+Enum google_trends_imports_source_resolution_enum {
+  "DAY"
+  "HOUR"
+}
+
+Enum weather_observation_time_alignment_status_enum {
+  "source_label"
+  "end_of_day_unverified"
+}
+
+Table analysis_event_station_hourly {
+  event_date date [not null]
+  hour_start datetime [not null, note: 'Asia/Taipei，原資料時段；非經確認的出站刷卡時間']
+  station varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  origin_count "bigint unsigned"
+  destination_count_same_source_bin "bigint unsigned"
+  origin_complete tinyint(1) [not null]
+  destination_complete tinyint(1) [not null]
+  out_degree_excluding_self "smallint unsigned"
+  in_degree_excluding_self "smallint unsigned"
+  baseline_origin_mean_28d double
+  baseline_n_days "tinyint unsigned" [not null]
+  origin_lag_7d "bigint unsigned"
+  source_run_sha256 char(64) [not null, note: 'collation=ascii_general_ci']
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: 'MySQL ON UPDATE CURRENT_TIMESTAMP']
+
+  indexes {
+    (station, hour_start) [name: 'ix_analysis_station_time']
+    (event_date, hour_start, station) [pk]
+  }
+
+  Note: '活動站點逐時長表；NULL 表示來源無該站時段或 OD 不完整'
+}
+
+Table analysis_event_station_window {
+  event_date date [not null]
+  station varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  window_start_hour "smallint unsigned" [not null]
+  window_end_hour_exclusive "smallint unsigned" [not null]
+  expected_hours "smallint unsigned" [not null]
+  observed_origin_hours "smallint unsigned" [not null]
+  observed_destination_hours "smallint unsigned" [not null]
+  origin_count_window "bigint unsigned"
+  destination_count_window "bigint unsigned"
+  peak_origin_hour_count "bigint unsigned"
+  baseline_origin_window double
+  baseline_min_days "tinyint unsigned" [not null]
+  origin_window_complete tinyint(1) [not null]
+  source_run_sha256 char(64) [not null, note: 'collation=ascii_general_ci']
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: 'MySQL ON UPDATE CURRENT_TIMESTAMP']
+
+  indexes {
+    station [name: 'fk_analysis_window_station']
+    (event_date, station, window_start_hour, window_end_hour_exclusive) [pk]
+  }
+
+  checks {
+    `((window_start_hour < window_end_hour_exclusive) and (window_end_hour_exclusive <= 48))` [name: 'chk_analysis_window']
+  }
+
+  Note: '活動站點固定視窗總量；24以上表示隔日，結束時刻不含'
+}
+
+Table analysis_station_label {
+  station varchar(64) [pk, not null, note: 'collation=utf8mb4_bin']
+  first_seen_date date [not null]
+  last_seen_date date [not null]
+  seen_as_origin tinyint(1) [not null]
+  seen_as_destination tinyint(1) [not null]
+
+  Note: '原檔站名標籤；尚未合併為實體車站'
+}
+
+Table dadaocheng_fireworks_events {
+  event_date date [pk, not null, note: '原訂或實際煙火日期；取消、延期仍保留原日期']
+  event_name varchar(120) [not null, note: '市府活動名稱；collation=utf8mb4_0900_ai_ci']
+  event_status dadaocheng_fireworks_events_event_status_enum [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  announced_show_start_time time [note: '官方公布的展演開始時間；不保證是煙火第一發時刻']
+  fireworks_duration_seconds "smallint unsigned" [note: '實際施放的煙火秒數；未施放則 NULL']
+  combined_show_duration_seconds "smallint unsigned" [note: '煙火加無人機／水幕的總展演秒數；與煙火秒數分開']
+  has_drone_show tinyint(1) [note: '實際無人機演出：1 有、0 已確認無、NULL 未核實']
+  related_activities json [note: '同日已查證的其他活動；NULL 表示尚未核實']
+  not_held_reason varchar(255) [note: '取消或延期原因；實際施放時為 NULL；collation=utf8mb4_0900_ai_ci']
+  transferred_to_date date [note: '延期至／取消內容併入的實際煙火日期']
+  transfer_type dadaocheng_fireworks_events_transfer_type_enum [note: 'rescheduled=整場改期；merged=煙火內容併入其他場；collation=utf8mb4_0900_ai_ci']
+  notes varchar(500) [note: '人流分析應注意的差異或時間精度；collation=utf8mb4_0900_ai_ci']
+  official_source_url varchar(1000) [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  secondary_source_url varchar(1000) [note: 'collation=utf8mb4_0900_ai_ci']
+  verified_on date [not null]
+
+  indexes {
+    (event_status, event_date) [name: 'ix_fireworks_status_date']
+    transferred_to_date [name: 'ix_transferred_to_date']
+  }
+
+  checks {
+    `((has_drone_show in (0,1)) or (has_drone_show is null))` [name: 'chk_dadaocheng_drone']
+    `(((event_status = _utf8mb4'held') and (not_held_reason is null) and (fireworks_duration_seconds is not null)) or ((event_status in (_utf8mb4'cancelled',_utf8mb4'postponed')) and (not_held_reason is not null) and (fireworks_duration_seconds is null)))` [name: 'chk_dadaocheng_status_reason']
+    `(((transferred_to_date is null) and (transfer_type is null)) or ((transferred_to_date is not null) and (transfer_type is not null) and (transferred_to_date <> event_date)))` [name: 'chk_dadaocheng_transfer']
+  }
+
+  Note: '2017–2026 大稻埕官方煙火原訂及實際場次，不含純音樂會'
+}
+
+Table event_trends_features {
+  event_date date [not null]
+  query_text varchar(120) [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  geo_code varchar(16) [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  import_id "bigint unsigned" [not null]
+  interest_1d decimal(7,4) [not null, note: 'D-1 的每日指標']
+  interest_3d_avg decimal(7,4) [not null, note: 'D-3 到 D-1 的算術平均']
+  interest_7d_avg decimal(7,4) [not null, note: 'D-7 到 D-1 的算術平均']
+  computed_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: 'MySQL ON UPDATE CURRENT_TIMESTAMP']
+
+  indexes {
+    import_id [name: 'ix_event_trends_import']
+    (event_date, query_text, geo_code) [pk]
+  }
+
+  checks {
+    `((interest_1d between 0 and 100) and (interest_3d_avg between 0 and 100) and (interest_7d_avg between 0 and 100))` [name: 'chk_event_trends_values']
+  }
+
+  Note: '原訂及實際煙火日前1、3、7日指標；活動狀態由事件表取得'
+}
+
+Table event_weather_station {
+  event_date date [not null]
+  station_id varchar(10) [not null, note: 'collation=ascii_bin']
+  station_role event_weather_station_station_role_enum [not null, note: 'collation=utf8mb4_bin']
+  station_role_raw varchar(255) [not null, note: 'collation=utf8mb4_bin']
+  distance_to_dadaocheng_km decimal(8,3) [not null]
+  primary_event_date date [note: 'MySQL STORED 生成欄位，不用手動填：(case when (`station_role` = _utf8mb4\'primary\') then `event_date` else NULL end)']
+
+  indexes {
+    station_id [name: 'fk_weather_event_station']
+    (event_date, station_id) [pk]
+    primary_event_date [name: 'uq_weather_primary_event', unique]
+  }
+
+  checks {
+    `(distance_to_dadaocheng_km >= 0)` [name: 'chk_weather_distance']
+  }
+
+  Note: '活動採用測站；每活動最多一個primary，觀測表可獨立存一般日；primary_event_date 是 STORED 生成欄位，UNIQUE 限制每個活動最多一個主要站。'
+}
+
+Table google_trends_daily {
+  import_id "bigint unsigned" [not null]
+  search_date date [not null, note: '日界線見 google_trends_imports.time_basis']
+  interest_score decimal(7,4) [not null, note: '來源日指標或24個小時指標平均；非搜尋次數']
+  samples_in_day "tinyint unsigned" [not null, default: 1]
+
+  indexes {
+    (import_id, search_date) [pk]
+  }
+
+  checks {
+    `(samples_in_day in (1,24))` [name: 'chk_trends_samples']
+    `(interest_score between 0 and 100)` [name: 'chk_trends_score']
+  }
+
+  Note: 'Google Trends 每日指標；原始小時資料保存在來源JSON快取'
+}
+
+Table google_trends_imports {
+  import_id "bigint unsigned" [pk, not null, increment]
+  query_year "smallint unsigned" [not null]
+  query_text varchar(120) [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  geo_code varchar(16) [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  period_start date [not null]
+  period_end date [not null]
+  source_sha256 char(64) [not null, note: 'collation=ascii_bin']
+  source_url varchar(1500) [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  time_basis google_trends_imports_time_basis_enum [not null, default: 'Asia/Taipei', note: 'collation=utf8mb4_0900_ai_ci']
+  imported_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  source_kind google_trends_imports_source_kind_enum [not null, default: 'explore_csv', note: 'collation=utf8mb4_0900_ai_ci']
+  source_resolution google_trends_imports_source_resolution_enum [not null, default: 'DAY', note: 'collation=utf8mb4_0900_ai_ci']
+
+  indexes {
+    (query_year, query_text, geo_code, period_start, period_end, source_sha256) [name: 'uq_trends_import', unique]
+  }
+
+  checks {
+    `(period_start <= period_end)` [name: 'chk_trends_period']
+  }
+
+  Note: 'Google Trends 每份來源快照一列；每次查詢各自正規化'
+}
+
+Table original_data {
+  id "bigint unsigned" [pk, not null, increment]
+  date_raw char(10) [not null, note: 'CSV 日期，尚未清理；collation=utf8mb4_0900_ai_ci']
+  hour_raw char(2) [not null, note: 'CSV 時段，尚未清理；collation=utf8mb4_0900_ai_ci']
+  entry_station_raw varchar(64) [not null, note: 'CSV 進站，尚未清理；collation=utf8mb4_0900_ai_ci']
+  exit_station_raw varchar(64) [not null, note: 'CSV 出站，尚未清理；collation=utf8mb4_0900_ai_ci']
+  passenger_count_raw varchar(20) [not null, note: 'CSV 人次，尚未清理；collation=utf8mb4_0900_ai_ci']
+  source_month char(6) [not null, note: '來源檔年月 YYYYMM；collation=utf8mb4_0900_ai_ci']
+  source_row "bigint unsigned" [not null, note: '來源 CSV 的資料列號，自 1 起算，不含標頭']
+  imported_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (date_raw, hour_raw, entry_station_raw) [name: 'ix_original_station_time']
+    (source_month, source_row) [name: 'uq_original_source', unique]
+  }
+
+  Note: '臺北捷運逐日分時站間 OD 原始資料；不可在此表直接清理或覆蓋；由 Python 清理、彙總後寫入 analysis_*，這是資料處理流程，沒有實際 FK。'
+}
+
+Table weather_observation {
+  station_id varchar(10) [not null, note: 'collation=ascii_bin']
+  observed_at datetime [not null, note: 'Asia/Taipei 原檔時間標籤；未確認各要素的代表區間']
+  datetime_tst_raw varchar(32) [not null, note: 'collation=utf8mb4_bin']
+  time_alignment_status weather_observation_time_alignment_status_enum [not null, note: 'collation=utf8mb4_bin']
+  air_temperature_c decimal(7,3)
+  temperature_quality_flag varchar(64) [note: 'collation=utf8mb4_bin']
+  hourly_precipitation_mm decimal(9,3)
+  precipitation_raw_value varchar(64) [note: 'collation=utf8mb4_bin']
+  precipitation_status varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  precipitation_quality_flag varchar(64) [note: 'collation=utf8mb4_bin']
+  mean_wind_speed_m_s decimal(7,3)
+  wind_speed_quality_flag varchar(64) [note: 'collation=utf8mb4_bin']
+  total_cloud_amount_tenths decimal(5,3)
+  cloud_measurement_type varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  cloud_status varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  cloud_method_review_required tinyint(1) [not null, note: '2026年前衛星標記待查來源；不表示數值錯誤']
+  source varchar(255) [not null, note: 'collation=utf8mb4_bin']
+  source_file_sha256 char(64) [not null, note: 'collation=ascii_bin']
+  source_row_number "int unsigned" [not null, note: 'CSV資料列序號；不含表頭，從1開始']
+  imported_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    observed_at [name: 'ix_weather_observed_at']
+    (station_id, observed_at) [pk]
+  }
+
+  checks {
+    `(total_cloud_amount_tenths between 0 and 10)` [name: 'chk_weather_cloud']
+    `(cloud_method_review_required in (0,1))` [name: 'chk_weather_cloud_review']
+    `(hourly_precipitation_mm >= 0)` [name: 'chk_weather_rain']
+    `(source_row_number > 0)` [name: 'chk_weather_source_row']
+    `(mean_wind_speed_m_s >= 0)` [name: 'chk_weather_wind']
+  }
+
+  Note: '每測站每時間一筆；缺值保留NULL，不推定為0'
+}
+
+Table weather_station {
+  station_id varchar(10) [pk, not null, note: 'collation=ascii_bin']
+  station_name varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  county varchar(64) [not null, note: 'collation=utf8mb4_bin']
+
+  Note: '氣象測站；代碼不可連到捷運站名表'
+}
+
+Table v_regression_event_station {
+  event_date date [not null]
+  station varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  window_start_hour "smallint unsigned" [not null]
+  window_end_hour_exclusive "smallint unsigned" [not null]
+  expected_hours "smallint unsigned" [not null]
+  observed_origin_hours "smallint unsigned" [not null]
+  observed_destination_hours "smallint unsigned" [not null]
+  origin_count_window "bigint unsigned"
+  destination_count_window "bigint unsigned"
+  peak_origin_hour_count "bigint unsigned"
+  baseline_origin_window double
+  baseline_min_days "tinyint unsigned" [not null]
+  origin_window_complete tinyint(1) [not null]
+  source_run_sha256 char(64) [not null, note: 'collation=ascii_general_ci']
+  updated_at timestamp [not null]
+  event_name varchar(120) [not null, note: '市府活動名稱；collation=utf8mb4_0900_ai_ci']
+  observed_event_status dadaocheng_fireworks_events_event_status_enum [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  observed_has_drone_show tinyint(1) [note: '實際無人機演出：1 有、0 已確認無、NULL 未核實']
+  interest_1d decimal(7,4) [note: 'D-1 的每日指標']
+  interest_3d_avg decimal(7,4) [note: 'D-3 到 D-1 的算術平均']
+  interest_7d_avg decimal(7,4) [note: 'D-7 到 D-1 的算術平均']
+  trends_missing int [not null]
+  trends_cross_event_calibrated int [not null]
+  origin_excess_vs_baseline double
+
+  Note: 'VIEW 檢視表，不是實體資料表；依查詢即時計算，沒有實體 PK/FK。來源：analysis_event_station_window、dadaocheng_fireworks_events、event_trends_features'
+}
+
+Table v_regression_station_hourly {
+  event_date date [not null]
+  hour_start datetime [not null, note: 'Asia/Taipei，原資料時段；非經確認的出站刷卡時間']
+  station varchar(64) [not null, note: 'collation=utf8mb4_bin']
+  origin_count "bigint unsigned"
+  destination_count_same_source_bin "bigint unsigned"
+  origin_complete tinyint(1) [not null]
+  destination_complete tinyint(1) [not null]
+  out_degree_excluding_self "smallint unsigned"
+  in_degree_excluding_self "smallint unsigned"
+  baseline_origin_mean_28d double
+  baseline_n_days "tinyint unsigned" [not null]
+  origin_lag_7d "bigint unsigned"
+  source_run_sha256 char(64) [not null, note: 'collation=ascii_general_ci']
+  updated_at timestamp [not null]
+  event_name varchar(120) [not null, note: '市府活動名稱；collation=utf8mb4_0900_ai_ci']
+  observed_event_status dadaocheng_fireworks_events_event_status_enum [not null, note: 'collation=utf8mb4_0900_ai_ci']
+  observed_has_drone_show tinyint(1) [note: '實際無人機演出：1 有、0 已確認無、NULL 未核實']
+  interest_1d decimal(7,4) [note: 'D-1 的每日指標']
+  interest_3d_avg decimal(7,4) [note: 'D-3 到 D-1 的算術平均']
+  interest_7d_avg decimal(7,4) [note: 'D-7 到 D-1 的算術平均']
+  trends_missing int [not null]
+  trends_cross_event_calibrated int [not null]
+
+  Note: 'VIEW 檢視表，不是實體資料表；依查詢即時計算，沒有實體 PK/FK。來源：analysis_event_station_hourly、dadaocheng_fireworks_events、event_trends_features'
+}
+
+Ref fk_analysis_hour_event: analysis_event_station_hourly.event_date > dadaocheng_fireworks_events.event_date [delete: no action, update: no action]
+Ref fk_analysis_hour_station: analysis_event_station_hourly.station > analysis_station_label.station [delete: no action, update: no action]
+Ref fk_analysis_window_event: analysis_event_station_window.event_date > dadaocheng_fireworks_events.event_date [delete: no action, update: no action]
+Ref fk_analysis_window_station: analysis_event_station_window.station > analysis_station_label.station [delete: no action, update: no action]
+Ref fk_event_trends_event: event_trends_features.event_date > dadaocheng_fireworks_events.event_date [delete: restrict, update: no action]
+Ref fk_event_trends_import: event_trends_features.import_id > google_trends_imports.import_id [delete: restrict, update: no action]
+Ref fk_weather_event: event_weather_station.event_date > dadaocheng_fireworks_events.event_date [delete: no action, update: no action]
+Ref fk_weather_event_station: event_weather_station.station_id > weather_station.station_id [delete: no action, update: no action]
+Ref fk_trends_daily_import: google_trends_daily.import_id > google_trends_imports.import_id [delete: restrict, update: no action]
+Ref fk_weather_observation_station: weather_observation.station_id > weather_station.station_id [delete: no action, update: no action]
+
+TableGroup Raw_OD {
+  original_data
+}
+
+TableGroup Events_and_Metro_Analysis {
+  dadaocheng_fireworks_events
+  analysis_station_label
+  analysis_event_station_hourly
+  analysis_event_station_window
+}
+
+TableGroup Google_Trends {
+  google_trends_imports
+  google_trends_daily
+  event_trends_features
+}
+
+TableGroup Weather {
+  weather_station
+  weather_observation
+  event_weather_station
+}
+
+TableGroup Views_not_physical_tables {
+  v_regression_event_station
+  v_regression_station_hourly
+}

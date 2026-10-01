@@ -15,6 +15,9 @@ uv sync --group notebook --extra social --extra web
 # 捷運資料前處理，並寫入 MySQL
 .\.venv\Scripts\python.exe -X utf8 src/main.py --mysql
 
+# 氣象 CSV 驗證、建表及匯入（加 --check-only 只檢查）
+.\.venv\Scripts\python.exe -X utf8 src/import_weather.py
+
 # Threads 或 PTT 貼文與文字雲
 .\.venv\Scripts\python.exe -X utf8 src/threads_web_collect.py
 .\.venv\Scripts\python.exe -X utf8 src/ptt_web_collect.py
@@ -22,6 +25,7 @@ uv sync --group notebook --extra social --extra web
 
 - **捷運資料**：月 CSV 放在 `data/original_data/`；活動與聲量讀取本機 MySQL，預設 login path 為 `codex-local`。移除 `--mysql` 只省略寫回，仍需讀取資料庫。SQL 檔與資料備份不提交 Git，隊員需另外私下取得並建立資料庫。
 - **社群資料**：預設期間為 2026/7/15–8/15。Threads 在新開的 Edge 登入後回終端按 Enter；PTT 不需登入。文字雲位於各平台 `results/` 下的執行資料夾內，檔名為 `wordcloud.png`。
+- **氣象資料**：預設讀取 `data/original_data/大稻埕周圍雲量資料.csv`，建立測站、觀測及活動測站對照三表；需先有活動表。相同資料可重跑，PK 內容衝突則整批停止。`23:59` 保留並標記待核對，缺值保留 `NULL`；尚未自動加入回歸表。匯入摘要在 `results/weather/import_summary.json`。
 
 ## 專案結構
 
@@ -46,6 +50,7 @@ uv sync --group notebook --extra social --extra web
 │   ├── data_preprocessing.py         # OD 清理與品質檢查
 │   ├── aggregate_flows.py            # 車站人次彙總、回歸表與流向表
 │   ├── export_mysql.py               # 分析表寫入 MySQL
+│   ├── import_weather.py             # 氣象三表建置、匯入與品質核對
 │   ├── threads_web_collect.py        # Threads「最相關」網頁取樣
 │   ├── threads_web_report.py         # 共用斷詞、詞頻與文字雲製作
 │   ├── ptt_web_collect.py            # PTT 看板標題搜尋與文章取樣
@@ -68,9 +73,19 @@ uv sync --group notebook --extra social --extra web
 
 ## 詳細說明與參考資料
 
+- [完整資料庫關聯圖](docs/database_schema.dbml)：整份貼到 dbdiagram.io 查看。
 - [資料前處理與欄位定義](docs/data_preprocessing.md)
 - [Threads 取樣](docs/threads_collection.md)／[PTT 取樣](docs/ptt_collection.md)／[Google Trends](mysql/GOOGLE_TRENDS_README.md)
 - [參考論文與專題用途](docs/references.md)：活動人流、圖論、排隊理論與串流處理。
 - [研究規劃與驗證方式](docs/research_plan.md)
+
+資料來源：
+
+- [北捷分時進出站運量](https://data.taipei/dataset/detail?id=63f31c7e-7fc3-418b-bd82-b95158755b4d)
+- [固定／變動成本](https://www.metro.taipei/cp.aspx?n=20CB8DE3F41B411)：參考 114 年審定決算書。
+- [變動／固定公里數](https://whhr.gov.taipei/News_Content.aspx?n=0121E4C78246FC0D&s=3E147DD6A74BE990)
+- [天氣資料](https://codis.cwa.gov.tw/StationData)：氣象署 CODiS 氣候觀測資料查詢服務。
+- [特殊節假日](https://data.gov.tw/dataset/14718)：政府行政機關辦公日曆表。
+- [大稻埕煙火排程參考](https://data.gov.tw/dataset/7778)：觀光資訊活動資料庫。
 
 公開逐時 OD 用於人流分析；逐筆到達與候車時間屬後續模擬。社群文字雲是搜尋樣本的回顧分析，不代表全站聲量。
