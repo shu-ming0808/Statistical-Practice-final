@@ -2,7 +2,7 @@
 
 ## 專案目的
 
-整理北捷逐時 OD、煙火活動日期與社群討論，分析活動人流及車站流向，後續建立回歸預測與班次調整模擬。目前已完成資料前處理及 Threads／PTT 文字雲，模型與調度模擬尚待建立。
+整理北捷逐時 OD、煙火活動日期與社群討論，分析活動人流及車站流向，後續建立回歸預測與班次調整模擬。目前已完成資料前處理、Threads／PTT 文字雲與人流網站第一版，模型與調度模擬尚待建立。
 
 ## 快速開始
 
@@ -10,7 +10,10 @@
 
 ```powershell
 # 安裝環境
-uv sync --group notebook --extra social --extra web
+uv sync --group notebook --extra social --extra web --extra app
+
+# 人流網站（首次建置見下方「網站啟動與隊員連線」）
+.\app\start.ps1
 
 # 捷運資料前處理，並寫入 MySQL
 .\.venv\Scripts\python.exe -X utf8 src/main.py --mysql
@@ -38,6 +41,11 @@ uv sync --group notebook --extra social --extra web
 ├── pyproject.toml                    # uv 環境與套件規格
 ├── uv.lock                           # 套件鎖定版本
 ├── .python-version                   # Python 3.10.11
+│
+├── app/
+│   ├── frontend/                     # 黑灰介面、地圖與資料瀏覽
+│   ├── backend/                      # FastAPI 與 MySQL 唯讀查詢
+│   └── start.ps1                     # 網站啟動／停止
 │
 ├── data/
 │   ├── original_data/                # 捷運月 CSV、Threads／PTT 原始樣本
@@ -73,6 +81,7 @@ uv sync --group notebook --extra social --extra web
 
 ## 詳細說明與參考資料
 
+- [網站啟動與隊員連線](app/README.md)：本機網址、首次建置與 Tailscale 私人連線。
 - [完整資料庫關聯圖](docs/database_schema.dbml)：整份貼到 dbdiagram.io 查看。
 - [資料前處理與欄位定義](docs/data_preprocessing.md)
 - [Threads 取樣](docs/threads_collection.md)／[PTT 取樣](docs/ptt_collection.md)／[Google Trends](mysql/GOOGLE_TRENDS_README.md)

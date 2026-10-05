@@ -38,3 +38,8 @@ __pycache__/
 /results/pdf/
 /results/preprocessing/
 /results/weather/
+
+# Website dependencies and generated bundles
+node_modules/
+/app/frontend/dist/
+/app/.runtime/
