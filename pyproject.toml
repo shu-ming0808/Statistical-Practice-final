@@ -23,6 +23,14 @@ web = [
 ]
 
 [dependency-groups]
+analysis = [
+    "matplotlib>=3.10.9",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7,<1.8",
+    "scipy>=1.15.3",
+    "xgboost>=3.1,<3.2",
+]
 notebook = [
     "ipykernel>=7.3.0",
     "matplotlib>=3.10.9",
