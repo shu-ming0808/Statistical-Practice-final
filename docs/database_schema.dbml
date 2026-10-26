@@ -704,3 +704,43 @@ TableGroup Official_operations {
   metro_station_line
   metro_timetable
 }
+
+// 2026-10-26: official distances and derived route mileage
+
+Table "metro_od_distance" {
+  source_id char(64) [not null]
+  origin varchar(64) [not null]
+  destination varchar(64) [not null]
+  shortest_km decimal(7,2) [not null]
+  full_fare_twd int [not null]
+  concession_fare_twd int [not null]
+  indexes {
+    (source_id, origin, destination) [pk]
+  }
+  Note: '原表名：metro_od_distance；相鄰站最短距離沿官方站序加總的近似值；未知出入庫和回送不計入。'
+}
+
+Table "metro_route_distance_segment" {
+  distance_source_id char(64) [not null]
+  link_source_id char(64) [not null]
+  link_no int [not null]
+  station_a varchar(64) [not null]
+  station_b varchar(64) [not null]
+  indexes {
+    (distance_source_id, link_source_id, link_no) [pk]
+  }
+  Note: '原表名：metro_route_distance_segment；相鄰站最短距離沿官方站序加總的近似值；未知出入庫和回送不計入。'
+}
+
+Table "v_metro_route_distance" {
+  distance_source_id char(64) [not null]
+  link_source_id char(64) [not null]
+  route_name varchar(64) [not null]
+  adjacent_segments int [not null]
+  service_km decimal(29,2) [not null]
+  Note: '原表名：v_metro_route_distance；相鄰站最短距離沿官方站序加總的近似值；未知出入庫和回送不計入。此為 VIEW，非實體資料表。'
+}
+
+Ref: metro_od_distance.source_id > metro_source_snapshot.source_id
+Ref: metro_route_distance_segment.(distance_source_id, station_a, station_b) > metro_od_distance.(source_id, origin, destination)
+Ref: metro_route_distance_segment.(link_source_id, link_no) > metro_link_time.(source_id, link_no)

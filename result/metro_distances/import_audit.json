@@ -1,0 +1,74 @@
+{
+  "dataset_page": "https://data.taipei/dataset/detail?id=4acb4911-0360-4063-808d-fcee629508b3",
+  "distance_source": {
+    "source_id": "6a7381284795d50816bb15f1ecee5a8e580fe3372bbfe04d17492e05c7a6228d",
+    "source_url": "https://data.taipei/api/frontstage/tpeod/dataset/resource.download?rid=893c2f2a-dcfd-407b-b871-394a14105532",
+    "content_sha256": "be30960079de159d1773fc617204b4883952651771723d1ba6b5fa8380abf659",
+    "source_kind": "fare_distance",
+    "effective_from": "2026-09-29",
+    "retrieved_at_utc": "2026-10-26 14:46:17",
+    "local_file": "fares.csv"
+  },
+  "metadata_sha256": "abf0e8711073f8b722e4847b9f5e8d5113c35801346aaac534b6f1a291e3235d",
+  "raw_rows": 17424,
+  "identical_duplicate_rows_collapsed": 3263,
+  "zero_off_diagonal": [
+    {
+      "origin": "新埔",
+      "destination": "新埔民生"
+    },
+    {
+      "origin": "新埔民生",
+      "destination": "新埔"
+    }
+  ],
+  "topology_snapshot_sha256": "b395e542f9531bdf31a8ed31ac0306883af7e4d80954f6022bf7355585174d56",
+  "counts": {
+    "metro_source_snapshot": 1,
+    "metro_od_distance": 14161,
+    "metro_route_distance_segment": 29
+  },
+  "method": "Sum adjacent shortest-OD distances along official ordered route; rounded distance proxy, not train odometer/depot mileage.",
+  "depot_and_return_known": false,
+  "routes": [
+    {
+      "distance_source_id": "6a7381284795d50816bb15f1ecee5a8e580fe3372bbfe04d17492e05c7a6228d",
+      "link_source_id": "c755f52404ea2ef3b78026082b61b550cf0d41438968bb6e95d01406d6335129",
+      "route_name": "松山-新店",
+      "origin": "松山",
+      "terminal": "新店",
+      "adjacent_segments": 18,
+      "service_km": "18.77",
+      "shortest_endpoint_km": "16.81",
+      "path_text": "松山 → 南京三民 → 台北小巨蛋 → 南京復興 → 松江南京 → 中山 → 北門 → 西門 → 小南門 → 中正紀念堂 → 古亭 → 台電大樓 → 公館 → 萬隆 → 景美 → 大坪林 → 七張 → 新店區公所 → 新店"
+    },
+    {
+      "distance_source_id": "6a7381284795d50816bb15f1ecee5a8e580fe3372bbfe04d17492e05c7a6228d",
+      "link_source_id": "c755f52404ea2ef3b78026082b61b550cf0d41438968bb6e95d01406d6335129",
+      "route_name": "松山-台電大樓",
+      "origin": "松山",
+      "terminal": "台電大樓",
+      "adjacent_segments": 11,
+      "service_km": "11.24",
+      "shortest_endpoint_km": "9.28",
+      "path_text": "松山 → 南京三民 → 台北小巨蛋 → 南京復興 → 松江南京 → 中山 → 北門 → 西門 → 小南門 → 中正紀念堂 → 古亭 → 台電大樓"
+    }
+  ],
+  "inserted": {
+    "metro_od_distance": 14161,
+    "metro_source_snapshot": 1,
+    "metro_route_distance_segment": 29
+  },
+  "second_import": {
+    "metro_od_distance": 0,
+    "metro_source_snapshot": 0,
+    "metro_route_distance_segment": 0
+  },
+  "existing_analysis_rows_unchanged": 74880,
+  "database_readback_verified": true,
+  "outputs": {
+    "beimen_origin_distances.csv": "4ab2207943d2399aa3c126cbbb3e65040ff4477c060248a18e2b83596f2f2bc2",
+    "route_distances.csv": "c5f3125152ad364c1be26ab43a29d020ff3bbca585c2ace9144d4d6825445b8a",
+    "route_segments.csv": "8e3caee8d1d6ad52e30ac21d7b4c11727449f619f223937983d7a0506b335997"
+  }
+}

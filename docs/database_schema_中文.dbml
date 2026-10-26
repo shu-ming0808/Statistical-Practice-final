@@ -711,3 +711,43 @@ TableGroup "官方營運與調度參考" {
   "官方方向班表"
 }
 
+
+// 2026-10-26: official distances and derived route mileage
+
+Table "官方站間距離" {
+  "距離來源版本" char(64) [not null, note: '原欄位：source_id']
+  "起站" varchar(64) [not null, note: '原欄位：origin']
+  "訖站" varchar(64) [not null, note: '原欄位：destination']
+  "最短距離公里" decimal(7,2) [not null, note: '原欄位：shortest_km']
+  "全票票價" int [not null, note: '原欄位：full_fare_twd']
+  "優惠票價" int [not null, note: '原欄位：concession_fare_twd']
+  indexes {
+    ("距離來源版本", "起站", "訖站") [pk]
+  }
+  Note: '原表名：metro_od_distance；相鄰站最短距離沿官方站序加總的近似值；未知出入庫和回送不計入。'
+}
+
+Table "營運路段距離關聯" {
+  "距離來源版本" char(64) [not null, note: '原欄位：distance_source_id']
+  "站序來源版本" char(64) [not null, note: '原欄位：link_source_id']
+  "來源路段序號" int [not null, note: '原欄位：link_no']
+  "路段起站" varchar(64) [not null, note: '原欄位：station_a']
+  "路段訖站" varchar(64) [not null, note: '原欄位：station_b']
+  indexes {
+    ("距離來源版本", "站序來源版本", "來源路段序號") [pk]
+  }
+  Note: '原表名：metro_route_distance_segment；相鄰站最短距離沿官方站序加總的近似值；未知出入庫和回送不計入。'
+}
+
+Table "營運區間距離檢視表" {
+  "距離來源版本" char(64) [not null, note: '原欄位：distance_source_id']
+  "站序來源版本" char(64) [not null, note: '原欄位：link_source_id']
+  "營運區間" varchar(64) [not null, note: '原欄位：route_name']
+  "相鄰路段數" int [not null, note: '原欄位：adjacent_segments']
+  "沿線服務距離公里" decimal(29,2) [not null, note: '原欄位：service_km']
+  Note: '原表名：v_metro_route_distance；相鄰站最短距離沿官方站序加總的近似值；未知出入庫和回送不計入。此為 VIEW，非實體資料表。'
+}
+
+Ref: "官方站間距離"."距離來源版本" > "捷運營運來源版本"."來源版本編號"
+Ref: "營運路段距離關聯".("距離來源版本", "路段起站", "路段訖站") > "官方站間距離".("距離來源版本", "起站", "訖站")
+Ref: "營運路段距離關聯".("站序來源版本", "來源路段序號") > "官方站間時間".("來源版本編號", "來源路段序號")

@@ -1,0 +1,123 @@
+{
+  "config": {
+    "prediction_path": ".local/forecast/predictions.csv",
+    "prediction_sha256": "96915ef02b9ebbf6fae909209f85b65cd9da1f2682dc87497d198bdb53daf3ef",
+    "prediction_column": "frozen_w4",
+    "truth_column": "y",
+    "operations_snapshot": "20261015",
+    "first_hour": 18,
+    "last_hour": 23,
+    "platform_delay_minutes": 5,
+    "seed": 20261026,
+    "optimization_draws_per_event": 200,
+    "evaluation_draws_per_event": 300,
+    "northbound_share_range": [
+      0.4,
+      0.6
+    ],
+    "remaining_capacity_fraction_range": [
+      0.25,
+      0.75
+    ],
+    "shapes": {
+      "uniform": null,
+      "broad": 20,
+      "concentrated": 5
+    },
+    "peak_centers_minutes": [
+      15,
+      30,
+      45
+    ],
+    "max_extra_trains": 8,
+    "min_separation_minutes": [
+      2,
+      3
+    ],
+    "insertion_window_minutes": [
+      0,
+      365
+    ],
+    "horizon_minutes": 420,
+    "residual_penalty_minutes": 60,
+    "capacity_cases": {
+      "same_as_regular": null,
+      "empty_90pct": 0.9
+    },
+    "p95_target_minutes": 10,
+    "cost_per_train_km_twd": 128.05,
+    "hourly_time_value_twd": 196,
+    "route_mileage_csv": "result/metro_distances/route_distances.csv",
+    "route_mileage_sha256": "c5f3125152ad364c1be26ab43a29d020ff3bbca585c2ace9144d4d6825445b8a",
+    "route_name": "松山-新店",
+    "service_km": 18.77,
+    "charged_route_multipliers": [
+      1,
+      2
+    ],
+    "incremental_km_per_train_scenarios": [
+      18.77,
+      37.54
+    ],
+    "waiting_cost_weights": [
+      0.5,
+      1,
+      2
+    ],
+    "reference_km_per_train": 18.77,
+    "reference_waiting_cost_weight": 1,
+    "cost_status": "18.77 km is a derived along-line distance proxy from official adjacent fare distances, for one Songshan-Xindian service. Compare one service only vs one service plus an assumed full-length empty return (37.54 km). Actual depot/turnback/return mileage is unknown, excluded unless explicitly assumed; no return passenger benefit is simulated. 128.05 TWD per train-km remains a user-provided unverified marginal-cost proxy.",
+    "temporal_policy": "Only earlier event dates donate errors; release timestamps remain unverified. No donors means no result. Current general timetables applied to historical demand: retrospective scenario comparison, not deployed D-1 validation.",
+    "scope": "Select among 0-8 extra-train heuristic plans; preserve baseline departures. No terminal dispatch readiness, full-line conflicts, fleet or crew constraints; no online feedback control.",
+    "output_dir": "result/dispatch_cost"
+  },
+  "signature": "e51500d6782e3d46e3e82b7f95702b87b56773e6cd2dee63a1df2c26166c9602",
+  "model_refitted": false,
+  "selection_split": "optimization_draws_only",
+  "evaluation_used_for_selection": false,
+  "input_prediction_sha256": "96915ef02b9ebbf6fae909209f85b65cd9da1f2682dc87497d198bdb53daf3ef",
+  "normalized_snapshot_sha256": "b395e542f9531bdf31a8ed31ac0306883af7e4d80954f6022bf7355585174d56",
+  "implementation_sha256": {
+    "configs/dispatch_cost.json": "51ed7bbbd3e19e4efabc678f50808d1e45cdc106d299d9422a02306e306c1e46",
+    "src/run_dispatch_cost.py": "f59c1089736a598020b25bc836ff1ab7411bc4da3df5dae49608be8a66c4df51",
+    "src/dispatch_optimization.py": "45d466a07081c5beb4565c169b446915e93745b14e9b824cd4d28f81dafe4176",
+    "src/run_dispatch_optimization.py": "10fb01fbe4f2ba6e9559fd9b31c9a2ceb5ca49c2fcca9582d61c7182b7b184a6",
+    "src/run_queue_uncertainty.py": "d82fc7b6d49bf8e9e87462e5d1be08902aa5c3c173390c2007039d50ba6a7081",
+    "src/queue_waits.py": "ddf071d070b5e9f78533f4702c537158a12e707c1e8b3d9ca33bda5d6b40f064",
+    "src/queue_scenarios.py": "806c190002a2b746fe9b163c99e770dfc1fa6034bb0f16b05ce6949f4353c917",
+    "src/queueing.py": "9d7267bca2a5896568bf911fae3e5c9391b10d755418471f3f0e2cb266e3a891"
+  },
+  "future_donors_allowed": false,
+  "event_release_times_verified": false,
+  "route_costs_verified": false,
+  "mileage_reference": {
+    "distance_source_id": "6a7381284795d50816bb15f1ecee5a8e580fe3372bbfe04d17492e05c7a6228d",
+    "link_source_id": "c755f52404ea2ef3b78026082b61b550cf0d41438968bb6e95d01406d6335129",
+    "route_name": "松山-新店",
+    "origin": "松山",
+    "terminal": "新店",
+    "adjacent_segments": 18,
+    "service_km": 18.77,
+    "shortest_endpoint_km": 16.81,
+    "path_text": "松山 → 南京三民 → 台北小巨蛋 → 南京復興 → 松江南京 → 中山 → 北門 → 西門 → 小南門 → 中正紀念堂 → 古亭 → 台電大樓 → 公館 → 萬隆 → 景美 → 大坪林 → 七張 → 新店區公所 → 新店"
+  },
+  "actual_full_incremental_mileage_known": false,
+  "full_timetable_redesigned": false,
+  "dispatch_lead_times_enforced": false,
+  "globally_optimal": false,
+  "skipped": [
+    {
+      "event_date": "2024-07-17",
+      "reason": "no_prior_error_donors"
+    }
+  ],
+  "outputs": {
+    "candidates.csv": "c737f29120e4e085fb759e0a7457fac90f4295fc5a99fc4749a2ea7d984abbfa",
+    "figures/cost_wait_comparison.png": "88d6336c3102eaf1071548056725b016f4f7503af730b8ea6dd629a4668f8ec2",
+    "figures/weight_sensitivity.png": "05a93afed0dd4a186d8bdd6b77e093a2514326b112c3ad4d7c5e9ef8ec044117",
+    "plans.csv": "f0e835c4522a46cc970b1ffb2c4521d986eb679f3c4649d1c87d9485e05f38e0",
+    "report.md": "ee9858663a62421eb8fa48adc7569c2fd1806592ab1631723ece8f3c1978fe7d",
+    "selected_plans.csv": "030e47a44c9c752574d2ea600ecdd44c288e4893b3927015dd8d8226d8490fac",
+    "skipped.csv": "fba84e7df6d4615e0a0381b5e4cbd5a290af911f18f353fda9865ff188b597ac"
+  }
+}

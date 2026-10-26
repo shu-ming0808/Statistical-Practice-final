@@ -15,7 +15,7 @@ import numpy as np
 class DirectionQueue:
     """Arrival scenarios for one direction: arrivals[s, i] arrive uniformly in minute i."""
 
-    def __init__(self, arrivals, capacity, horizon, extra_capacity=None):
+    def __init__(self, arrivals, capacity, horizon, extra_capacity=None, *, include_terminal_wait=False):
         arrivals=np.asarray(arrivals,dtype=float)
         if arrivals.ndim!=2 or (arrivals<0).any() or not np.isfinite(arrivals).all():
             raise ValueError('arrivals must be a finite nonnegative scenarios × minutes array')
@@ -33,6 +33,7 @@ class DirectionQueue:
         self.area=np.hstack([zero,(self.cumulative[:,:-1]+padded/2).cumsum(axis=1)])
         self.demand=self.cumulative[:,-1]
         self.horizon=width
+        self.include_terminal_wait=include_terminal_wait
 
     def evaluate(self,train_times,extra_times=()):
         """Return (waiting person-minutes, residual queue, left-behind departures) per scenario."""
@@ -48,7 +49,11 @@ class DirectionQueue:
             queue=queue+self.cumulative[:,t]-self.cumulative[:,previous]
             queue=queue-np.minimum(queue,self.extra_capacity if t in extra else self.capacity)
             left+=queue>1e-7;previous=t
-        # Arrivals after the last train never board: count them as residual, not as waits.
+        # Cost comparisons need the same end time for both directions and all plans.
+        # The default preserves the original exploratory report's convention.
+        if self.include_terminal_wait:
+            span=self.horizon-previous
+            wait+=queue*span+self.area[:,-1]-self.area[:,previous]-self.cumulative[:,previous]*span
         queue=queue+self.demand-self.cumulative[:,previous]
         return wait,queue,left
 
@@ -71,19 +76,23 @@ def plan_cost(queues,trains,extras,residual_penalty):
     return total
 
 
-def optimize_insertions(queues,trains,n_extra,separation,window,residual_penalty=60.):
+def optimize_insertions(queues,trains,n_extra,separation,window,residual_penalty=60., *, feasibility_trains=None):
     """Greedy insertion of n_extra trains (either direction), then relocation passes.
 
     Returns {direction: sorted inserted minutes} for each n = 0..n_extra.
-    Plans are nested: the n+1 plan starts from the improved n plan.
+    The n+1 search starts from the n plan; relocation can move earlier inserts.
+    feasibility_trains may include the departure just before the modeled window.
     """
     extras={d:[] for d in queues}
+    guards=trains if feasibility_trains is None else feasibility_trains
+    if any(not set(trains[d]).issubset(guards[d]) for d in trains):
+        raise ValueError('Feasibility departures must include all modeled baseline trains')
     plans=[{d:[] for d in queues}]
     best=plan_cost(queues,trains,extras,residual_penalty)
     for _ in range(n_extra):
         choice=None
         for d in queues:
-            for m in feasible_minutes(list(trains[d])+extras[d],separation,*window):
+            for m in feasible_minutes(list(guards[d])+extras[d],separation,*window):
                 trial={**extras,d:extras[d]+[int(m)]}
                 cost=plan_cost(queues,trains,trial,residual_penalty)
                 if choice is None or cost<choice[0]-1e-9: choice=(cost,d,int(m))
@@ -95,7 +104,7 @@ def optimize_insertions(queues,trains,n_extra,separation,window,residual_penalty
             for d in queues:
                 for m in list(extras[d]):
                     others=[x for x in extras[d] if x!=m]
-                    for alt in feasible_minutes(list(trains[d])+others,separation,*window):
+                    for alt in feasible_minutes(list(guards[d])+others,separation,*window):
                         trial={**extras,d:sorted(others+[int(alt)])}
                         cost=plan_cost(queues,trains,trial,residual_penalty)
                         if cost<best-1e-9:

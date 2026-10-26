@@ -1,0 +1,3 @@
+﻿distance_source_id,link_source_id,route_name,origin,terminal,adjacent_segments,service_km,shortest_endpoint_km,path_text
+6a7381284795d50816bb15f1ecee5a8e580fe3372bbfe04d17492e05c7a6228d,c755f52404ea2ef3b78026082b61b550cf0d41438968bb6e95d01406d6335129,松山-新店,松山,新店,18,18.77,16.81,松山 → 南京三民 → 台北小巨蛋 → 南京復興 → 松江南京 → 中山 → 北門 → 西門 → 小南門 → 中正紀念堂 → 古亭 → 台電大樓 → 公館 → 萬隆 → 景美 → 大坪林 → 七張 → 新店區公所 → 新店
+6a7381284795d50816bb15f1ecee5a8e580fe3372bbfe04d17492e05c7a6228d,c755f52404ea2ef3b78026082b61b550cf0d41438968bb6e95d01406d6335129,松山-台電大樓,松山,台電大樓,11,11.24,9.28,松山 → 南京三民 → 台北小巨蛋 → 南京復興 → 松江南京 → 中山 → 北門 → 西門 → 小南門 → 中正紀念堂 → 古亭 → 台電大樓

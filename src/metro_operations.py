@@ -246,8 +246,9 @@ def sql_value(value):
     return "CONVERT(X'"+str(value).encode('utf-8').hex()+"' USING utf8mb4)"
 
 
-def import_sql(tables):
+def import_sql(tables, schema=None):
     """Atomic insert-only data import. Abort on conflicting existing PK values."""
+    schema = SCHEMA if schema is None else schema
     statements=[f'USE {DB};', 'CREATE TEMPORARY TABLE metro_guard(label VARCHAR(128),ok INT NOT NULL CHECK(ok=1));']
     for table,rows in tables.items():
         if not rows: raise ValueError('Empty import table')
@@ -258,7 +259,7 @@ def import_sql(tables):
             statements.append(f'INSERT INTO incoming_{table} ({cols}) VALUES {vals};')
     statements.append('START TRANSACTION;')
     for table,rows in tables.items():
-        keys=SCHEMA[table][0].split(',');cols=list(rows[0])
+        keys=schema[table][0].split(',');cols=list(rows[0])
         on=' AND '.join(f'd.{c}=s.{c}' for c in keys)
         # A re-download of identical bytes may have a new retrieval timestamp.
         same=' AND '.join(f'd.{c}<=>s.{c}' for c in cols if c!='retrieved_at_utc')

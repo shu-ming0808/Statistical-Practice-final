@@ -140,24 +140,37 @@ MySQL 沿用 128 MiB buffer pool，DuckDB 專案設定為 4 執行緒／2 GB；�
 
 [候車情境結果](result/queue_dispatch_v1/report.md)／[分鐘到達圖](result/queue_dispatch_v1/figures/arrival_queue_comparison.png)／[營運資料與缺口](docs/metro_operations.md)／[網站與發布](app/README.md)
 
-### 增班最佳化設計（尚未求解）
+### 組員新增：候車分布、MC 與增班搜尋
 
-以官方假日班表為基準，保留原班次與時刻，只選擇新增列車。在相同人流、剩餘容量與評估期間下，同時考慮新增營運成本及乘客候車時間成本：
+- **候車分布：**用先到先上的累積曲線算平均、P95 與跨班滯留；沿用原 XGBoost，沒有重訓。
+- **MC 情境：**九場各 1,000 次，共 9,000 次。人潮形狀、方向比例、剩餘容量與到達隨機性共同變動；平均候車的情境中位數為 2.90 分，P95 的情境中位數為 6.15 分。這是研究假設下的分布，不是實測候車。
+- **增班搜尋：**200 次情境找插車位置，另 300 次評估；比較 0–4／0–8 班及一般剩餘容量／90% 空間。原班次保留。以 2024/8/10、120 秒、90% 空間為例，找到的 5 班方案將「P95 > 10 分」情境比例由 26.3% 降至 4.3%；不是已證明最少班數，也不是最小成本解。
+
+原 MC 只排除本場，仍會借用較晚活動的誤差；只能作回顧壓力測試。新成本比較改用較早活動，但兩份報告的樣本與情境分布不同，不能直接相減當成成本項效果。新增分析目前尚未接入網站。
+
+[候車不確定性](result/queue_uncertainty_v1/report.md)／[增班 0–4 班](result/dispatch_optimization_v1/report.md)／[0–8 班：一般容量](result/dispatch_sensitivity_same_capacity_8/report.md)／[0–8 班：90% 空間](result/dispatch_sensitivity_empty_extra_8/report.md)
+
+![組員候車情境區間：點為中位數，線為5–95%情境範圍](result/queue_uncertainty_v1/figures/event_intervals.png)
+
+### 增班成本＋候車加權比較
+
+依活動星期選官方一般平日／週六班表，保留原班次與時刻。在每個班數的啟發式方案中，以 **200 次訓練情境**選擇加權總成本最低的 0–8 班方案，再用另外 **300 次情境**評估；不根據評估結果重選班數。
 
 $$
-\min_{x_k\in\{0,1\}} J(x)
-=\underbrace{u\sum_{k\in E}L_kx_k}_{\text{相較原班表增加的營運成本}}
-+\underbrace{v\sum_d\int_0^T Q_d(t;x)\,dt}_{\text{新班表下的候車時間成本}}.
+\min_{x\in\mathcal P} J(x)
+=\underbrace{un(x)L}_{\text{增加的營運成本}}
++\underbrace{\lambda v\frac1S\sum_{s=1}^{S}\left[W_s(x)+60R_s(x)\right]}_{\text{平均候車與滯留估值}}.
 $$
 
 | 符號 | 定義與單位 |
 |---|---|
-| $E,\ x_k$ | 候選增班集合；$x_k=1$ 表示選擇第 $k$ 個增班 |
-| $L_k$ | 該班完整新增行駛公里數，包含納入成本的調度／回送路段 |
+| $\mathcal P,\ n(x)$ | 搜尋出的候選班表；$n(x)$ 是新增班數，不是所有可能班表的窮舉 |
+| $L$ | 松山—新店相鄰站加總 18.77 km；比較僅計服務 18.77 km、另假設全程回送共 37.54 km。實際出入庫／回送仍未知 |
 | $u$ | 每列車公里增量成本；先以使用者提供的 128.05 元／公里試算，單位與年度仍待核對 |
-| $Q_d(t;x)$ | 新班表下，北門方向 $d$ 在時間 $t$ 的候車人數 |
-| $T,\ \sum_d\int_0^TQ_d(t;x)\,dt$ | 各方案共用的評估期間；時間用分鐘，積分結果為總候車「人分鐘」 |
+| $W_s(x)$ | 情境 $s$ 下雙向排隊積分，單位人分鐘；所有方案計至 18:00 後 420 分鐘 |
+| $R_s(x)$ | 期末未上車人數；每人加 60 分鐘是懲罰假設，不是觀測值 |
 | $v$ | 每人每分鐘候車時間的貨幣估值，單位為元／人分鐘 |
+| $\lambda$ | 候車成本權重 0.5／1／2；由研究偏好設定，不是用測試結果學出的權重 |
 
 **時間價值第一版以最低時薪換算。**依[勞動部資料](https://www.mol.gov.tw/1607/28690/2282/2284/2290/7121/)，2026/1/1 起最低時薪為 196 元，因此設定：
 
@@ -167,9 +180,19 @@ $$
 
 這是本研究的估值假設，並非實測候車時間價值，也不是北捷支付給乘客的費用。例如 100 人各少等 5 分鐘，時間效益估值為 $100\times5\times196/60\approx1,633.33$ 元；不能稱為營運現金節省。計算保留 $196/60$，只在顯示時四捨五入。
 
-後續比較 $0.5v_0、v_0、2v_0$（約 1.63、3.27、6.53 元／人分鐘），檢查增班決策是否受估值假設影響；這些是待比較的敏感度情境。歷史人流搭配此值屬於 2026 年參考情境；正式經濟比較仍需將營運成本與時間價值統一至相同幣值基年。
+以 $\lambda=0.5,1,2$ 比較，相當於 1.63／3.27／6.53 元／人分鐘。僅計單程服務每班約 2,403.50 元；另假設一次全程空車回送約 4,807.00 元。回送未計作載客服務，也未模擬其效益。完整新增里程、單位成本口徑與幣值基年仍待核實。
 
-求解仍須遵守班距、調度提前量、剩餘容量及期末滯留限制；第一版依研究範圍省略備車數限制。公式是本案設計，並非已求得的最佳班表，完整限制見[增班最佳化公式](docs/metro_operations.md#8-假日基準班表與增班最佳化公式)。
+**官方距離已匯入 MySQL。**採[捷運最短站間距離](https://data.taipei/dataset/detail?id=4acb4911-0360-4063-808d-fcee629508b3)，沿官方路線逐段加總；不能拿可能跨線的端點最短距離代替。新增 14,161 筆去重後 OD 距離、29 筆綠線路段關聯與來源版本。[距離、成本與資料庫說明](result/metro_distances/report.md)
+
+新增列車檢查同方向前後原班與新增班的 120／180 秒間隔，含分析起點前的原班。成本版只借用較早活動的誤差，2024/7/17 因沒有可用歷史誤差跳過，其餘八場只有 1–8 場誤差來源；增加 MC 次數不會增加活動樣本。
+
+**這次算出的結果：**120 秒、一般剩餘容量、$\lambda=1$、僅計服務里程下，八場中三場選不增班、一場增 1 班、四場增 8 班。2024/8/10 的平均候車情境中位數由 3.62 降至 3.23 分，新增費用約 19,228 元；若另計假設全程回送，該場改選 2 班。2026/8/5 增 1 班的評估總成本反而增加約 253 元，照實保留。選到 8 班是碰到搜尋上限，不能宣稱已找到不限班數的最優解。
+
+![成本選班與原班表比較](result/dispatch_cost/figures/cost_wait_comparison.png)
+
+[成本比較結果與選定時刻](result/dispatch_cost/report.md)／[權重敏感度圖](result/dispatch_cost/figures/weight_sensitivity.png)／[可調參數](configs/dispatch_cost.json)
+
+**適用範圍：**固定班數且每班成本相同時，成本不改變時刻搜尋，只影響最後選幾班。此版不是全面重排班表或已證明的全域最佳；尚未加入起站就緒／調度提前量、司機、備車、折返及全線衝突，P95 10 分鐘也不是硬限制。實際資料發布時間未全面核實，現行班表配歷史需求仍是回顧情境，不是已驗證的 D−1 營運部署。理論完整限制見[增班最佳化公式](docs/metro_operations.md#8-假日基準班表與增班最佳化公式)。
 
 ## 快速開始
 
@@ -180,6 +203,17 @@ uv run --group analysis python -X utf8 -m unittest discover -s tests -p "test_fo
 ~~~
 
 隊員需私下取得 .local/forecast/analysis_input.csv 與 reference_predictions.csv；以雜湊確認凍結資料。**不必先跑十九個版本，也不用連 MySQL。**逐列資料與模型保持私有；只看 README／PNG 不用安裝環境。命令重現既定模型，不會以新資料自動調參或覆蓋網站快照。
+
+候車／增班另需 `.local/forecast/predictions.csv` 與 `.local/transit_reference/20261015/` 官方原始快照：
+
+~~~powershell
+uv sync --inexact --extra transit --group analysis
+uv run --extra transit --group analysis python -X utf8 src/run_queue_uncertainty.py
+uv run --extra transit --group analysis python -X utf8 src/run_dispatch_optimization.py
+uv run --extra transit --group analysis python -X utf8 src/run_dispatch_cost.py
+~~~
+
+更新官方距離及資料庫：`uv run --extra transit --group analysis python -X utf8 src/import_metro_distances.py --import-db`。已有快照會重用；不加 `--import-db` 則只解析、匯出。
 
 <details>
 <summary>原始資料前處理、資料庫與文字雲</summary>
@@ -206,10 +240,18 @@ uv run --group analysis python -X utf8 -m unittest discover -s tests -p "test_fo
 │   ├── forecasting/           # 編碼、Ridge、GAM、XGBoost、指標及圖表
 │   ├── queueing.py            # 列車批次服務
 │   ├── run_queue_scenarios.py # 分鐘到達與候車情境
+│   ├── run_queue_uncertainty.py # MC 候車分布（組員回顧版本）
+│   ├── run_dispatch_optimization.py # 固定增班數搜尋（組員版本）
+│   ├── run_dispatch_cost.py  # 較早場次誤差、成本選班與獨立評估
+│   ├── import_metro_distances.py # 官方距離入庫與沿路線加總
 │   └── main.py                # 原始捷運資料前處理
 ├── result/
 │   ├── forecast/              # 最終報告、參數、係數、表格及 PNG
-│   └── queue_dispatch_v1/     # 候車與官方營運資料
+│   ├── queue_dispatch_v1/     # 候車與官方營運資料
+│   ├── queue_uncertainty_v1/ # MC 候車區間與因子比較
+│   ├── dispatch_optimization_v1/ # 固定增班數方案
+│   ├── dispatch_cost/        # 加權成本、選定班表與敏感度
+│   └── metro_distances/      # 官方距離來源、沿線里程與匯入稽核
 ├── app/                       # 前端、FastAPI、公開快照
 ├── data/                      # 本機原始／整理資料，不公開
 ├── .local/forecast/           # 私有輸入、逐列預測與模型
@@ -247,16 +289,18 @@ uv run --group analysis python -X utf8 -m unittest discover -s tests -p "test_fo
 - [特殊節假日](https://data.gov.tw/dataset/14718)：政府行政機關辦公日曆表。
 - [大稻埕煙火排程參考](https://data.gov.tw/dataset/7778)：觀光資訊活動資料庫。
 
-候車與列車調度新增官方來源（2026-10-15 核對）：
+候車與列車調度官方來源（2026-10-15 至 2026-10-26 分批核對）：
 
 - 四站時刻表：[北門](https://web.metro.taipei/pages2026/WebStation/105/7)／[大橋頭](https://web.metro.taipei/pages2026/WebStation/128/7)／[雙連](https://web.metro.taipei/pages2026/WebStation/054/7)／[民權西路](https://web.metro.taipei/pages2026/WebStation/055/7)。八份自 2026/8/30 生效，橘線往南勢角兩份自 10/1 生效；都是一般離站表。每份 PDF 的直連與 SHA-256 見 [來源清單](result/queue_dispatch_v1/metro_source_snapshot.csv)。
-- 北門假日基準：[往松山 PDF](https://web.metro.taipei/img/ALL/timetables/105a.PDF)／[往新店方向 PDF](https://web.metro.taipei/img/ALL/timetables/105b.PDF)，各含週六、週日及國定假日欄位。已另匯出 [假日逐班 CSV](result/queue_dispatch_v1/beimen_holiday_baseline.csv)（668 列，次日以 24:xx 表示）；[保留原班表、只選增班的公式](docs/metro_operations.md#8-假日基準班表與增班最佳化公式)與比較方式已整理，尚未求解最佳班表。
+- 北門假日基準：[往松山 PDF](https://web.metro.taipei/img/ALL/timetables/105a.PDF)／[往新店方向 PDF](https://web.metro.taipei/img/ALL/timetables/105b.PDF)，各含週六、週日及國定假日欄位。已另匯出 [假日逐班 CSV](result/queue_dispatch_v1/beimen_holiday_baseline.csv)（668 列，次日以 24:xx 表示）；[保留原班表、只選增班的公式](docs/metro_operations.md#8-假日基準班表與增班最佳化公式)與比較方式已整理；另有成本候選方案比較，尚未求得全線可行最佳班表。
 - [相鄰兩站行駛與停靠時間](https://data.taipei/dataset/detail?id=513e97fe-6a98-4a0d-b7dc-11122c8638d4)／[官方 CSV](https://data.taipei/api/frontstage/tpeod/dataset/resource.download?rid=c32998fa-c9b2-4324-9016-e19fbe0815f1)：推算同線候選發車站→四站的行車部分，不含未知整備／出庫／插車時間。
 - [高運量六節編組最大載客量](https://www.dorts.gov.taipei/News_Content.aspx?n=2A66A485FACB0D5B&s=F32662CFF6FE4D80)：370 人／節、2,220 人／列；不是剩餘容量。
 - [北捷 API 申請與資料目錄](https://www.metro.taipei/cp.aspx?n=BDEB860F2BE3E249)／[API 規格第 1 頁項次 6](https://www-ws.gov.taipei/001/Upload/405/relfile/18288/116939/26d47117-1927-48fb-9293-3f7879ec8092.pdf)：車次、方向及四級擁擠度，30 秒更新；尚未申請接入，不能直接當精確人數。
 - [北捷載重與票證人流模型](https://www.metro.taipei/News_Content.aspx?n=30CCEFD2A45592BF&s=3C06D5F73D9377D0&sms=72544237BBE4C5F6)：車上背景載客估計的官方實務依據。
 - [新莊機廠與迴龍進出軌](https://www.dorts.gov.taipei/cp.aspx?n=A7D84926581F5817&s=2091F0361804122D)／[新店機廠與小碧潭支線限制](https://www.dorts.gov.taipei/News_Content.aspx?n=2A66A485FACB0D5B&s=89085E307909460C&sms=87415A8B9CE81B16)：機廠位置與路徑線索，沒有公布活動當日可用備車與就緒時間。
 - [松山新店線班距](https://www.metro.taipei/cp.aspx?n=EAD981369A065968&s=0F3F913C344BA050)：2026-10-18 核對，北門所在重疊區間平日尖峰平均約 3 分鐘；可作研究班距參考，並非號誌最小安全班距。
-- [大稻埕活動疏運公告](https://www.gov.taipei/News_Content.aspx?n=F0DDAF49B89E9413&s=DA77537CE5B880D7&sms=72544237BBE4C5F6)：公告依人潮彈性加開，未提供活動當日可用備車數。第一版省略備車數限制、以起站至北門行車時間作調度提前量的設計，見 [調度研究範圍](docs/metro_operations.md#7-第一版調度研究範圍2026-10-18)；尚未執行最佳化。
+- [大稻埕活動疏運公告](https://www.gov.taipei/News_Content.aspx?n=F0DDAF49B89E9413&s=DA77537CE5B880D7&sms=72544237BBE4C5F6)：公告依人潮彈性加開，未提供活動當日可用備車數。第一版省略備車數限制、以起站至北門行車時間作調度提前量的設計，見 [調度研究範圍](docs/metro_operations.md#7-第一版調度研究範圍2026-10-18)；目前已有固定原班的增班搜尋，但未完成全線可行性驗證。
 - [114 年審定決算書 PDF 第 51 頁](https://www-ws.gov.taipei/001/Upload/405/relfile/18288/7602/4627504c-4034-4a4e-b403-c692be626487.pdf#page=51)：合併勞務成本明細表的年度固定／變動運輸費用；不是單班增量成本，參見 [成本口徑](docs/metro_operations.md#4-營運成本有找到仍不能直接當每加一班的成本)。
 - [勞動部：最低工資](https://www.mol.gov.tw/1607/28690/2282/2284/2290/7121/)：2026-10-18 核對，自 2026/1/1 起最低時薪 196 元。本案以其除以 60 作候車時間價值的研究基準；官方資料支持工資數額，並未規定應如此估計候車價值。
+- [北捷票價與最短站間距離](https://data.taipei/dataset/detail?id=4acb4911-0360-4063-808d-fcee629508b3)／[官方 CSV 下載](https://data.taipei/api/frontstage/tpeod/dataset/resource.download?rid=893c2f2a-dcfd-407b-b871-394a14105532)：2026-09-29 版本，2026-10-26 匯入 MySQL。原資料是起訖站最短距離；本案沿上述官方相鄰站順序加總，得到松山—新店約 18.77 km、松山—台電大樓約 11.24 km，屬衍生近似值。來源版本、原檔雜湊及資料庫讀回核對見[匯入稽核](result/metro_distances/import_audit.json)；[逐路段距離](result/metro_distances/route_segments.csv)／[距離與成本說明](result/metro_distances/report.md)。
+- [松山新店線工程路線與新店機廠背景](https://www.dorts.gov.taipei/cp.aspx?n=71ACC5B0CDFFC313&s=CBD13A8895C4EF94)：只作機廠及支線位置參考，未提供活動逐班完整調度／回送紀錄。因此[成本加權比較](result/dispatch_cost/report.md)中的「另加一次全程空車回送」仍是假設，不能把工程長度或端點最短距離當成完整新增里程。
