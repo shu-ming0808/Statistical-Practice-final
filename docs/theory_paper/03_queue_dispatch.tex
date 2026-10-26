@@ -1,0 +1,329 @@
+\section{從逐時預測到有限期批次候車}
+
+\subsection{需求輸入與分鐘情境}
+對北門第 $h$ 小時，令 $\widehat Y_h\ge0$ 為已凍結的人流預測。
+目前保留模型是散場加權 XGBoost；若日後採用融合，則用
+$\widehat Y_h=\sum_m\widehat w_m\widehat y_{hm}$，但權重必須先在預測階段估計。
+設方向比例 $\pi_{dh}\ge0$、小時內分鐘比例 $p_{hr}\ge0$，且
+$\sum_d\pi_{dh}=1$、$\sum_{r=1}^{60}p_{hr}=1$，定義
+\begin{equation}
+A_{dhr}=\widehat Y_h\pi_{dh}p_{hr},\qquad
+\sum_{d,r}A_{dhr}=\widehat Y_h.
+\label{eq:arrival}
+\end{equation}
+均勻情境取 $p_{hr}=1/60$；寬峰與集中峰取不同的非負形狀再正規化。
+這些形狀是對未知分鐘分布的情境假設，不是由逐時總量唯一識別的結果。
+無窮多組分鐘曲線可能產生相同逐時總量。
+若另納入閘門至月台步行延遲，須使用總質量為 1 的延遲分布，
+並保留跨出小時或模擬終點的尾端人流。
+
+\textbf{兩階段不能混成任意降低需求的最佳化。}
+若把融合權重 $w\ge0$ 和列車決策一起放入只有營運、候車成本的目標，
+可能藉由 $w=0$ 得到零需求，製造虛假的低成本。
+本文先估計並固定需求，再比較相同需求下的班表。
+
+\subsection{剩餘容量與事件格點}
+列車 $j$ 的可上車容量為
+\begin{equation}
+R_j=\max\{0,K_{\mathrm{use},j}-(O_j-H_j)\},\qquad 0\le H_j\le O_j,
+\end{equation}
+其中 $O_j$ 是到站前車上人數、$H_j$ 是本站下車人數，
+$K_{\mathrm{use},j}$ 是採用的載客上限。
+六節高運量列車的最大參考容量不等於每班到北門後都還能載入同樣人數。
+目前逐班剩餘容量尚未實測，555、1,110、1,665 人為本案情境值。
+新增班次也不自動假設抵站時為空車。
+
+對方向 $d$，合併分鐘到達率轉折、原班列車、所有候選列車與共同終點 $T$，
+建立固定格點
+\[
+0=t_{d,0}<t_{d,1}<\cdots<t_{d,J_d}=T,\qquad
+\Delta_{d,j}=t_{d,j}-t_{d,j-1}.
+\]
+$q_{d,0}$ 是起點服務處理完後的排隊量，
+$a_{d,j}$ 是區間 $(t_{d,j-1},t_{d,j}]$ 的到達量；該區間內到達率固定。
+令 $B_d$ 為方向 $d$ 的原班表，$E$ 為有限個候選增班，
+$\tau_k$ 為到達北門時刻，$x_k\in\{0,1\}$ 表示是否選用。
+格點服務容量為
+\begin{equation}
+C_{d,j}(x)=C^0_{d,j}
++\sum_{k\in E:\,d_k=d,\,\tau_k=t_{d,j}}R_kx_k,
+\quad
+C^0_{d,j}=\sum_{b\in B_d:\,\tau_b=t_{d,j}}R_b.
+\label{eq:capacity}
+\end{equation}
+乘客可在服務時刻前持續累積；列車到站後以批次上車處理。
+
+\subsection{人數守恆與總候車時間}
+\begin{equation}
+\boxed{\begin{aligned}
+q^-_{d,j}&=q_{d,j-1}+a_{d,j},\\
+b_{d,j}&=\min\{q^-_{d,j},C_{d,j}(x)\},\\
+q_{d,j}&=q^-_{d,j}-b_{d,j}
+=\max\{0,q_{d,j-1}+a_{d,j}-C_{d,j}(x)\}.
+\end{aligned}}
+\label{eq:queue}
+\end{equation}
+這是有限期流體需求與批次服務模型；有人排隊且車上有剩餘容量時就上車。
+沒有上滿可能來自該方向當時候車量不足；並非模型要求列車必須留空。
+
+\begin{proposition}[人數守恆]
+對任一方向與任一 $j$，
+\[
+q_{d,j}+\sum_{\ell=1}^j b_{d,\ell}
+=q_{d,0}+\sum_{\ell=1}^j a_{d,\ell}.
+\]
+且 $q_{d,j},b_{d,j}\ge0$，$b_{d,j}\le C_{d,j}(x)$。
+\end{proposition}
+\begin{proof}
+由式 \eqref{eq:queue} 有 $q_{d,j}-q_{d,j-1}=a_{d,j}-b_{d,j}$；
+對 $j$ 次遞推求和即得。非負性與容量限制直接由 min 與 max 的定義成立。
+\end{proof}
+
+區間內沒有其他服務，排隊量從 $q_{d,j-1}$ 線性增加，故
+\begin{equation}
+\boxed{W(x)=\sum_d\int_0^T Q_d(t;x)\,dt
+=\sum_{d,j}\left[q_{d,j-1}\Delta_{d,j}
++\frac12 a_{d,j}\Delta_{d,j}\right].}
+\label{eq:waiting}
+\end{equation}
+$W$ 的單位為人分鐘。只加總列車離站後排隊量會漏掉班次之間的等待，
+亦缺少時間單位。
+
+\begin{theorem}[候車面積的樣本路徑恆等式]
+假設起點無排隊，旅客 $\ell$ 的到達與上車時刻分別為
+$A_\ell\in[0,T]$、$B_\ell\ge A_\ell$。
+未上車者令 $B_\ell=+\infty$。對有限個旅客，
+\begin{equation}
+\int_0^T Q(t)\,dt
+=\sum_\ell\{\min(B_\ell,T)-A_\ell\}.
+\label{eq:area}
+\end{equation}
+若全部在 $T$ 前上車，右側就是總完整候車時間。
+\end{theorem}
+\begin{proof}
+除不影響積分的端點外，
+$Q(t)=\sum_\ell\mathbf1\{A_\ell\le t<B_\ell\}$。
+交換有限求和與積分，每個指示函數的積分是
+$[A_\ell,B_\ell)$ 與 $[0,T]$ 的交集長度，得到式 \eqref{eq:area}。
+對流體需求，將有限求和改成非負質量積分，Tonelli 定理給出相同結論。
+\end{proof}
+
+這個面積恆等式不需要 Poisson 到達、指數服務或穩態；
+與 Little 定律的計數思路相關，但不能把有限期間截尾量
+直接當作無限期間穩態平均 \cite{little,urban}。
+若起點已有旅客，面積只含他們在起點之後的等待。
+若起點為零且期末全員上車，平均候車為
+$W/\sum_{d,j}a_{d,j}$（分母須大於零）；否則應另報期末滯留，
+不能宣稱已估計完整平均等待。
+
+\subsection{為何不直接使用 M/M/c}
+M/M/c 的 $c$ 是同時並行、逐人服務的服務台數，
+並非一小時到站的列車班數。其穩態結果通常要求
+固定 Poisson 到達率 $\lambda$、獨立指數服務率 $\mu$，且
+$\rho=\lambda/(c\mu)<1$。
+本案散場需求非定態、列車定時批次提供容量，所以採式 \eqref{eq:queue}。
+分鐘分配只是需求建模的一步；排隊模型還包含容量、上車、滯留與等待時間。
+短時間需求高於供給時，仍能計算有限期滯留，
+但不能因此聲稱對應的 M/M/c 穩態等待有限。
+
+\section{班表最佳化：完整問題、存在性與求解形式}
+
+\subsection{基準班表、提前量與班距}
+原班表固定使用已整理的北門假日時刻表；這是官方發布時的研究基準，
+不等於已取得每個歷史活動日的實際行車紀錄。
+新增候選包含方向、到站時刻、起站至北門的行駛時間 $\delta_k$、
+整備時間 $\ell_k$、完整新增公里 $L_k$ 及剩餘容量 $R_k$。
+若決策時刻是 $t_0$，候選至少滿足
+\begin{equation}
+r_k=\tau_k-\delta_k-\ell_k\ge t_0.
+\end{equation}
+若尚無整備資料而暫取 $\ell_k=0$，這只是較樂觀的研究假設。
+起站到北門的時間是提前量的一部分，不是完整增班行駛里程。
+
+令研究最小同方向班距為 $h_{\min}$，定義 $e_k\in\{0,1\}$：
+只有提前量合格，且與該方向所有相關原班時刻相隔至少 $h_{\min}$，才令 $e_k=1$。
+相鄰視野外原班也要納入衝突檢查。
+令 $\mathcal P$ 為同方向且 $|\tau_k-\tau_l|<h_{\min}$ 的候選對，則
+\begin{equation}
+\mathcal X=\left\{x\in\{0,1\}^{K}:
+x_k\le e_k,\quad x_k+x_l\le1\ ((k,l)\in\mathcal P),\quad
+x_k=\bar x_k\ (k\in\mathcal C)\right\}.
+\label{eq:feasible}
+\end{equation}
+$\mathcal C$ 是已承諾、不可取消的候選，$\bar x_k$ 為其固定決策。
+同時刻的互斥候選也放入 $\mathcal P$。
+若另有跨方向共用路段或折返限制，須再增加限制，不能由此式自動推得安全。
+
+目前以 3 分鐘作研究門檻，來源是官方尖峰平均班距資訊；
+\textbf{平均班距不能當成已核實的最小安全班距}。
+備車數未取得，依目前研究範圍未設定備車供給限制；
+因此求得方案仍可能超出實際車隊、司機或折返能力。
+官方來源索引見附錄 \ref{app:implementation}。
+
+\subsection{營運成本與時間成本的聯合目標}
+新增班次成本先寫為 $c_k=uL_k$，$u$ 單位為元／列車公里。
+$L_k$ 應含完整新增服務與需計價的回送，不只計算到北門為止。
+目前 $u=128.05$ 是使用者提供的研究試算值，
+成本與公里的年度、車公里或列車公里口徑尚須統一核實。
+對所有方案都不變的年度固定成本，可從目標刪去；
+只有會隨增班改變的啟用成本，才另列入 $c_k$。
+
+時間價值取 $v=196/60$ 元／人分鐘，
+是以 2026 年最低時薪作代理值 \cite{mol}，不是已估計的乘客願付價格。
+可比較 $0.5v,v,2v$，且與營運成本使用相同幣值年度。
+候車成本是貨幣化的不便，不是業者實際付出的現金。
+
+以期末排空為要求，完整問題為
+\begin{equation}
+\boxed{\begin{aligned}
+\min_{x,q,b}\quad
+&\sum_{k=1}^{K}uL_kx_k
++v\sum_{d,j}\left(q_{d,j-1}\Delta_{d,j}
++\tfrac12 a_{d,j}\Delta_{d,j}\right)\\
+\text{使得}\quad
+&x\in\mathcal X,\qquad C_{d,j}(x)\ \text{由式 \eqref{eq:capacity} 決定},\\
+&q^-_{d,j}=q_{d,j-1}+a_{d,j},\\
+&b_{d,j}=\min\{q^-_{d,j},C_{d,j}(x)\},\\
+&q_{d,j}=q^-_{d,j}-b_{d,j},\qquad q_{d,J_d}=0\quad\forall d.
+\end{aligned}}
+\label{eq:dispatch}
+\end{equation}
+需求 $a_{d,j}$、原班表及比較終點 $T$ 對所有方案相同。
+相較原班表的目標變化可寫成
+$\sum_k c_kx_k+v\{W(x)-W(0)\}$；
+因 $W(0)$ 為固定常數，最適班表與式 \eqref{eq:dispatch} 相同。
+新增班數為 $\sum_kx_k$；這個計數差不能取代等待時間和行駛公里的比較。
+
+共同考慮候車與營運成本的研究方向見 Pan 等 \cite{pan}。
+本節是針對北門的簡化模型與自行推導，並非該論文的原式；
+本次核對其期刊摘要，沒有聲稱重現全文的所有限制。
+只計算北門等待時，結論亦只對本研究邊界成立，不能稱整條路線總效益最優。
+
+\subsection{最佳解存在性}
+\begin{theorem}[有限候選班表的最小值]
+假設候選數 $K$、事件格點數及 $T$ 有限；
+起始排隊、到達、容量與成本皆有限且非負；
+式 \eqref{eq:dispatch} 至少有一個可行班表。
+則至少存在一個全域最佳班表。
+\label{thm:dispatch}
+\end{theorem}
+\begin{proof}
+二元向量最多有 $2^K$ 個，滿足全部限制的集合是其非空有限子集。
+對每個可行 $x$，式 \eqref{eq:queue} 逐步唯一決定排隊與上車量。
+令方向總人數上界為
+$D_d=q_{d,0}+\sum_j a_{d,j}<\infty$。
+由守恆可得 $0\le Q_d(t;x)\le D_d$，因此
+\[
+0\le W(x)\le T\sum_dD_d<\infty.
+\]
+新增成本也因候選數與單班成本有限而有限。
+非空有限集合上的有限實值函數必取得最小值，
+故存在最佳 $x^*$，再由遞推得到相應 $q^*,b^*$。
+\end{proof}
+
+此證明不要求二元問題凸或可微，也不保證最佳解唯一或求解迅速。
+它保證候選時間格點內有最佳方案，不保證對所有秒級連續發車時刻最優。
+若改成連續時刻，須另證可行集合非空、緊緻及目標的下半連續性。
+
+\textbf{非空前提不能省略。}
+總服務容量不足或最後一班後仍有旅客到達時，可能無法排空。
+總容量足夠也不充分，因服務可能發生在旅客抵達之前。
+無解時應報告是哪個限制造成，不能免費補尾班車或提早截斷時間軸。
+
+若允許期末滯留，必須明確換成另一個問題：
+\begin{equation}
+\min_{x\in\mathcal X}\left\{
+\sum_kc_kx_k+vW(x)+\gamma\sum_d q_{d,J_d}(x)\right\},\qquad \gamma\ge0.
+\label{eq:softterminal}
+\end{equation}
+移除期末排空等式、保留排隊遞推；$\gamma$ 為元／滯留人次。
+只要 $\mathcal X$ 非空且 $\gamma$ 有限，同一證明仍成立。
+有限懲罰不保證排空，$\gamma=0$ 則只衡量視野內等待。
+
+\subsection{精確的混合整數線性表示}
+令 $s_{d,j}=q_{d,j-1}+a_{d,j}-C_{d,j}(x)$，
+以及 $\overline C_{d,j}=C^0_{d,j}+\sum_{k:\,d_k=d,\,\tau_k=t_{d,j}}R_k$。
+引入 $z_{d,j}\in\{0,1\}$，用以下限制替代 max：
+\begin{equation}
+\begin{aligned}
+0\le q_{d,j}&\le D_d, &q_{d,j}&\ge s_{d,j},\\
+q_{d,j}&\le D_dz_{d,j}, &
+q_{d,j}&\le s_{d,j}+\overline C_{d,j}(1-z_{d,j}).
+\end{aligned}
+\label{eq:milp}
+\end{equation}
+\begin{proposition}[式 \eqref{eq:milp} 的等價性]
+對遵守前段守恆的狀態，式 \eqref{eq:milp} 與
+$q_{d,j}=\max(0,s_{d,j})$ 完全等價。
+\end{proposition}
+\begin{proof}
+$z=1$ 時強制 $q=s\ge0$；$z=0$ 時強制 $q=0$ 且 $s\le0$。
+反之，$s\ge0$ 選 $z=1$，由守恆 $s\le D_d$；
+$s\le0$ 選 $z=0$，因 $s\ge-\overline C_{d,j}$，最後一條亦成立。
+由起點逐段套用即可。
+\end{proof}
+所有上界都由需求與容量計算，無須任意設定巨大常數。
+式 \eqref{eq:capacity} 與 \eqref{eq:waiting} 為線性，
+搭配式 \eqref{eq:feasible}、\eqref{eq:milp} 及期末條件，得到 MILP。
+上車量可由 $b=q_{\mathrm{prev}}+a-q$ 還原。
+只保留 $q\ge s,q\ge0$ 一般不是服務規則的完整等價限制，
+除非另證所用目標會讓相關不等式都取緊。
+
+\subsection{滾動更新與「等於 2、3」的不同意思}
+滾動更新時，先固定當下排隊、已發車或承諾的列車及當時可用需求，
+求解未來有限視野，僅執行近期決策，再更新狀態重新求解。
+這是模型預測控制的設計方向；目前尚未完成實際動態最佳班表。
+每次子問題存在最小值，不代表下一次一定可行，
+更不保證所有未來資訊已知時的全期間最優。
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}p{35mm}X@{}}
+\toprule
+設定 & 數學意義與條件\\
+\midrule
+$v=2$ 或 $v=3$ & 固定時間價值；定理 \ref{thm:dispatch} 仍適用，不必與其他成本係數加總為 1。\\
+$\sum_kx_k=2$ 或 $3$ & 恰好增開兩班或三班；集合仍有限，但可能因班距、提前量或排空要求而為空。\\
+$\sum_kx_k\le2$ 或 $3$ & 最多增開指定班數；仍須檢查完整可行性。\\
+$x_k=2$ 或 $3$ & 違反本案二元候選定義；要增加不同時刻的候選，不能在同一時刻直接乘載客量。\\
+\bottomrule
+\end{tabularx}
+\end{table}
+若寫成 $\alpha\Delta C+\beta vW$，事先固定的無量綱偏好係數
+$\alpha,\beta>0$ 不須總和為 1；共同乘同一正數不改最適解，
+改變兩者比例才改變取捨。不能把它們也當自由非負變數一起最小化，
+否則全取 0 就能消除目標。
+
+\section{既有實驗與理論結論的對照}
+
+以下為專案已保存的回顧結果，本文件沒有重新訓練模型或新增北門調度實驗。
+同一批 2024--2026 年九場北門活動、每場六個來源時段的比較如下。
+\begin{table}[htbp]
+\centering
+\caption{既有北門回顧誤差；單位皆為人次／來源小時}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+模型 & MAE & RMSE\\
+\midrule
+Ridge &845.44&1547.49\\
+GAM &830.71&1315.75\\
+XGBoost（未加散場權重） &473.91&766.90\\
+散場加權 XGBoost（目前保留） &440.28&690.91\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+2026 年 Ridge 的 $\lambda=0.177827941004$，訓練列數 $n=432$，
+故程式內 $\texttt{alpha}=n\lambda\approx76.82167$。
+GAM 各外層年度使用 $\lambda_s=0.1,\alpha_G=0.001$，
+基底數在 2024、2025 年為 5、2026 年為 7。
+保留的 XGBoost 在 2024 年使用深度 3、250 棵樹、學習率 0.1；
+2025、2026 年為深度 4、250 棵樹、學習率 0.05。
+這些都是各年度可用過去資料下的設定，不是用九場真值重新一次擬合的單一模型。
+
+這九場已反覆用於開發，故結果支持「目前比較中選擇保留此模型」，
+尚不足以證明對全新活動同樣優越。
+固定問題有唯一係數、融合存在全域解、班表存在最小值，
+都不能取代時間外驗證與營運資料校準。
+後續調度仍需核實逐班剩餘容量、分鐘到達形狀、完整增班公里、
+起站行駛與整備時間，及實際車隊和行車限制。

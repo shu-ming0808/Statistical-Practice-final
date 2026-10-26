@@ -1,0 +1,84 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=22mm,headheight=16pt,footskip=10mm]{geometry}
+\usepackage{fontspec,xeCJK}
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.88]
+\setCJKmainfont{PMingLiU}[BoldFont={Microsoft JhengHei Bold},ItalicFont={PMingLiU},BoldItalicFont={Microsoft JhengHei Bold}]
+\setCJKsansfont{Microsoft JhengHei}[BoldFont={Microsoft JhengHei Bold}]
+\setCJKmonofont{PMingLiU}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{enumitem,setspace,titlesec,fancyhdr}
+\usepackage{needspace}
+\usepackage[hidelinks,unicode,bookmarksnumbered]{hyperref}
+\usepackage{xurl}
+\setstretch{1.22}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{2em}
+\clubpenalty=10000
+\widowpenalty=10000
+\renewcommand{\tablename}{表}
+\renewcommand{\refname}{參考文獻}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.15}
+\setlist[itemize]{topsep=3pt,itemsep=2pt,leftmargin=2em}
+\setlist[enumerate]{topsep=3pt,itemsep=2pt,leftmargin=2em}
+\titleformat{\section}{\Large\sffamily\bfseries}{\thesection}{.7em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries}{\thesubsection}{.7em}{}
+\titlespacing*{\section}{0pt}{14pt}{7pt}
+\titlespacing*{\subsection}{0pt}{10pt}{5pt}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small 大稻埕人流預測與列車調度}
+\fancyhead[R]{\small 理論、假設與證明}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\newtheoremstyle{chinese}{6pt}{6pt}{\normalfont}{}{\bfseries}{。}{0.5em}{}
+\theoremstyle{chinese}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{proposition}[theorem]{命題}
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{definition}[theorem]{定義}
+\newtheorem{remark}[theorem]{說明}
+\renewcommand{\proofname}{證明}
+\numberwithin{equation}{section}
+\allowdisplaybreaks[1]
+\newcommand{\R}{\mathbb R}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\pos}[1]{\left[#1\right]_+}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\hypersetup{pdftitle={大稻埕人流預測與列車調度：理論、假設及最佳解存在性},
+pdfauthor={專案方法文件},pdfsubject={Ridge、GAM、XGBoost、融合及批次候車最佳化}}
+\begin{document}
+\begin{center}
+{\LARGE\sffamily\bfseries 大稻埕人流預測與列車調度}\\[5pt]
+{\Large\sffamily\bfseries 理論、假設及最佳解存在性}\\[8pt]
+專案方法與數學證明文件\\
+2026 年 10 月 18 日
+\end{center}
+\vspace{4pt}
+\noindent\textbf{摘要。}
+本研究文件以活動日捷運需求為背景，整理資料時間界線、正則化迴歸、加法平滑、
+樹提升、非負融合及有限期批次候車的數學基礎。對 Ridge 與具有全係數懲罰的
+GAM 證明固定設計下解的存在與唯一性；對不限制總和的非負融合，
+利用有限生成錐及預測空間的緊緻次水平集證明最佳解存在，
+並釐清權重總和改為 2 或 3 的尺度效果。
+列車調度以官方班表為固定基準，聯結分鐘需求、剩餘容量、候車積分及增班成本，
+給出完整限制、混合整數線性表示及有限候選集合上的存在性證明。
+本文區分標準理論、本案推導、既有回顧結果及尚待實作設計；
+數學最適性不被解讀為未來預測準確性或實際行車安全保證。
+
+\noindent\textbf{關鍵詞：} 非負融合；強制性；P-spline；批次服務；
+混合整數規劃；最佳解存在性。
+\input{01_foundations}
+\input{02_models_fusion}
+\input{03_queue_dispatch}
+\input{appendices}
+\input{references}
+\end{document}

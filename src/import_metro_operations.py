@@ -6,6 +6,43 @@ from metro_operations import ROOT, DB, collect, schema_sql, import_sql
 from load_data import mysql
 
 
+def export_beimen_holiday_baseline(tables, out):
+    """Export the two official holiday columns without changing departure times."""
+    sources = {row['source_id']: row for row in tables['metro_source_snapshot']}
+    timetables = {row['source_id']: row for row in tables['metro_timetable']
+                  if row['station_label'] == '北門'}
+    day_labels = {'saturday': '週六', 'sunday_holiday': '週日及國定假日'}
+    rows = []
+    for departure in tables['metro_departure']:
+        source_id = departure['source_id']
+        day = departure['day_type']
+        if source_id not in timetables or day not in day_labels:
+            continue
+        minute = int(departure['departure_minute'])
+        source = sources[source_id]
+        rows.append(dict(
+            day_type=day, day_type_label=day_labels[day],
+            direction=timetables[source_id]['direction_text'],
+            terminal=departure['terminal'], departure_minute=minute,
+            departure_time=f'{minute // 60:02d}:{minute % 60:02d}',
+            effective_from=source['effective_from'], source_url=source['source_url'],
+            source_id=source_id,
+        ))
+    if len(timetables) != 2 or {(row['source_id'], row['day_type']) for row in rows} != {
+        (source_id, day) for source_id in timetables for day in day_labels
+    }:
+        raise ValueError('Expected both Beimen directions and both holiday columns')
+    rows.sort(key=lambda row: (row['day_type'], row['direction'], row['departure_minute']))
+    keys = [(row['source_id'], row['day_type'], row['departure_minute']) for row in rows]
+    if len(set(keys)) != len(keys):
+        raise ValueError('Duplicate Beimen holiday departure')
+    with (out / 'beimen_holiday_baseline.csv').open('w', encoding='utf-8-sig', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return len(rows)
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--snapshot',default='20261015')
@@ -20,6 +57,7 @@ def main():
     for name,rows in tables.items():
         with (out/(name+'.csv')).open('w',encoding='utf-8-sig',newline='') as f:
             writer=csv.DictWriter(f,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
+    export_beimen_holiday_baseline(tables, out)
     report={'snapshot':args.snapshot,'counts':{t:len(r) for t,r in tables.items()},
             'sources':tables['metro_source_snapshot'],'historical_event_timetable':False}
     if args.import_db:

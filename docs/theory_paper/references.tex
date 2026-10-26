@@ -1,0 +1,118 @@
+\clearpage
+\begin{thebibliography}{99}
+\setlength{\itemsep}{5pt}
+
+\bibitem{ridge}
+Hoerl, A. E., \& Kennard, R. W. (1970).
+Ridge regression: Biased estimation for nonorthogonal problems.
+\emph{Technometrics}, 12(1), 55--67.
+\href{https://doi.org/10.1080/00401706.1970.10488634}{DOI: 10.1080/00401706.1970.10488634}.
+用途：Ridge 正則化背景；本文第 3 節依本案損失尺度給出矩陣推導。
+
+\bibitem{gam}
+Hastie, T., \& Tibshirani, R. (1986).
+Generalized additive models.
+\emph{Statistical Science}, 1(3), 297--310.
+\href{https://doi.org/10.1214/ss/1177013604}{DOI: 10.1214/ss/1177013604}.
+用途：加法模型的基本形式；不代表本文所有基底與門檻皆取自原文。
+
+\bibitem{pspline}
+Eilers, P. H. C., \& Marx, B. D. (1996).
+Flexible smoothing with B-splines and penalties.
+\emph{Statistical Science}, 11(2), 89--102（正文；討論續至 121 頁）.
+\href{https://doi.org/10.1214/ss/1038425655}{DOI: 10.1214/ss/1038425655}.
+用途：B-spline 係數差分懲罰；本文另加入全係數 L2 穩定項。
+
+\bibitem{xgb}
+Chen, T., \& Guestrin, C. (2016).
+XGBoost: A scalable tree boosting system.
+\emph{Proceedings of KDD}, 785--794.
+\href{https://arxiv.org/abs/1603.02754}{作者論文：arXiv:1603.02754}.
+用途：第 2.2 節正則化目標、二階展開、最佳葉值及分裂增益；
+本文將其寫成加權平方損失的特例。
+
+\bibitem{breiman}
+Breiman, L. (1996).
+Stacked regressions.
+\emph{Machine Learning}, 24, 49--64.
+\href{https://doi.org/10.1007/BF00117832}{DOI: 10.1007/BF00117832}.
+用途：以交叉驗證預測學習非負線性組合的經典依據；
+不保證任意資料都優於最佳單模型。
+
+\bibitem{pystacked}
+Ahrens, A., Hansen, C. B., \& Schaffer, M. E. (2023).
+pystacked: Stacking generalization and machine learning in Stata.
+\emph{The Stata Journal}, 23(4), 909--931.
+\href{https://doi.org/10.1177/1536867X231212426}{DOI: 10.1177/1536867X231212426}.
+用途：第 2 節 stacking 與限制方式；包含非負但不強制總和為 1 的選項。
+
+\bibitem{bertsekas}
+Bertsekas, D. P. (2009).
+\emph{Convex Optimization Theory}. Athena Scientific.
+\href{https://web.mit.edu/dimitrib/www/convexduality.html}{作者教材與相關資源（MIT）}.
+用途：有限維凸分析、有限生成錐的封閉性；
+本文附錄 A 提供本案所需的完整獨立證明。
+
+\bibitem{boyd}
+Boyd, S., \& Vandenberghe, L. (2004).
+\emph{Convex Optimization}. Cambridge University Press.
+\href{https://web.stanford.edu/~boyd/cvxbook/}{作者開放教材（Stanford）}.
+用途：第 4--5 章凸最佳化與 KKT；
+本文明確另證可行性、存在性，未僅由凸性推論有解。
+
+\bibitem{fpp}
+Hyndman, R. J., \& Athanasopoulos, G. (2021).
+\emph{Forecasting: Principles and Practice}, 3rd ed. OTexts.
+\href{https://otexts.com/fpp3/tscv.html}{第 5.10 節：時間序列交叉驗證}.
+用途：只使用過去資料的向前驗證；活動分群與年度切分為本案設計。
+
+\bibitem{cawley}
+Cawley, G. C., \& Talbot, N. L. C. (2010).
+On over-fitting in model selection and subsequent selection bias in performance evaluation.
+\emph{Journal of Machine Learning Research}, 11, 2079--2107.
+\href{https://www.jmlr.org/papers/v11/cawley10a.html}{JMLR 原文}.
+用途：模型選擇與反覆評估可能造成的樂觀偏差。
+
+\bibitem{little}
+Little, J. D. C. (1961).
+A proof for the queuing formula: $L=\lambda W$.
+\emph{Operations Research}, 9(3), 383--387.
+\href{https://doi.org/10.1287/opre.9.3.383}{DOI: 10.1287/opre.9.3.383}.
+用途：長期排隊量、到達率與時間的關係；
+本文第 7 節另證有限視野面積恆等式，未直接套用穩態假設。
+
+\bibitem{urban}
+Larson, R. C., \& Odoni, A. R. (1981).
+\emph{Urban Operations Research}. Prentice-Hall.
+\href{https://web.mit.edu/urban_or_book/www/book/chapter4/4.4.html}{MIT 開放教材，第 4.4 節}.
+用途：排隊系統計數與 Little 關係的面積解釋。
+
+\Needspace{6\baselineskip}
+\bibitem{pan}
+Pan, H., Liu, Y., Liu, Z., \& Hu, H. (2022).
+Passenger inflow control along rail corridor for recurrent heavy passenger flow mitigation.
+\emph{Transportation Research Record}, 2676(9), 59--75.
+\href{https://doi.org/10.1177/03611981221085527}{DOI: 10.1177/03611981221085527}.
+用途：共同考慮等待與營運成本、MIP 與 MPC 的研究方向；
+本次核對摘要，本文式 \eqref{eq:dispatch} 是自行設計，非原文公式重現。
+
+\bibitem{mol}
+勞動部（2026）。基本工資／最低工資之制訂與調整經過。
+\href{https://www.mol.gov.tw/1607/28690/2282/2284/2290/7121/}{勞動部官方資料}.
+用途：2026 年 1 月 1 日起最低時薪 196 元；
+換算乘客時間價值是本案研究假設，非該頁提出的交通估價方法。
+
+\bibitem{lasso}
+Tibshirani, R. (1996).
+Regression shrinkage and selection via the lasso.
+\emph{Journal of the Royal Statistical Society: Series B}, 58(1), 267--288.
+\href{https://doi.org/10.1111/j.2517-6161.1996.tb02080.x}{DOI: 10.1111/j.2517-6161.1996.tb02080.x}.
+用途：附錄 B 的 L1 懲罰背景；存在性論證在本文直接給出。
+
+\bibitem{aic}
+Akaike, H. (1974).
+A new look at the statistical model identification.
+\emph{IEEE Transactions on Automatic Control}, 19(6), 716--723.
+\href{https://doi.org/10.1109/TAC.1974.1100705}{DOI: 10.1109/TAC.1974.1100705}.
+用途：附錄 B 的 AIC 形式與資訊準則背景。
+\end{thebibliography}

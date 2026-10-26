@@ -1,0 +1,1331 @@
+{
+  "run_id": "20261020T083841Z_03aab8f3",
+  "started_at_utc": "2026-10-20T08:38:41.889834+00:00",
+  "month": "202607",
+  "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+  "duckdb_version": "1.5.6",
+  "hardware": {
+    "cpu": "AMD Ryzen 5 7600X 6-Core Processor             ",
+    "physical_cores": 6,
+    "logical_processors": 12,
+    "ram_bytes": 33450315776
+  },
+  "source_manifest": {
+    "pipeline_version": 1,
+    "source_file": "202607.csv",
+    "source_sha256": "1e331e0e4aa704b2f39fe505192ce4d9e9a456d0c822c30d694d8deed24681b9",
+    "source_rows": 8366652,
+    "clean_rows": 8366652,
+    "exact_duplicate_rows_removed": 0,
+    "invalid_rows": 0,
+    "conflicting_keys": 0,
+    "passengers": 63379613,
+    "zero_rows": 3322037,
+    "output_sha256": "c3b20175772c9ccb46a314fe9fbe3de7bc7841ca615e82d9a92e5212a076d370"
+  },
+  "parquet_relative_path": "data\\interim\\clean_od\\202607.parquet",
+  "parquet_bytes": 16857501,
+  "script_sha256": "ec0f91150fe58be425fb1bedbf746e9cf9fee34914f438ad71602b7b5e51be87",
+  "setup": {
+    "mysql_typed_import_seconds": 52.26177540000026,
+    "mysql_index_seconds": 16.924512600000526
+  },
+  "verification": {
+    "mysql_stream_seconds": 9.17025829999875,
+    "duckdb_stream_seconds": 16.20471980000002,
+    "mysql_rows": 8366652,
+    "duckdb_rows": 8366652,
+    "mysql_sha256": "7edd3b8791d0a5309cc366fa39a909ebf2939f8a1a96293ad39f3a1090cdf600",
+    "duckdb_sha256": "7edd3b8791d0a5309cc366fa39a909ebf2939f8a1a96293ad39f3a1090cdf600",
+    "canonical_fields": "source_row,service_date,source_hour,origin_station,destination_station,passengers",
+    "ordering": "source_row ascending",
+    "all_rows_equal": true
+  },
+  "queries": {
+    "q1_beimen_day": {
+      "label": "北門單日 18–23 時逐時人次",
+      "mysql_sql": "SELECT source_hour,SUM(passengers) AS total\n                  FROM bench_duckdb_20261020t083841z_03aab8f3.od WHERE origin_station='北門'\n                  AND service_date='2026-07-29' AND source_hour BETWEEN 18 AND 23\n                  GROUP BY source_hour ORDER BY source_hour",
+      "duckdb_sql": "SELECT source_hour,SUM(passengers) AS total\n                  FROM od WHERE origin_station='北門'\n                  AND service_date='2026-07-29' AND source_hour BETWEEN 18 AND 23\n                  GROUP BY source_hour ORDER BY source_hour"
+    },
+    "q2_four_stations": {
+      "label": "四站全月晚間逐日逐時人次",
+      "mysql_sql": "SELECT service_date,origin_station,source_hour,SUM(passengers) AS total\n                  FROM bench_duckdb_20261020t083841z_03aab8f3.od WHERE origin_station IN ('北門','大橋頭站','雙連','民權西路')\n                  AND source_hour BETWEEN 18 AND 23\n                  GROUP BY service_date,origin_station,source_hour\n                  ORDER BY service_date,origin_station,source_hour",
+      "duckdb_sql": "SELECT service_date,origin_station,source_hour,SUM(passengers) AS total\n                  FROM od WHERE origin_station IN ('北門','大橋頭站','雙連','民權西路')\n                  AND source_hour BETWEEN 18 AND 23\n                  GROUP BY service_date,origin_station,source_hour\n                  ORDER BY service_date,origin_station,source_hour"
+    },
+    "q3_network_hourly": {
+      "label": "全站全月依車站與時段彙總",
+      "mysql_sql": "SELECT origin_station,source_hour,SUM(passengers) AS total\n                  FROM bench_duckdb_20261020t083841z_03aab8f3.od GROUP BY origin_station,source_hour\n                  ORDER BY origin_station,source_hour",
+      "duckdb_sql": "SELECT origin_station,source_hour,SUM(passengers) AS total\n                  FROM od GROUP BY origin_station,source_hour\n                  ORDER BY origin_station,source_hour"
+    },
+    "q4_top_od": {
+      "label": "全月非零 OD 彙總前 20 名",
+      "mysql_sql": "SELECT origin_station,destination_station,SUM(passengers) AS total\n                  FROM bench_duckdb_20261020t083841z_03aab8f3.od WHERE passengers>0\n                  GROUP BY origin_station,destination_station\n                  ORDER BY total DESC,origin_station,destination_station LIMIT 20",
+      "duckdb_sql": "SELECT origin_station,destination_station,SUM(passengers) AS total\n                  FROM od WHERE passengers>0\n                  GROUP BY origin_station,destination_station\n                  ORDER BY total DESC,origin_station,destination_station LIMIT 20"
+    }
+  },
+  "measurements": [
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 0.7958000005601207,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 5.34700000025623,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 4.372399998828769,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 3.808400000707479,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 3.85669999923266,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 0.8137000004353467,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 3.6343000010674587,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 3.868499999953201,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 0.8926999998948304,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 4.247300001225085,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 3.3452999996370636,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 0.7112000002962304,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 1,
+      "elapsed_ms": 3.409799999644747,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 2,
+      "elapsed_ms": 3.942100000131177,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 3,
+      "elapsed_ms": 0.8780999996815808,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 1,
+      "elapsed_ms": 4.2371999988972675,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 2,
+      "elapsed_ms": 0.7289999994100071,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 3,
+      "elapsed_ms": 3.611599999203463,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 1,
+      "elapsed_ms": 4.262799999196432,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 2,
+      "elapsed_ms": 3.26860000132001,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 3,
+      "elapsed_ms": 0.8541999995941296,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 1,
+      "elapsed_ms": 3.3468000001448672,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 2,
+      "elapsed_ms": 0.6408999997802312,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 3,
+      "elapsed_ms": 4.244300000209478,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 1,
+      "elapsed_ms": 3.791799999817158,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 2,
+      "elapsed_ms": 0.7341999989876058,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 3,
+      "elapsed_ms": 3.1642000012652716,
+      "rows": 6,
+      "sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 59.67410000084783,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 157.61769999880926,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 25.76539999972738,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 57.24539999937406,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 23.094899999705376,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 106.58760000114853,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 62.936999998782994,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 23.859400000219466,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 107.31609999857028,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 22.53999999993539,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 62.86290000025474,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 108.74580000017886,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 1,
+      "elapsed_ms": 111.36509999960253,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 2,
+      "elapsed_ms": 24.261800001113443,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 3,
+      "elapsed_ms": 88.10509999966598,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 1,
+      "elapsed_ms": 24.58470000055968,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 2,
+      "elapsed_ms": 111.6727999997238,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 3,
+      "elapsed_ms": 79.7616999989259,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 1,
+      "elapsed_ms": 106.56589999962307,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 2,
+      "elapsed_ms": 77.17730000149459,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 3,
+      "elapsed_ms": 23.07479999944917,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 1,
+      "elapsed_ms": 55.78289999903063,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 2,
+      "elapsed_ms": 102.50649999943562,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 3,
+      "elapsed_ms": 26.078900000356953,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 1,
+      "elapsed_ms": 23.477900000216323,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 2,
+      "elapsed_ms": 121.35029999990365,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 3,
+      "elapsed_ms": 76.59649999914109,
+      "rows": 744,
+      "sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 157.17330000006768,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 58.76850000095146,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 21872.154800001226,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 109.92819999955827,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 22240.220699999554,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 58.47390000053565,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 57.41689999922528,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 22851.03219999837,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 108.95780000100785,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 22449.391000000105,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 41.03489999943122,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 105.47149999911198,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 1,
+      "elapsed_ms": 38.94559999935154,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 2,
+      "elapsed_ms": 104.74470000008296,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 3,
+      "elapsed_ms": 22573.579900001278,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 1,
+      "elapsed_ms": 116.59739999959129,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 2,
+      "elapsed_ms": 22826.186399999642,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 3,
+      "elapsed_ms": 55.62219999956142,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 1,
+      "elapsed_ms": 110.91050000140967,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 2,
+      "elapsed_ms": 60.02719999924011,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 3,
+      "elapsed_ms": 21538.1512999993,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 1,
+      "elapsed_ms": 52.86479999995208,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 2,
+      "elapsed_ms": 21669.30670000147,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 3,
+      "elapsed_ms": 109.72120000042196,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 1,
+      "elapsed_ms": 110.20689999895694,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 2,
+      "elapsed_ms": 57.88360000042303,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 3,
+      "elapsed_ms": 21638.48710000093,
+      "rows": 2499,
+      "sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 63.362899998537614,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 16886.117500000182,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 120.62159999914002,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 61.42779999936465,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 117.55889999949432,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "warmup",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 16314.507800001593,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 1,
+      "elapsed_ms": 15876.155799998742,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 2,
+      "elapsed_ms": 120.86280000039551,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 1,
+      "order": 3,
+      "elapsed_ms": 56.17510000047332,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 1,
+      "elapsed_ms": 118.9552999985608,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 2,
+      "elapsed_ms": 15843.69230000084,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 2,
+      "order": 3,
+      "elapsed_ms": 58.341900001323665,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 1,
+      "elapsed_ms": 119.13060000006226,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 2,
+      "elapsed_ms": 15842.913800001043,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 3,
+      "order": 3,
+      "elapsed_ms": 61.20329999976093,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 1,
+      "elapsed_ms": 15896.568299998762,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 2,
+      "elapsed_ms": 65.56579999960377,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 4,
+      "order": 3,
+      "elapsed_ms": 121.25949999972363,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 1,
+      "elapsed_ms": 123.1009000002814,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 2,
+      "elapsed_ms": 63.75379999917641,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 5,
+      "order": 3,
+      "elapsed_ms": 15999.701199998526,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 1,
+      "elapsed_ms": 15818.579700000555,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 2,
+      "elapsed_ms": 58.932500000082655,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 6,
+      "order": 3,
+      "elapsed_ms": 117.50930000016524,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "mysql_indexed",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 1,
+      "elapsed_ms": 15846.117399998548,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_4t_2gb",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 2,
+      "elapsed_ms": 58.94869999974617,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "engine": "duckdb_1t_128mib",
+      "phase": "measured",
+      "iteration": 7,
+      "order": 3,
+      "elapsed_ms": 122.75570000019798,
+      "rows": 20,
+      "sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    }
+  ],
+  "warmups": 2,
+  "repeats": 7,
+  "seed": 20261020,
+  "timing": "Persistent connections, execute plus complete result fetch to Python; exclude startup, setup, plans, verification, and Python result hashing. MySQL uses mysql CLI pipes; DuckDB uses Python API. First measured query is NOT a cold-cache benchmark.",
+  "scratch_database": "bench_duckdb_20261020t083841z_03aab8f3",
+  "mysql_version": "8.0.44",
+  "mysql_variables": {
+    "innodb_buffer_pool_size": "134217728",
+    "innodb_page_size": "16384",
+    "max_heap_table_size": "16777216",
+    "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+    "sort_buffer_size": "262144",
+    "tmp_table_size": "19922944",
+    "version_compile_machine": "x86_64"
+  },
+  "source_mysql_schema": "CREATE TABLE `original_data` (\n  `id` bigint unsigned NOT NULL AUTO_INCREMENT,\n  `date_raw` char(10) NOT NULL COMMENT 'CSV 日期，尚未清理',\n  `hour_raw` char(2) NOT NULL COMMENT 'CSV 時段，尚未清理',\n  `entry_station_raw` varchar(64) NOT NULL COMMENT 'CSV 進站，尚未清理',\n  `exit_station_raw` varchar(64) NOT NULL COMMENT 'CSV 出站，尚未清理',\n  `passenger_count_raw` varchar(20) NOT NULL COMMENT 'CSV 人次，尚未清理',\n  `source_month` char(6) NOT NULL COMMENT '來源檔年月 YYYYMM',\n  `source_row` bigint unsigned NOT NULL COMMENT '來源 CSV 的資料列號，自 1 起算，不含標頭',\n  `imported_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `uq_original_source` (`source_month`,`source_row`),\n  KEY `ix_original_station_time` (`date_raw`,`hour_raw`,`entry_station_raw`)\n) ENGINE=InnoDB AUTO_INCREMENT=15970081 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='臺北捷運逐日分時站間 OD 原始資料；不可在此表直接清理或覆蓋'",
+  "mysql_benchmark_schema": "CREATE TABLE `od` (\n  `source_row` bigint NOT NULL,\n  `service_date` date NOT NULL,\n  `source_hour` smallint NOT NULL,\n  `origin_station` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,\n  `destination_station` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,\n  `passengers` bigint NOT NULL,\n  PRIMARY KEY (`source_row`),\n  KEY `ix_station_date_hour_count` (`origin_station`,`service_date`,`source_hour`,`passengers`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
+  "mysql_table_storage": [
+    "532676608",
+    "351256576",
+    "5242880"
+  ],
+  "duckdb_configurations": {
+    "duckdb_1t_128mib": {
+      "memory_limit": "128.0 MiB",
+      "preserve_insertion_order": "true",
+      "threads": "1"
+    },
+    "duckdb_4t_2gb": {
+      "memory_limit": "1.8 GiB",
+      "preserve_insertion_order": "true",
+      "threads": "4"
+    }
+  },
+  "summaries": [
+    {
+      "query": "q1_beimen_day",
+      "label": "北門單日 18–23 時逐時人次",
+      "engine": "mysql_indexed",
+      "n": 7,
+      "median_ms": 0.7341999989876058,
+      "minimum_ms": 0.6408999997802312,
+      "maximum_ms": 0.8926999998948304,
+      "mysql_over_engine": 1.0,
+      "returned_rows": 6,
+      "result_sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "label": "北門單日 18–23 時逐時人次",
+      "engine": "duckdb_1t_128mib",
+      "n": 7,
+      "median_ms": 4.2371999988972675,
+      "minimum_ms": 3.791799999817158,
+      "maximum_ms": 4.262799999196432,
+      "mysql_over_engine": 0.17327480392209044,
+      "returned_rows": 6,
+      "result_sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q1_beimen_day",
+      "label": "北門單日 18–23 時逐時人次",
+      "engine": "duckdb_4t_2gb",
+      "n": 7,
+      "median_ms": 3.3468000001448672,
+      "minimum_ms": 3.1642000012652716,
+      "maximum_ms": 3.6343000010674587,
+      "mysql_over_engine": 0.21937372981828185,
+      "returned_rows": 6,
+      "result_sha256": "0e8587a03bc7fcf3a8b4b452011094ac6cc79940bc6089d55899472c115b4609"
+    },
+    {
+      "query": "q2_four_stations",
+      "label": "四站全月晚間逐日逐時人次",
+      "engine": "mysql_indexed",
+      "n": 7,
+      "median_ms": 108.74580000017886,
+      "minimum_ms": 102.50649999943562,
+      "maximum_ms": 121.35029999990365,
+      "mysql_over_engine": 1.0,
+      "returned_rows": 744,
+      "result_sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "label": "四站全月晚間逐日逐時人次",
+      "engine": "duckdb_1t_128mib",
+      "n": 7,
+      "median_ms": 76.59649999914109,
+      "minimum_ms": 55.78289999903063,
+      "maximum_ms": 88.10509999966598,
+      "mysql_over_engine": 1.4197228333069825,
+      "returned_rows": 744,
+      "result_sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q2_four_stations",
+      "label": "四站全月晚間逐日逐時人次",
+      "engine": "duckdb_4t_2gb",
+      "n": 7,
+      "median_ms": 23.859400000219466,
+      "minimum_ms": 22.53999999993539,
+      "maximum_ms": 26.078900000356953,
+      "mysql_over_engine": 4.557775970861739,
+      "returned_rows": 744,
+      "result_sha256": "e7aa21d905c5045420a70e7f8ba69b5ce3e6814e33f65bb6a418e01b67b7c6e6"
+    },
+    {
+      "query": "q3_network_hourly",
+      "label": "全站全月依車站與時段彙總",
+      "engine": "mysql_indexed",
+      "n": 7,
+      "median_ms": 22449.391000000105,
+      "minimum_ms": 21538.1512999993,
+      "maximum_ms": 22851.03219999837,
+      "mysql_over_engine": 1.0,
+      "returned_rows": 2499,
+      "result_sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "label": "全站全月依車站與時段彙總",
+      "engine": "duckdb_1t_128mib",
+      "n": 7,
+      "median_ms": 109.72120000042196,
+      "minimum_ms": 104.74470000008296,
+      "maximum_ms": 116.59739999959129,
+      "mysql_over_engine": 204.6039507398185,
+      "returned_rows": 2499,
+      "result_sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q3_network_hourly",
+      "label": "全站全月依車站與時段彙總",
+      "engine": "duckdb_4t_2gb",
+      "n": 7,
+      "median_ms": 55.62219999956142,
+      "minimum_ms": 38.94559999935154,
+      "maximum_ms": 60.02719999924011,
+      "mysql_over_engine": 403.6048735968214,
+      "returned_rows": 2499,
+      "result_sha256": "8928889bfd4cd4bea7ad19e8ec9783bcaf42845eed08bc62ceb37ab12cfd1d29"
+    },
+    {
+      "query": "q4_top_od",
+      "label": "全月非零 OD 彙總前 20 名",
+      "engine": "mysql_indexed",
+      "n": 7,
+      "median_ms": 15846.117399998548,
+      "minimum_ms": 15818.579700000555,
+      "maximum_ms": 15999.701199998526,
+      "mysql_over_engine": 1.0,
+      "returned_rows": 20,
+      "result_sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "label": "全月非零 OD 彙總前 20 名",
+      "engine": "duckdb_1t_128mib",
+      "n": 7,
+      "median_ms": 120.86280000039551,
+      "minimum_ms": 117.50930000016524,
+      "maximum_ms": 123.1009000002814,
+      "mysql_over_engine": 131.10830958695888,
+      "returned_rows": 20,
+      "result_sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    },
+    {
+      "query": "q4_top_od",
+      "label": "全月非零 OD 彙總前 20 名",
+      "engine": "duckdb_4t_2gb",
+      "n": 7,
+      "median_ms": 58.94869999974617,
+      "minimum_ms": 56.17510000047332,
+      "maximum_ms": 65.56579999960377,
+      "mysql_over_engine": 268.8119907659843,
+      "returned_rows": 20,
+      "result_sha256": "79c33fa7f171f1396360ff28fc284715c884605da26ecc71025ebab27205861b"
+    }
+  ],
+  "finished_at_utc": "2026-10-20T08:46:07.613592+00:00",
+  "all_query_results_equal": true,
+  "scratch_database_removed": true
+}

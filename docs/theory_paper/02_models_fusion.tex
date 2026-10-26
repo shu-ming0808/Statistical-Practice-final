@@ -1,0 +1,298 @@
+\section{GAM：有限基底、平滑懲罰與識別性}
+
+\subsection{本案使用的加法模型}
+Gaussian identity GAM 允許部分連續變數使用加法曲線：
+\begin{equation}
+\eta_i=\beta_0+x_i^\top\beta+\sum_{j\in\mathcal S}f_j(z_{ij}),
+\qquad f_j(z)=\sum_{r=1}^{K_j}\theta_{jr}B_{jr}(z).
+\end{equation}
+將線性項與樣條基底合併為矩陣 $A$，所有非截距係數合併為 $\theta$。
+本案使用 cubic P-spline；參考 GAM 與 P-spline 文獻
+\cite{gam,pspline}，但支持門檻及格點是自行設定。
+連續候選須至少六場已知資料；指定可平滑欄另須至少八個相異已知值。
+一般日基準在現行設定為線性項，並非所有連續欄都畫成曲線。
+
+令 $D_2$ 為二階差分矩陣，樣條係數的差分為
+$\theta_{r+2}-2\theta_{r+1}+\theta_r$。目標為
+\begin{equation}
+\min_{\beta_0,\theta}
+\norm{y-\beta_0\one-A\theta}^2
++\lambda_s\sum_{j\in\mathcal S}\norm{D_2\theta_j}^2
++n\alpha_G\norm{\theta}^2,
+\label{eq:gam}
+\end{equation}
+其中 $\lambda_s\ge0,\alpha_G>0$。係數差分懲罰不是
+精確的 $\int[f_j''(z)]^2\,dz$；兩者不可混寫為同一個實作。
+
+\begin{theorem}[目前 GAM 的唯一解]
+在固定有限基底、有限資料及 $\alpha_G>0$ 下，
+式 \eqref{eq:gam} 對截距與所有非截距係數有唯一最佳解。
+\end{theorem}
+\begin{proof}
+將差分懲罰組成半正定矩陣 $S$，使
+$\theta^\top S\theta=\lambda_s\sum_j\norm{D_2\theta_j}^2$。
+對任意變動 $(b,v)\ne(0,0)$，目標 Hessian 的二分之一二次型為
+\[
+\norm{b\one+Av}^2+v^\top Sv+n\alpha_G\norm v^2 .
+\]
+若 $v\ne0$，最後一項嚴格正；若 $v=0,b\ne0$，
+第一項為 $nb^2>0$。故 Hessian 正定，
+二次函數具有唯一全域最小點。
+\end{proof}
+
+全係數 L2 懲罰是上述證明的重要條件。
+只靠二階差分懲罰時，常數與線性趨勢落在其零空間，
+若再與截距或其他項重疊，不能直接宣稱係數唯一。
+實際程式另核對懲罰矩陣、收斂狀態與正規方程殘差。
+
+\subsection{解釋與外插的限制}
+平滑分量的中心化只是圖形呈現慣例，
+不能把單條曲線當成控制所有混雜後的因果效果。
+有限基底數與正懲罰能保證固定問題的唯一解，
+不保證邊界外的曲線合理；本案邊界外仍可能線性外插。
+「GAM 融合權重為 0」也不是此定理失效，
+因為基礎模型擬合與後續融合權重是兩個不同最佳化問題。
+
+\section{XGBoost：加權樹提升與能證明的局部步驟}
+
+\subsection{散場訓練權重}
+對活動 $e$ 的資料列，令 $o_i\in[0,1]$ 為事前預定結束後兩小時與該來源時段的重疊，
+定義
+\begin{equation}
+r_i=1+3\,\mathbf1(s_i=\text{北門})o_i,\qquad
+\omega_i=\frac{n_e r_i}{\sum_{j\in e}r_j}.
+\label{eq:weights}
+\end{equation}
+因此 $\sum_{i\in e}\omega_i=n_e$，每場平均權重為 1，
+避免只因提高北門權重而使整場總權重任意放大。
+未知預定結束時間不加權。
+這個「最多四倍的原始列權重」不等於損失中「低估罰兩倍」，
+亦不等於三模型融合權重。
+
+\subsection{固定樹結構下的葉節點最適值}
+在第 $t$ 次提升中，令舊預測為 $\hat y_i^{(t-1)}$、
+新增樹為 $f_t$。以加權半平方誤差與樹懲罰表示：
+\begin{equation}
+\sum_i\frac{\omega_i}{2}
+\{y_i-\hat y_i^{(t-1)}-f_t(z_i)\}^2
++\gamma_T J+\frac{\lambda_T}{2}\sum_{j=1}^J v_j^2.
+\end{equation}
+$J$ 是葉節點數、$v_j$ 是葉節點值；這裡的 $\lambda_T$
+不是 Ridge 的 $\lambda$。依 XGBoost 原文第 2 節的二階表示
+\cite{xgb}，設
+\[
+g_i=\omega_i(\hat y_i^{(t-1)}-y_i),\quad h_i=\omega_i,\quad
+G_j=\sum_{i\in I_j}g_i,\quad H_j=\sum_{i\in I_j}h_i .
+\]
+對平方損失，此二階展開除常數外是精確等式，而不只是局部近似。
+固定各葉的樣本集合 $I_j$ 後，目標分離為
+\[
+\sum_{j=1}^J\left[G_jv_j+\frac12(H_j+\lambda_T)v_j^2\right]+\gamma_TJ .
+\]
+
+\begin{proposition}[固定分區的唯一葉值]
+若每葉 $H_j+\lambda_T>0$，則
+\begin{equation}
+v_j^*=-\frac{G_j}{H_j+\lambda_T}
+\label{eq:leaf}
+\end{equation}
+是該葉唯一最佳值。
+\end{proposition}
+\begin{proof}
+對 $v_j$ 微分得 $G_j+(H_j+\lambda_T)v_j$；
+二階導數嚴格正，故令一階導數為零即得唯一全域最小點。
+各葉可分離求解，得到固定樹結構的最佳葉值。
+\end{proof}
+
+候選分裂的目標改善量為
+\begin{equation}
+\operatorname{Gain}
+=\frac12\left[
+\frac{G_L^2}{H_L+\lambda_T}
++\frac{G_R^2}{H_R+\lambda_T}
+-\frac{(G_L+G_R)^2}{H_L+H_R+\lambda_T}\right]-\gamma_T .
+\end{equation}
+現行模型的 L1 懲罰為 0，故採上述葉值式；
+若另加 L1，分子須改為對 $G_j$ 的軟閾值。
+學習率 $\nu$ 再縮小新增樹：
+$\hat y^{(t)}=\hat y^{(t-1)}+\nu f_t$。
+
+\subsection{不能由葉值定理推出整個建樹全域最優}
+貪婪建樹逐次選分裂，hist 限制可考慮的切點，
+並受樹深、葉節點門檻與樹數限制。
+因此式 \eqref{eq:leaf} 不保證找出所有樹結構與所有提升步驟的聯合全域最佳解。
+若列舉有限個樹結構，每個結構有最小值，可證明這個有限集合內至少有最佳結構；
+但實際 XGBoost 並未窮舉該集合。
+同理，調參的有限格點最小值存在，不代表已搜尋所有可能設定。
+目前保留版本沒有採用 early stopping。
+
+\section{融合權重：總和自由、總和為 2 或 3}
+
+\subsection{固定留出預測上的融合問題}
+把 Ridge、GAM、XGBoost 在同一批過去留出資料上的預測合為
+$P=[p_R,p_G,p_X]\in\R^{n\times3}$。此處基礎模型及其預測固定，
+只估計融合係數：
+\begin{equation}
+\min_{w\ge0}F(w)
+=\sum_{i=1}^n a_i\ell\{y_i-(Pw)_i\},
+\qquad a_i>0,\quad\sum_i a_i=1 .
+\label{eq:fusion}
+\end{equation}
+若活動等權，每場有 $n_e$ 列、共 $N_E$ 場，
+可令該場每列 $a_i=1/(N_En_e)$。
+這些 $a_i$ 與式 \eqref{eq:weights} 的訓練權重不同。
+非負且不限制總和的融合有文獻先例
+\cite{breiman,pystacked}；總和為 1 是一種模型限制，不是所有 stacking 的公理。
+
+\begin{lemma}[有限生成錐封閉]\label{lem:cone}
+對有限矩陣 $P$，集合
+$C=\{Pw:w\ge0\}=\operatorname{cone}\{p_R,p_G,p_X\}$
+是非空封閉凸集合。
+\end{lemma}
+有限生成錐的標準結果見 \cite{bertsekas}；
+本案所需的完整證明另列附錄 \ref{app:cone}。
+
+\begin{theorem}[總和自由時的存在性]\label{thm:free}
+若 $P,y$ 有限，$\ell$ 取平方、絕對或式 \eqref{eq:loss}
+中 $\kappa>0$ 的非對稱絕對損失，
+則式 \eqref{eq:fusion} 至少有一組全域最佳權重，
+不要求 $P$ 的三個欄向量線性獨立。
+\end{theorem}
+\begin{proof}
+改在可達預測集合 $C$ 上最小化
+$g(z)=\sum_i a_i\ell(y_i-z_i)$。
+令 $a_{\min}=\min_i a_i>0$。三種損失依序滿足
+\[
+g(z)\ge a_{\min}\norm{y-z}_2^2,\qquad
+g(z)\ge a_{\min}\norm{y-z}_1,\qquad
+g(z)\ge a_{\min}\min(1,\kappa)\norm{y-z}_1 .
+\]
+所以 $g$ 連續，且 $\norm z\to\infty$ 時 $g(z)\to\infty$。
+令
+\[
+K=\{z\in C:g(z)\le g(0)\}.
+\]
+由 $0\in C$，$K$ 非空；由引理 \ref{lem:cone} 與連續性，$K$ 封閉；
+由上述不等式，$K$ 有界。有限維空間中 $K$ 緊緻，
+Weierstrass 極值定理保證 $g$ 在 $K$ 取得最小值 $g(z^*)$。
+$K$ 外的點比可行點 0 更差，故 $z^*$ 亦為 $C$ 上最小點。
+由 $z^*\in C$，存在有限 $w^*\ge0$ 使 $Pw^*=z^*$，
+即得到式 \eqref{eq:fusion} 的最佳解。
+\end{proof}
+
+這個證明在\textbf{預測空間}建立有界次水平集；
+沒有誤稱權重集合 $\R_+^3$ 本身有界。
+它也不要求資料彼此獨立；資料相依影響泛化評估與統計推論，
+但不會使固定有限資料上的這個存在性定理失效。
+
+\subsection{唯一性、KKT 與線性規劃}
+對平方損失，令 $D_a=\diag(a_i)$，
+\[
+\nabla F(w)=2P^\top D_a(Pw-y),\qquad
+\nabla^2F(w)=2P^\top D_aP\succeq0 .
+\]
+若 $\rank P=3$，權重解唯一；否則仍存在最小點，但可能有多組權重。
+因平方損失在預測向量上嚴格凸，最適訓練擬合 $Pw^*$ 唯一，
+不代表各組解在新輸入上仍產生相同預測。
+必要且充分的 KKT 條件為
+\begin{equation}
+w^*\ge0,\quad g^*=2P^\top D_a(Pw^*-y)\ge0,\quad
+w_m^*g_m^*=0 .
+\end{equation}
+此為凸二次問題的最適性條件 \cite{boyd}。
+必要性可由可行方向看出：$w_m^*>0$ 時可向兩側微動，故 $g_m^*=0$；
+$w_m^*=0$ 時可向正方向微動，故 $g_m^*\ge0$。
+充分性由凸函數的一階不等式得到：對任意 $w\ge0$，
+\[
+F(w)\ge F(w^*)+(g^*)^\top(w-w^*)\ge F(w^*),
+\]
+因互補條件使 $(g^*)^\top w^*=0$，且 $(g^*)^\top w\ge0$。
+
+非對稱絕對損失可改寫為線性規劃：
+\begin{equation}
+\begin{aligned}
+\min_{w,r^+,r^-}\quad&\sum_i a_i(\kappa r_i^++r_i^-),\\
+\text{使得}\quad&y-Pw=r^+-r^-,\\
+&w,r^+,r^-\ge0 .
+\end{aligned}
+\end{equation}
+$\kappa=1$ 為 MAE，$\kappa=2$ 為低估雙倍。
+不可微不妨礙全域最佳化。
+對固定 $w$，若同一列 $r_i^+,r_i^-$ 同時為正，
+兩者同減可維持等式並嚴格降低成本。
+故最小時分別等於殘差的正、負部分，證明上述 LP 與原損失等價。
+若另外加入 $\eta\norm w^2$、$\eta>0$，
+目標在權重空間強制且嚴格凸，因此三種損失皆有唯一權重解；
+這是新的融合層正則化，仍須用過去資料選擇 $\eta$。
+
+\subsection{權重總和等於 2 或 3}
+\begin{theorem}[固定正總和的存在性]\label{thm:sum}
+對任意固定 $c>0$，
+\[
+\min_{w\in S_c}F(w),\qquad
+S_c=\{w\ge0:\one^\top w=c\}
+\]
+若 $F$ 連續，則至少有一組最佳解。特別是 $c=2$ 或 $3$ 均成立。
+\end{theorem}
+\begin{proof}
+$(c,0,0)\in S_c$，故非空。
+等式與非嚴格不等式定義的 $S_c$ 封閉，
+且每個分量滿足 $0\le w_m\le c$，故有界。
+Weierstrass 極值定理立即給出最小點。
+\end{proof}
+
+\textbf{重新最佳化後的比例未必不變。}
+例如教學資料 $n=1$，真值為 1，三個預測為 $(1,2,0.2)$。
+總和為 1 時 $(1,0,0)$ 可達零誤差；
+把它乘 2 得 $(2,0,0)$，在總和為 2 的問題中誤差為 1，
+但 $(0.75,0,1.25)$ 的預測仍為 1，可達零誤差。
+因此「把原權重乘 2」不一定是新問題的最佳解；
+存在性與最佳比例是否相同是不同問題。
+
+若總和固定為 $c$，卻用 $Pw/c$ 計算訓練損失，
+令 $\alpha=w/c$ 就有 $\alpha\ge0,\sum_m\alpha_m=1$，
+所以與總和為 1 的加權平均完全等價。
+此等價要求目標同步轉換；若原來加上 $\eta\norm w^2$，
+變數替換後是 $\eta c^2\norm\alpha^2$，不能忽略懲罰尺度。
+
+若三模型皆預測 1,000 人，直接使用總和為 2 或 3 的 $Pw$，
+必分別預測 2,000 或 3,000 人。數學上仍有最小點，
+但限制會強制改變整體尺度。總和自由時，
+只要 $s=\sum_mw_m>0$，可寫成
+\[
+Pw=sP\alpha,\qquad \alpha=w/s,\quad\sum_m\alpha_m=1,
+\]
+表示同時學習配比與尺度；$s=0$ 為零預測的特例。
+
+\subsection{嚴格正權重、固定數值與誤差互補}
+要求 $w_m>0$ 時集合不再封閉，存在性可能失敗。
+例如 $P=(1,1,1)$、$y=0$，平方誤差為
+$(w_R+w_G+w_X)^2$；三個權重嚴格正時永遠大於 0，
+但可一起趨近 0。因此有下界卻沒有最小點。
+若改成 $w_m\ge\varepsilon>0$，
+令 $w=\varepsilon\one+u$，即可在總和自由時套用定理 \ref{thm:free}；
+總和固定為 $c$ 時則須先有 $3\varepsilon\le c$。
+
+若全部權重固定為 $(2,3,4)$，只有一個候選，沒有要學習的配比；
+若只固定 $w_R=2$，其餘非負且總和自由，
+把目標改為 $y-2p_R$ 即可對剩餘兩欄套用同一存在性證明。
+每個權重從 $\{2,3\}$ 選最多 8 組，有限集合內亦有最佳組合，
+但不等於連續問題的最佳解。
+
+令 $e_m=p_m-y$，誤差矩陣為 $E=[e_R,e_G,e_X]$。
+當 $\sum_mw_m=1$ 時，
+\begin{equation}
+Pw-y=Ew,\qquad
+\operatorname{MSE}(w)=w^\top(E^\top E/n)w .
+\end{equation}
+$E^\top E/n$ 是未中心化二階矩，不只是相關矩陣。
+設誤差均值向量為 $\mu$、以 $1/n$ 定義的樣本共變異矩陣為 $\Sigma$，
+則 $E^\top E/n=\Sigma+\mu\mu^\top$。
+因此高誤差相關與共同偏差會限制融合的互補效益。
+若權重總和為 $s\ne1$，則
+\[
+Pw-y=Ew+(s-1)y,
+\]
+不能繼續沿用總和為 1 的純誤差共變異式。
+最小化過去資料損失也不保證未來優於 XGBoost，
+故現行專案沒有因存在性定理就改採融合。

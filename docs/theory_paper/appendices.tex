@@ -1,0 +1,154 @@
+\appendix
+\section{有限生成錐封閉的完整證明}\label{app:cone}
+
+本附錄證明引理 \ref{lem:cone}。
+不能只說「封閉集合的線性像封閉」，因為該敘述一般不成立；
+此處需要有限生成的特性。
+
+設 $C=\{Pw:w\ge0\}$。顯然 $0\in C$；
+任意兩點的非負線性組合仍屬 $C$，所以 $C$ 是凸錐。
+取 $z\in C$ 的一組非負表示 $z=Pw$，只看正權重的欄向量。
+若它們線性相依，存在非零 $h$ 支持在這些欄上，使 $Ph=0$。
+必要時令 $h$ 換號，保證至少一個 $h_j>0$。定義
+\begin{equation}
+t=\min_{j:h_j>0}\frac{w_j}{h_j}>0,\qquad w'=w-th.
+\end{equation}
+則 $w'\ge0$ 且 $Pw'=Pw$，至少一個原本的正係數變為 0，
+並未新增原支持以外的欄。重複有限次，
+就能以線性獨立的欄向量非負組合表示 $z$；$z=0$ 亦可取空組合。
+
+因此 $C$ 是有限多個由線性獨立欄生成的錐之聯集。
+考慮其中一個滿 column rank 的矩陣 $A$。
+若 $z_r=A\theta_r\to z$ 且 $\theta_r\ge0$，則
+\begin{equation}
+\theta_r=(A^\top A)^{-1}A^\top z_r
+\longrightarrow\theta=(A^\top A)^{-1}A^\top z\ge0.
+\end{equation}
+由連續性 $A\theta=\lim_rA\theta_r=z$，故此錐封閉。
+空組合生成的 $\{0\}$ 也封閉。
+有限個封閉集合的聯集封閉，所以 $C$ 封閉，證畢。
+
+\section{OLS、Lasso 與變數分析的適用界線}
+
+這些方法曾用於專案比較或資料探索，並非目前保留的三個核心方法全都同時使用。
+本附錄補充解存在性的關係與推論條件，避免把探索指標當成必經的篩選規則。
+
+\subsection{OLS 與 Lasso 的解}
+對完整設計矩陣 $X$（含截距），OLS 解
+$\min_\beta\norm{y-X\beta}^2$ 一定存在：
+$\operatorname{col}(X)$ 是有限維封閉線性子空間，
+$y$ 對此空間的正交投影唯一存在。
+但係數唯一須有 $\rank X=p$；rank 不足時可能有多個係數對應相同擬合。
+
+Lasso \cite{lasso} 解
+\[
+\min_{\beta_0,\beta}\frac1n\norm{y-\beta_0\one-X\beta}^2
++\lambda\norm\beta_1,\qquad\lambda>0.
+\]
+消去最適截距後，目標對 $\beta$ 連續且至少為 $\lambda\norm\beta_1$，
+故次水平集有界且封閉，保證取得最小值。
+L1 懲罰不是嚴格凸，相關或重複欄位可能使係數解不唯一。
+這與 Ridge 用正 L2 懲罰保證唯一的機制不同；
+不存在「Lasso 理論上一定比 Ridge 更適合」的結論。
+
+\subsection{相關、VIF 與交互作用}
+Spearman 相關是對排名取 Pearson 相關；有相同值時使用平均秩。
+它衡量單調關聯，不證明因果，也不能由低相關排除非線性或條件交互作用。
+VIF 對非恆定欄位 $X_j$ 的定義為
+\[
+\operatorname{VIF}_j=\frac1{1-R_j^2},
+\]
+其中 $R_j^2$ 來自以其他欄位與截距迴歸 $X_j$。
+在固定且滿 column rank 的設計、獨立同變異誤差的 OLS 中，
+\[
+\Var(\widehat\beta_j\mid X)
+=\frac{\sigma^2}{\sum_i(X_{ij}-\overline X_j)^2}\operatorname{VIF}_j.
+\]
+這是 $(X^\top X)^{-1}$ 的分割矩陣表示，
+說明共線性放大係數估計變異；不是「VIF 超過某數就必須刪除」的定理。
+加入車站與時段的主效果、交互作用時應處理參考組，
+避免完整 dummy 與截距的精確線性相依。
+Ridge 與 GAM 的正懲罰可處理 rank 不足的最小化，
+但不會憑空創造能辨認因果效果的獨立資訊。
+
+\subsection{F 檢定與 AIC 不可無條件套用}
+對兩個巢狀 OLS 模型，完整模型 rank 為 $p_F$，
+簡化模型比它少 $q>0$ 個自由參數，且 $n>p_F$，傳統統計量為
+\[
+F=\frac{(\operatorname{RSS}_R-\operatorname{RSS}_F)/q}
+{\operatorname{RSS}_F/(n-p_F)}.
+\]
+在虛無假設成立、固定設計且誤差為 $N(0,\sigma^2I)$ 時，
+投影差與完整殘差是互相正交的 Gaussian 分量，
+各自平方和除以 $\sigma^2$ 為自由度 $q$ 與 $n-p_F$ 的獨立卡方，
+故比例服從 $F_{q,n-p_F}$。
+同一活動內各站、各時段相關時，$\sigma^2I$ 假設不自動成立；
+不能把全部 504 列當成獨立重複而直接沿用此精確分布。
+經資料選模後再做相同檢定，也需要處理選擇造成的推論偏差。
+
+AIC 的形式為 $-2\log L(\widehat\theta)+2k$ \cite{aic}，
+是在指定概似與正則條件下估計資訊損失的準則，
+不是保證未來預測最準的定理。
+一般 $k$ 不可任意替代懲罰模型的有效自由度；
+本案目前的超參數比較主要依時間向前驗證，並非用 AIC 統一選所有模型。
+
+\section{調度公式的可重算教學例子}
+
+此例完全是假設資料，用來驗算式子，不是北門最佳班表的實驗結果。
+單方向 0--10 分鐘、每分鐘到達 2 人、起始無排隊。
+原班在第 10 分鐘提供 20 人容量；候選增班在第 3、5、7 分鐘，
+各容量 20 人、各成本 10 元，最小班距 3 分鐘，提前量均已符合。
+採 $v=196/60$。
+
+由於每一班都能清空當時候車，對任一相鄰服務間隔長度 $\Delta$，
+排隊面積為 $\int_0^\Delta2t\,dt=\Delta^2$。
+故不增班為 $10^2=100$；只在第 5 分鐘增班為 $5^2+5^2=50$；
+在第 3、7 分鐘增班為 $3^2+4^2+3^2=34$。
+
+\begin{table}[htbp]
+\centering\small
+\caption{有限候選調度的完整可行方案列舉}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+增班時刻 & 班數 & $W$（人分鐘） & 成本（元） & $\Delta C+vW$（元）\\
+\midrule
+無 &0&100&0&326.67\\
+3 &1&58&10&199.47\\
+5 &1&50&10&173.33\\
+7 &1&58&10&199.47\\
+3、7 &2&34&20&131.07\\
+\bottomrule
+\end{tabular}
+\end{table}
+3 與 5、5 與 7 都只間隔 2 分鐘，所以不能同選。
+這個有限集合的最佳值是 $20+(196/60)\times34=131.0666\ldots$。
+強制兩班仍有解，強制三班則無解，
+因定理 \ref{thm:dispatch} 的非空前提不成立。
+上述列舉與既有批次候車函數、MILP 教學驗算一致；
+數值核對只檢查這個例子的算術與表示，不取代理論證明。
+
+\section{程式、輸出與資料來源索引}\label{app:implementation}
+
+本文依本機專案 2026 年 10 月 18 日檢視狀態編寫，
+當時 Git 基準版本為 \texttt{5a331a1}，另含尚未提交的理論與營運文件。
+下列路徑相對於專案根目錄，可供核對本文公式與目前實作。
+
+\begin{longtable}{@{}p{73mm}p{86mm}@{}}
+\toprule
+位置 & 本文用途\\
+\midrule
+\endfirsthead
+\toprule 位置 & 本文用途\\\midrule
+\endhead
+\path{src/forecasting/linear.py} & Ridge 的標準化、$n\lambda$ 懲罰與非負預測處理。\\
+\path{src/forecasting/gam_fit.py} & GAM 的候選、基底與擬合介面。\\
+\path{src/forecasting/gam_stable.py} & 係數差分、全係數懲罰及數值檢查。\\
+\path{src/forecasting/weighted_tree.py} & 北門散場重疊權重、場內正規化與 XGBoost 設定。\\
+\path{src/queueing.py} & 有限期流體到達、批次上車與候車面積；不含本文完整增班最佳化。\\
+\path{result/forecast/validation.json} & 既有實作核對與資料使用界線；不是新活動驗證。\\
+\path{README.md}、\path{process.md} & 現行保留結果、模型理由與執行方式。\\
+\path{docs/metro_operations.md} & 官方時刻表、班距、容量與調度時間來源；平均班距與安全門檻須區分。\\
+\path{result/queue_dispatch_v1/beimen_holiday_baseline.csv} & 已整理的官方假日基準班表；不是已最佳化班表。\\
+\path{docs/theory_paper/} & 本文件的可編輯 LaTeX 原始碼與證明。\\
+\bottomrule
+\end{longtable}

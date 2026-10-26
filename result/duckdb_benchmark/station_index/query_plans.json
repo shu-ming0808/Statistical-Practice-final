@@ -1,0 +1,576 @@
+{
+  "q1_beimen_day": {
+    "mysql": [
+      [
+        "{"
+      ],
+      [
+        "  \"query_block\": {"
+      ],
+      [
+        "    \"select_id\": 1,"
+      ],
+      [
+        "    \"cost_info\": {"
+      ],
+      [
+        "      \"query_cost\": \"152.18\""
+      ],
+      [
+        "    },"
+      ],
+      [
+        "    \"ordering_operation\": {"
+      ],
+      [
+        "      \"using_filesort\": false,"
+      ],
+      [
+        "      \"grouping_operation\": {"
+      ],
+      [
+        "        \"using_filesort\": false,"
+      ],
+      [
+        "        \"table\": {"
+      ],
+      [
+        "          \"table_name\": \"od\","
+      ],
+      [
+        "          \"access_type\": \"range\","
+      ],
+      [
+        "          \"possible_keys\": ["
+      ],
+      [
+        "            \"ix_station_date_hour_count\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"key\": \"ix_station_date_hour_count\","
+      ],
+      [
+        "          \"used_key_parts\": ["
+      ],
+      [
+        "            \"origin_station\","
+      ],
+      [
+        "            \"service_date\","
+      ],
+      [
+        "            \"source_hour\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"key_length\": \"263\","
+      ],
+      [
+        "          \"rows_examined_per_scan\": 648,"
+      ],
+      [
+        "          \"rows_produced_per_join\": 648,"
+      ],
+      [
+        "          \"filtered\": \"100.00\","
+      ],
+      [
+        "          \"using_index\": true,"
+      ],
+      [
+        "          \"cost_info\": {"
+      ],
+      [
+        "            \"read_cost\": \"87.38\","
+      ],
+      [
+        "            \"eval_cost\": \"64.80\","
+      ],
+      [
+        "            \"prefix_cost\": \"152.18\","
+      ],
+      [
+        "            \"data_read_per_join\": \"344K\""
+      ],
+      [
+        "          },"
+      ],
+      [
+        "          \"used_columns\": ["
+      ],
+      [
+        "            \"source_row\","
+      ],
+      [
+        "            \"service_date\","
+      ],
+      [
+        "            \"source_hour\","
+      ],
+      [
+        "            \"origin_station\","
+      ],
+      [
+        "            \"passengers\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"attached_condition\": \"((`bench_duckdb_20261020t083841z_03aab8f3`.`od`.`service_date` = DATE'2026-07-29') and (`bench_duckdb_20261020t083841z_03aab8f3`.`od`.`origin_station` = '北門') and (`bench_duckdb_20261020t083841z_03aab8f3`.`od`.`source_hour` between 18 and 23))\""
+      ],
+      [
+        "        }"
+      ],
+      [
+        "      }"
+      ],
+      [
+        "    }"
+      ],
+      [
+        "  }"
+      ],
+      [
+        "}"
+      ]
+    ],
+    "duckdb": [
+      [
+        "physical_plan",
+        "┌───────────────────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_decompress_integ│\n│    ral_smallint(#0, 18)   │\n│             #1            │\n│                           │\n│          ~0 rows          │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│          ORDER_BY         │\n│    ────────────────────   │\n│ memory.main.od.source_hour│\n│             ASC           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_compress_integra│\n│     l_utinyint(#0, 18)    │\n│             #1            │\n│                           │\n│      ~1,516,616 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_decompress_integ│\n│    ral_smallint(#0, 18)   │\n│             #1            │\n│                           │\n│      ~1,516,616 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│   PERFECT_HASH_GROUP_BY   │\n│    ────────────────────   │\n│         Groups: #0        │\n│    Aggregates: sum(#1)    │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│        source_hour        │\n│         passengers        │\n│                           │\n│      ~1,673,330 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_compress_integra│\n│     l_utinyint(#0, 18)    │\n│             #1            │\n│                           │\n│      ~1,673,330 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│        READ_PARQUET       │\n│    ────────────────────   │\n│         Function:         │\n│        READ_PARQUET       │\n│                           │\n│        Projections:       │\n│        source_hour        │\n│         passengers        │\n│                           │\n│          Filters:         │\n│ service_date='2026-07-29':│\n│           :DATE           │\n│    source_hour>=18 AND    │\n│       source_hour<=23     │\n│   origin_station='北門'   │\n│                           │\n│      ~1,673,330 rows      │\n└───────────────────────────┘\n"
+      ]
+    ]
+  },
+  "q2_four_stations": {
+    "mysql": [
+      [
+        "{"
+      ],
+      [
+        "  \"query_block\": {"
+      ],
+      [
+        "    \"select_id\": 1,"
+      ],
+      [
+        "    \"cost_info\": {"
+      ],
+      [
+        "      \"query_cost\": \"192734.85\""
+      ],
+      [
+        "    },"
+      ],
+      [
+        "    \"ordering_operation\": {"
+      ],
+      [
+        "      \"using_filesort\": false,"
+      ],
+      [
+        "      \"grouping_operation\": {"
+      ],
+      [
+        "        \"using_temporary_table\": true,"
+      ],
+      [
+        "        \"using_filesort\": true,"
+      ],
+      [
+        "        \"cost_info\": {"
+      ],
+      [
+        "          \"sort_cost\": \"62168.01\""
+      ],
+      [
+        "        },"
+      ],
+      [
+        "        \"table\": {"
+      ],
+      [
+        "          \"table_name\": \"od\","
+      ],
+      [
+        "          \"access_type\": \"range\","
+      ],
+      [
+        "          \"possible_keys\": ["
+      ],
+      [
+        "            \"ix_station_date_hour_count\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"key\": \"ix_station_date_hour_count\","
+      ],
+      [
+        "          \"used_key_parts\": ["
+      ],
+      [
+        "            \"origin_station\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"key_length\": \"258\","
+      ],
+      [
+        "          \"rows_examined_per_scan\": 559568,"
+      ],
+      [
+        "          \"rows_produced_per_join\": 62168,"
+      ],
+      [
+        "          \"filtered\": \"11.11\","
+      ],
+      [
+        "          \"using_index\": true,"
+      ],
+      [
+        "          \"cost_info\": {"
+      ],
+      [
+        "            \"read_cost\": \"124350.04\","
+      ],
+      [
+        "            \"eval_cost\": \"6216.80\","
+      ],
+      [
+        "            \"prefix_cost\": \"130566.84\","
+      ],
+      [
+        "            \"data_read_per_join\": \"32M\""
+      ],
+      [
+        "          },"
+      ],
+      [
+        "          \"used_columns\": ["
+      ],
+      [
+        "            \"source_row\","
+      ],
+      [
+        "            \"service_date\","
+      ],
+      [
+        "            \"source_hour\","
+      ],
+      [
+        "            \"origin_station\","
+      ],
+      [
+        "            \"passengers\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"attached_condition\": \"((`bench_duckdb_20261020t083841z_03aab8f3`.`od`.`origin_station` in ('北門','大橋頭站','雙連','民權西路')) and (`bench_duckdb_20261020t083841z_03aab8f3`.`od`.`source_hour` between 18 and 23))\""
+      ],
+      [
+        "        }"
+      ],
+      [
+        "      }"
+      ],
+      [
+        "    }"
+      ],
+      [
+        "  }"
+      ],
+      [
+        "}"
+      ]
+    ],
+    "duckdb": [
+      [
+        "physical_plan",
+        "┌───────────────────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│             #1            │\n│__internal_decompress_integ│\n│    ral_smallint(#2, 18)   │\n│             #3            │\n│                           │\n│          ~0 rows          │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│          ORDER_BY         │\n│    ────────────────────   │\n│       memory.main.od      │\n│     .service_date ASC     │\n│       memory.main.od      │\n│    .origin_station ASC    │\n│ memory.main.od.source_hour│\n│             ASC           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│             #1            │\n│__internal_compress_integra│\n│     l_utinyint(#2, 18)    │\n│             #3            │\n│                           │\n│       ~334,666 rows       │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│             #1            │\n│__internal_decompress_integ│\n│    ral_smallint(#2, 18)   │\n│             #3            │\n│                           │\n│       ~334,666 rows       │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│       HASH_GROUP_BY       │\n│    ────────────────────   │\n│          Groups:          │\n│             #0            │\n│             #1            │\n│             #2            │\n│                           │\n│    Aggregates: sum(#3)    │\n│                           │\n│       ~334,666 rows       │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│        service_date       │\n│       origin_station      │\n│        source_hour        │\n│         passengers        │\n│                           │\n│       ~334,666 rows       │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│__internal_compress_integra│\n│     l_utinyint(#1, 18)    │\n│             #2            │\n│             #3            │\n│                           │\n│       ~334,666 rows       │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│           FILTER          │\n│    ────────────────────   │\n│ ((origin_station = '北門')│\n│  OR (origin_station = '大 │\n│        橋頭站') OR        │\n│ (origin_station = '雙連') │\n│  OR (origin_station = '民 │\n│         權西路'))         │\n│                           │\n│       ~334,666 rows       │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│        READ_PARQUET       │\n│    ────────────────────   │\n│         Function:         │\n│        READ_PARQUET       │\n│                           │\n│        Projections:       │\n│        service_date       │\n│        source_hour        │\n│       origin_station      │\n│         passengers        │\n│                           │\n│          Filters:         │\n│    source_hour>=18 AND    │\n│       source_hour<=23     │\n│  optional: origin_station │\n│  IN ('北門', '大橋頭站',  │\n│    '雙連', '民權西路')    │\n│                           │\n│      ~1,673,330 rows      │\n└───────────────────────────┘\n"
+      ]
+    ]
+  },
+  "q3_network_hourly": {
+    "mysql": [
+      [
+        "{"
+      ],
+      [
+        "  \"query_block\": {"
+      ],
+      [
+        "    \"select_id\": 1,"
+      ],
+      [
+        "    \"cost_info\": {"
+      ],
+      [
+        "      \"query_cost\": \"8954585.05\""
+      ],
+      [
+        "    },"
+      ],
+      [
+        "    \"ordering_operation\": {"
+      ],
+      [
+        "      \"using_filesort\": false,"
+      ],
+      [
+        "      \"grouping_operation\": {"
+      ],
+      [
+        "        \"using_temporary_table\": true,"
+      ],
+      [
+        "        \"using_filesort\": true,"
+      ],
+      [
+        "        \"cost_info\": {"
+      ],
+      [
+        "          \"sort_cost\": \"8116465.00\""
+      ],
+      [
+        "        },"
+      ],
+      [
+        "        \"table\": {"
+      ],
+      [
+        "          \"table_name\": \"od\","
+      ],
+      [
+        "          \"access_type\": \"index\","
+      ],
+      [
+        "          \"possible_keys\": ["
+      ],
+      [
+        "            \"ix_station_date_hour_count\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"key\": \"ix_station_date_hour_count\","
+      ],
+      [
+        "          \"used_key_parts\": ["
+      ],
+      [
+        "            \"origin_station\","
+      ],
+      [
+        "            \"service_date\","
+      ],
+      [
+        "            \"source_hour\","
+      ],
+      [
+        "            \"passengers\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"key_length\": \"271\","
+      ],
+      [
+        "          \"rows_examined_per_scan\": 8116465,"
+      ],
+      [
+        "          \"rows_produced_per_join\": 8116465,"
+      ],
+      [
+        "          \"filtered\": \"100.00\","
+      ],
+      [
+        "          \"using_index\": true,"
+      ],
+      [
+        "          \"cost_info\": {"
+      ],
+      [
+        "            \"read_cost\": \"26473.55\","
+      ],
+      [
+        "            \"eval_cost\": \"811646.50\","
+      ],
+      [
+        "            \"prefix_cost\": \"838120.05\","
+      ],
+      [
+        "            \"data_read_per_join\": \"4G\""
+      ],
+      [
+        "          },"
+      ],
+      [
+        "          \"used_columns\": ["
+      ],
+      [
+        "            \"source_row\","
+      ],
+      [
+        "            \"source_hour\","
+      ],
+      [
+        "            \"origin_station\","
+      ],
+      [
+        "            \"passengers\""
+      ],
+      [
+        "          ]"
+      ],
+      [
+        "        }"
+      ],
+      [
+        "      }"
+      ],
+      [
+        "    }"
+      ],
+      [
+        "  }"
+      ],
+      [
+        "}"
+      ]
+    ],
+    "duckdb": [
+      [
+        "physical_plan",
+        "┌───────────────────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│__internal_decompress_integ│\n│    ral_smallint(#1, 0)    │\n│             #2            │\n│                           │\n│          ~0 rows          │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│          ORDER_BY         │\n│    ────────────────────   │\n│       memory.main.od      │\n│    .origin_station ASC    │\n│ memory.main.od.source_hour│\n│             ASC           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│__internal_compress_integra│\n│     l_utinyint(#1, 0)     │\n│             #2            │\n│                           │\n│      ~8,366,651 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│__internal_decompress_integ│\n│    ral_smallint(#1, 0)    │\n│             #2            │\n│                           │\n│      ~8,366,651 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│       HASH_GROUP_BY       │\n│    ────────────────────   │\n│          Groups:          │\n│             #0            │\n│             #1            │\n│                           │\n│    Aggregates: sum(#2)    │\n│                           │\n│      ~8,366,651 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│       origin_station      │\n│        source_hour        │\n│         passengers        │\n│                           │\n│      ~8,366,652 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_compress_integra│\n│     l_utinyint(#0, 0)     │\n│             #1            │\n│             #2            │\n│                           │\n│      ~8,366,652 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│        READ_PARQUET       │\n│    ────────────────────   │\n│         Function:         │\n│        READ_PARQUET       │\n│                           │\n│        Projections:       │\n│        source_hour        │\n│       origin_station      │\n│         passengers        │\n│                           │\n│      ~8,366,652 rows      │\n└───────────────────────────┘\n"
+      ]
+    ]
+  },
+  "q4_top_od": {
+    "mysql": [
+      [
+        "{"
+      ],
+      [
+        "  \"query_block\": {"
+      ],
+      [
+        "    \"select_id\": 1,"
+      ],
+      [
+        "    \"cost_info\": {"
+      ],
+      [
+        "      \"query_cost\": \"838120.05\""
+      ],
+      [
+        "    },"
+      ],
+      [
+        "    \"ordering_operation\": {"
+      ],
+      [
+        "      \"using_filesort\": true,"
+      ],
+      [
+        "      \"grouping_operation\": {"
+      ],
+      [
+        "        \"using_temporary_table\": true,"
+      ],
+      [
+        "        \"using_filesort\": false,"
+      ],
+      [
+        "        \"table\": {"
+      ],
+      [
+        "          \"table_name\": \"od\","
+      ],
+      [
+        "          \"access_type\": \"ALL\","
+      ],
+      [
+        "          \"rows_examined_per_scan\": 8116465,"
+      ],
+      [
+        "          \"rows_produced_per_join\": 2705217,"
+      ],
+      [
+        "          \"filtered\": \"33.33\","
+      ],
+      [
+        "          \"cost_info\": {"
+      ],
+      [
+        "            \"read_cost\": \"567598.27\","
+      ],
+      [
+        "            \"eval_cost\": \"270521.77\","
+      ],
+      [
+        "            \"prefix_cost\": \"838120.05\","
+      ],
+      [
+        "            \"data_read_per_join\": \"1G\""
+      ],
+      [
+        "          },"
+      ],
+      [
+        "          \"used_columns\": ["
+      ],
+      [
+        "            \"source_row\","
+      ],
+      [
+        "            \"origin_station\","
+      ],
+      [
+        "            \"destination_station\","
+      ],
+      [
+        "            \"passengers\""
+      ],
+      [
+        "          ],"
+      ],
+      [
+        "          \"attached_condition\": \"(`bench_duckdb_20261020t083841z_03aab8f3`.`od`.`passengers` > 0)\""
+      ],
+      [
+        "        }"
+      ],
+      [
+        "      }"
+      ],
+      [
+        "    }"
+      ],
+      [
+        "  }"
+      ],
+      [
+        "}"
+      ]
+    ],
+    "duckdb": [
+      [
+        "physical_plan",
+        "┌───────────────────────────┐\n│           TOP_N           │\n│    ────────────────────   │\n│          Top: 20          │\n│                           │\n│         Order By:         │\n│     sum(memory.main.od    │\n│     .passengers) DESC     │\n│       memory.main.od      │\n│    .origin_station ASC    │\n│       memory.main.od      │\n│  .destination_station ASC │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│       HASH_GROUP_BY       │\n│    ────────────────────   │\n│          Groups:          │\n│             #0            │\n│             #1            │\n│                           │\n│    Aggregates: sum(#2)    │\n│                           │\n│      ~1,673,329 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│       origin_station      │\n│    destination_station    │\n│         passengers        │\n│                           │\n│      ~1,673,330 rows      │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│        READ_PARQUET       │\n│    ────────────────────   │\n│         Function:         │\n│        READ_PARQUET       │\n│                           │\n│        Projections:       │\n│       origin_station      │\n│    destination_station    │\n│         passengers        │\n│                           │\n│   Filters: passengers>0   │\n│                           │\n│      ~1,673,330 rows      │\n└───────────────────────────┘\n"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,217 @@
+\section{研究範圍與理論保證}
+
+\subsection{本案要解決的問題}
+第一階段利用事前可取得的活動、車站與歷史人流資訊，預測活動日的逐時進站量。
+第二階段把固定的需求預測分配為方向與分鐘到達情境，評估列車剩餘容量下的候車，
+再搜尋兼顧新增營運成本與候車時間的增班方案。
+預測與決策必須分開估計：不能在調度求解時，讓預測權重任意降低需求以節省成本。
+
+本文以目前程式、設定與公開結果為準。既有資料為 21 場活動、四站、每場
+18--23 時六個來源時段，共 504 列；主要回顧評估為 2024--2026 年九場北門資料，
+共 54 列。同一活動的車站與時段彼此相關，504 列不能視為 504 場獨立活動。
+四站為北門、大橋頭、雙連及民權西路。
+
+\begin{table}[htbp]
+\centering\small
+\caption{方法的實作狀態與本文能證明的內容}
+\begin{tabularx}{\linewidth}{@{}p{24mm}p{36mm}X@{}}
+\toprule
+方法 & 本案狀態 & 理論保證的範圍\\
+\midrule
+Ridge & 保留作比較與解釋 & 固定設計、正懲罰下，係數解存在且唯一\\
+GAM & 保留作非線性比較 & 固定基底、全係數正懲罰下，解存在且唯一\\
+XGBoost & 散場加權版本為保留模型 & 固定樹結構的葉節點值可求最適；不保證貪婪建樹全域最優\\
+融合 & 曾比較但未採用；新限制為理論設計 & 指定有限資料與損失下的權重解存在性\\
+候車情境 & 已有批次上車模擬 & 人數守恆、候車面積與有限期計算\\
+最佳化班表 & 公式與教學驗算已完成，實際班表尚未求解 & 有限、非空可行集合中的最佳方案存在\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\Needspace{12\baselineskip}
+\subsection{「有最佳解」不等於「一定預測準」}
+\begin{definition}[四種不同的敘述]
+給定問題 $\inf_{x\in\mathcal F}f(x)$：
+\begin{enumerate}
+\item \textbf{存在性：}存在 $x^*\in\mathcal F$，使 $f(x^*)=\inf_{\mathcal F}f$。
+\item \textbf{唯一性：}只有一個決策達到該最小值。
+\item \textbf{演算法最適性：}所用演算法確實找到全域最小值，而非僅可行或局部解。
+\item \textbf{外部有效性：}對未來活動仍準確，且決策符合未納入模型的營運條件。
+\end{enumerate}
+\end{definition}
+
+凸性本身不保證最佳解存在。例如 $\min_{x\ge0}e^{-x}$ 是凸問題，
+下界為 0，卻沒有任何有限 $x$ 可達到。後文會逐一說明保證存在所需的附加條件。
+本文的定理與證明是依標準數學結果針對本案重述或推導，
+不是聲稱提出新的普遍性定理。文獻與程式位置列於文末。
+
+\subsection{主要記號}
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}p{23mm}X p{34mm}@{}}
+\toprule
+記號 & 意義 & 單位或範圍\\
+\midrule
+$i=(e,s,h)$ & 活動、車站、來源時段的資料列 & $i=1,\ldots,n$\\
+$y_i,z_i$ & 真實進站量、前處理後輸入 & 人次；設計向量\\
+$\omega_i$ & XGBoost 訓練列權重 & 正數，場內平均為 1\\
+$a_i$ & 融合損失的列權重 & $a_i>0,\ \sum_i a_i=1$\\
+$w_m$ & 第 $m$ 個模型的融合係數 & 與 $\omega_i$ 不同\\
+$x_k$ & 是否選擇第 $k$ 個候選增班 & $\{0,1\}$\\
+$Q_d(t),W$ & 方向排隊量、總候車面積 & 人；人分鐘\\
+$u,v$ & 單位增量營運成本、時間價值 & 元／列車公里；元／人分鐘\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{資料時間界線、損失與驗證}
+
+\subsection{資訊可得性與前處理}
+令 $\mathcal I_{t_0}$ 為預測截止時間 $t_0$ 已知資訊生成的 $\sigma$-代數；
+資料欄位除了觀測時刻，還需記錄真正發布或可取得的時刻。正式日前預測要求
+\begin{equation}
+\operatorname{available\_at}(z_{ij})\le t_0.
+\end{equation}
+活動日前一天的實際氣象、事後全月聲量或當日未來時段人流不滿足這個條件。
+歷史觀測日期早於 $t_0$，也不代表該資料當時已發布。
+本案歷史 OD 與日曆的部分發布時點仍未完全核實，因此目前結果是回顧比較，
+不能宣稱已完整驗證嚴格 D$-1$ 部署。
+
+\begin{proposition}[預測資訊的封閉性]
+若訓練資料、前處理參數、超參數及目標輸入均可由 $\mathcal I_{t_0}$ 取得，
+且計算程序為可測函數，則最終預測亦為 $\mathcal I_{t_0}$ 可測。
+\end{proposition}
+\begin{proof}
+把補值、標準化、編碼、擬合及預測寫成有限個可測映射的合成。
+可測映射的合成仍可測；固定亂數種子或將已抽取的種子納入已知資訊即可。
+\end{proof}
+這只證明沒有把未來資訊放進計算，並不證明預測無偏或泛化誤差小。
+本案按年度向前驗證；前處理只由各折訓練資料估計，
+2024、2025、2026 年分別使用過去 12、15、18 場活動。
+向前驗證的設計參考文獻 \cite{fpp}；九場反覆參與開發的限制仍須保留
+\cite{cawley}。
+
+連續欄以訓練平均與母體標準差轉換：
+\[
+z_{ij}=\frac{x_{ij}-\bar x_{j,\mathrm{train}}}{s_{j,\mathrm{train}}}.
+\]
+類別與二元欄維持參考編碼。移除常數與完全線性相依欄是識別性處理，
+不是依相關係數或 $p$ 值自動選變數。
+車站與時段交互作用使時段差異可以因站而異：
+\[
+\eta_{s,h}=\beta_0+\alpha_s+\gamma_h+\delta_{s,h}+z^\top\beta.
+\]
+在固定車站 $s$，由 $h_1$ 改為 $h_2$ 的條件差異為
+$(\gamma_{h_2}-\gamma_{h_1})+(\delta_{s,h_2}-\delta_{s,h_1})$；
+不能把它解讀成活動的因果效果。
+
+\subsection{MSE、MAE 與低估雙倍的不同目標}
+定義 $r=y-\hat y$，故 $r>0$ 表示低估。三種損失為
+\begin{align}
+\ell_2(r)&=r^2,&
+\ell_1(r)&=|r|,&
+\ell_\kappa(r)&=\kappa[r]_++[-r]_+,\quad\kappa>0.
+\label{eq:loss}
+\end{align}
+本案曾以 $\kappa=2$ 選參；目前 XGBoost 訓練仍使用加權平方誤差，
+不能將這兩件事混為「模型已改成分位數訓練」。
+
+\begin{proposition}[損失決定所估的母體位置]
+給定條件資訊 $X$，若所需動差有限：
+平方誤差的最佳常數預測為 $\E(Y\mid X)$；
+絕對誤差的最佳預測為條件中位數；
+非對稱絕對誤差的最佳預測為
+$\tau=\kappa/(1+\kappa)$ 的條件分位數。
+\end{proposition}
+\begin{proof}
+對平方誤差，設 $\mu=\E(Y\mid X)$，則
+\[
+\E[(Y-a)^2\mid X]=\Var(Y\mid X)+(a-\mu)^2,
+\]
+右式在 $a=\mu$ 最小。對非對稱絕對誤差，
+若條件分布函數 $F$ 在 $a$ 連續，對 $a$ 微分得
+\[
+\frac{d}{da}\E\{\ell_\kappa(Y-a)\mid X\}
+=F(a)-\kappa\{1-F(a)\}.
+\]
+零點滿足 $F(a)=\kappa/(1+\kappa)$。
+有原子時改用次梯度，條件為
+$F(a^-)\le\tau\le F(a)$。令 $\kappa=1$ 即得中位數結論。
+\end{proof}
+因此低估罰 2 倍的母體目標是 $2/3$ 分位數，而非自動等於平均人流。
+這是條件母體目標的敘述；受限的三模型融合不一定能精確表示該分位數。
+
+回顧評分採
+\[
+\operatorname{MAE}=\frac1N\sum_i|\hat y_i-y_i|,\qquad
+\operatorname{RMSE}=\sqrt{\frac1N\sum_i(\hat y_i-y_i)^2}.
+\]
+RMSE 與 MSE 在同一資料、相同權重下的排序相同，因平方根嚴格遞增。
+這不表示 RMSE 與 MAE 的最小點相同，也不表示使用平方誤差訓練一定
+能最佳化實際列車調度成本。
+
+\subsection{有限調參與選模的界線}
+固定有限候選超參數集合 $\Theta$，若每個候選皆成功產生有限驗證損失，
+則 $\argmin_{\theta\in\Theta}\widehat R_{\mathrm{val}}(\theta)$ 非空。
+此證明只需在有限個實數中取最小值，不能推論找到連續參數空間的最適解。
+失敗候選需明確排除並記錄；若全部失敗，便無可比較的模型。
+反覆觀看同一批驗證結果會帶來選模偏差，故「存在最小驗證誤差」
+不等於「已無偏估計未來誤差」\cite{cawley}。
+
+\section{Ridge：線性結構、收縮與唯一解}
+
+\subsection{目標與閉式解}
+令 $Z\in\R^{n\times p}$ 為固定訓練設計，截距不受懲罰。
+本案採用
+\begin{equation}
+\min_{\beta_0,\beta}
+\frac1n\norm{y-\beta_0\one-Z\beta}_2^2+\lambda\norm{\beta}_2^2,
+\qquad\lambda>0.
+\label{eq:ridge}
+\end{equation}
+這是 Ridge 的經典設定 \cite{ridge}，其懲罰作用是穩定係數，
+不保證每一個係數的絕對值都相對 OLS 變小，也不保證所有資料的預測誤差都下降。
+
+\begin{theorem}[Ridge 解存在且唯一]
+若 $n\ge1$、$Z,y$ 有限且 $\lambda>0$，式 \eqref{eq:ridge}
+有唯一最佳解，無須假設 $Z$ 的欄向量線性獨立。
+\end{theorem}
+\begin{proof}
+對固定 $\beta$，截距的一階條件給出
+$\hat\beta_0=\bar y-\bar z^\top\beta$。
+令 $Z_c=Z-\one\bar z^\top$、$y_c=y-\bar y\one$，
+問題等價於最小化
+$n^{-1}\norm{y_c-Z_c\beta}^2+\lambda\norm{\beta}^2$。
+對任意非零 $v$，
+\[
+v^\top(Z_c^\top Z_c+n\lambda I)v
+=\norm{Z_cv}^2+n\lambda\norm v^2>0.
+\]
+故係數矩陣正定，唯一駐點為
+\begin{equation}
+\hat\beta=(Z_c^\top Z_c+n\lambda I)^{-1}Z_c^\top y_c,\qquad
+\hat\beta_0=\bar y-\bar z^\top\hat\beta .
+\end{equation}
+目標為嚴格凸二次函數，該駐點即唯一全域最小點。
+\end{proof}
+
+若程式採用未除以 $n$ 的 SSE，
+必須用 $\alpha_{\mathrm{software}}=n\lambda$，才能與
+\eqref{eq:ridge} 相同。本案用 SVD 求解，不直接以數值反矩陣實作。
+
+\subsection{收縮的幾何意義}
+令 $Z_c=U\operatorname{diag}(d_j)V^\top$ 為 SVD。
+在有資料支持的奇異方向上，
+\[
+Z_c\hat\beta
+=U\operatorname{diag}\!\left(\frac{d_j^2}{d_j^2+n\lambda}\right)U^\top y_c .
+\]
+每個倍率介於 0 與 1；小奇異值方向受到較強收縮，
+所以近共線性引起的不穩定可以被限制。
+這是在正交方向上的收縮，不是每個原始變數係數的逐項單調性定理。
+
+最終人流輸出採 $\hat y=\max(0,\eta)$。
+若真值 $y\ge0$，對任意 $\eta<0$，有
+$|y-0|=y\le y-\eta=|y-\eta|$，
+所以截去負預測不會增加該筆絕對或平方誤差；
+這不等於在融合求解時任意加入截斷後仍保有原來的凸性。
