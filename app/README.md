@@ -11,6 +11,7 @@ React＋shadcn 黑灰介面、MapLibre 地圖。提供「人流展示」「資�
 - 預測結果：九場、54 小時，實際／預測比較及 MAE、RMSE。沿用最終四站加權 XGBoost，未重訓。
 - 候車情境：切換場次、方向、剩餘空間、方向比例與峰位置，比較三種到達形狀。北門高運量六節編組；每班 555／1,110／1,665 人是剩餘空間假設。
 - 班表與調度：四站分線、方向、日型與終點；附官方 PDF、生效日及來源。候選路徑只計發車後行車時間，完整調度提前量仍缺整備、出庫與插車等待。
+- [增減班比較](https://shu-ming0808.github.io/Statistical-Practice-final/#/research?tab=dispatch)：18:00–23:00 松山新店線可增、減、移時，切換八場活動與 λ=0.5／1／2，查看成本、等待、原四站涉及綠線旅次的轉乘影響及逐班時刻。其他線班表固定，無 P95 合格門檻；不是已完成備車／折返驗證的營運班表。
 
 公開版只讀 `frontend/public/data/` 的彙總快照，頁面標示匯出時間；不會查詢 MySQL 或自動重算模型。模型九場驗證已反覆使用，候車為現行一般班表的情境估計，不是歷史實測。MySQL、原始 CSV、SQL dump、帳密與 `.local/` 都不發布。
 
@@ -22,6 +23,8 @@ React＋shadcn 黑灰介面、MapLibre 地圖。提供「人流展示」「資�
 - 模型名稱由快照讀取，完整分析連到 [最終模型報告](../result/forecast/report.md)。
 
 ### 更新公開快照
+
+只更新新調度成果（不連 MySQL、不重訓預測）：先執行 `uv run --group analysis --extra transit python -X utf8 src/run_green_dispatch.py --reuse --update-readme`，再執行 `uv run --group analysis python -X utf8 -m app.export_dispatch`。匯出只複製結果 JSON、彙總 CSV 與圖表，重新計算 manifest 雜湊；舊觀測的時間戳不會被冒充更新。全量匯出亦會一併接入調度成果。
 
 在本機更新資料與分析結果後，從專案根目錄執行：
 

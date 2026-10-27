@@ -13,9 +13,30 @@ from run_dispatch_cost import causal_ratio_pool, score_family, select_plan_index
 from metro_operations import sha
 from run_queue_uncertainty import donor_ratios
 from queueing import simulate_bulk_queue
+from report_dispatch_cost import validate_selection, update_readme, START, END
 
 
 class CostDispatchTests(unittest.TestCase):
+    def test_reporting_rejects_selection_using_evaluation_winner(self):
+        common=dict(event_date='2025-01-01',capacity_case='same_as_regular',min_separation=2,
+                    km_per_train=18.77,waiting_weight=1)
+        candidates=pd.DataFrame([dict(**common,n_extra=0,objective_twd=100.,evaluation_objective_twd=50.,selected=False),
+                                 dict(**common,n_extra=1,objective_twd=80.,evaluation_objective_twd=90.,selected=True)])
+        chosen=pd.DataFrame([dict(**common,selected_n_extra=1)])
+        validate_selection(chosen,candidates)
+        with self.assertRaises(ValueError):
+            validate_selection(chosen.assign(selected_n_extra=0),candidates)
+
+    def test_readme_refresh_preserves_surrounding_content(self):
+        with TemporaryDirectory() as folder:
+            path=Path(folder)/'README.md'
+            path.write_text(f'Before\n{START}\nOld\n{END}\nAfter',encoding='utf-8')
+            update_readme(path,'New result')
+            self.assertEqual(path.read_text(encoding='utf-8'),f'Before\n{START}\n\nNew result\n\n{END}\nAfter')
+            path.write_text('Keep this unchanged',encoding='utf-8')
+            with self.assertRaises(ValueError): update_readme(path,'New result')
+            self.assertEqual(path.read_text(encoding='utf-8'),'Keep this unchanged')
+
     def test_sourced_mileage_and_return_multiplier_checked(self):
         with TemporaryDirectory() as folder:
             root = Path(folder)

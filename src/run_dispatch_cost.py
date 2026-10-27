@@ -6,10 +6,11 @@ Service mileage has a sourced along-line proxy; depot/return remain assumptions.
 from __future__ import annotations
 
 import argparse
-from datetime import date
+from datetime import date, datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+from time import perf_counter
 
 import matplotlib
 matplotlib.use('Agg')
@@ -21,11 +22,13 @@ from dispatch_optimization import DirectionQueue, optimize_insertions
 from metro_operations import ROOT, sha
 from run_dispatch_optimization import sample_scenarios, evaluate_plan, clock
 from run_queue_uncertainty import NORTH, SOUTH, beimen_trains, load_cohort
+from report_dispatch_cost import detailed_results, update_readme
 
 CONFIG = 'configs/dispatch_cost.json'
 IMPLEMENTATION = [CONFIG, 'src/run_dispatch_cost.py', 'src/dispatch_optimization.py',
                   'src/run_dispatch_optimization.py', 'src/run_queue_uncertainty.py',
-                  'src/queue_waits.py', 'src/queue_scenarios.py', 'src/queueing.py']
+                  'src/queue_waits.py', 'src/queue_scenarios.py', 'src/queueing.py',
+                  'src/metro_operations.py', 'src/report_dispatch_cost.py']
 
 
 def causal_ratio_pool(ratios, event):
@@ -99,7 +102,10 @@ def mileage_reference(cfg):
     return route.iloc[0].to_dict()
 
 
-def run(cfg, out):
+def run(cfg, out, *, fresh=False):
+    started = datetime.now(timezone.utc).isoformat()
+    timer = perf_counter()
+    searched_families = cached_families = checked_insertions = 0
     mileage = mileage_reference(cfg)
     forecasts, ratios = load_cohort(ROOT / cfg['prediction_path'], cfg['prediction_sha256'],
                                     cfg['prediction_column'], cfg['truth_column'],
@@ -146,18 +152,21 @@ def run(cfg, out):
                                            include_terminal_wait=True) for d in trains}
             for sep in cfg['min_separation_minutes']:
                 checkpoint = cache / f'{event}_{capacity}_{sep}.json'
-                if checkpoint.exists():
+                if checkpoint.exists() and not fresh:
                     plans = json.loads(checkpoint.read_text(encoding='utf-8'))
+                    cached_families += 1
                 else:
                     plans = optimize_insertions(queues, trains, cfg['max_extra_trains'], sep,
                                                 tuple(cfg['insertion_window_minutes']),
                                                 cfg['residual_penalty_minutes'], feasibility_trains=guards)
                     checkpoint.write_text(json.dumps(plans, ensure_ascii=False), encoding='utf-8')
+                    searched_families += 1
                 for n, plan in enumerate(plans):
                     if sum(map(len, plan.values())) != n:
                         raise ValueError('Plan count mismatch')
                     for d in trains:
                         for m in plan[d]:
+                            checked_insertions += 1
                             others = guards[d] + [t for t in plan[d] if t != m]
                             if any(abs(m - t) < sep for t in others):
                                 raise ValueError('New train violates baseline/extra departure separation')
@@ -201,6 +210,7 @@ def run(cfg, out):
                                          selected_mean_wait_median=waits[chosen]['mean_wait_median'],
                                          baseline_p95_exceed_share=waits[0]['share_p95_over_target'],
                                          selected_p95_exceed_share=waits[chosen]['share_p95_over_target'],
+                                         baseline_censored_share=waits[0]['censored_share'],
                                          selected_censored_share=waits[chosen]['censored_share'],
                                          selected_residual_mean=ev_metrics[chosen]['residual_mean'],
                                          northbound=' '.join(clock(m, cfg['first_hour']) for m in plans[chosen][NORTH]),
@@ -210,6 +220,11 @@ def run(cfg, out):
     for name, rows in [('candidates', candidates), ('selected_plans', selected), ('plans', plan_rows), ('skipped', skipped)]:
         pd.DataFrame(rows).to_csv(out / f'{name}.csv', index=False, encoding='utf-8-sig')
     audit = dict(config=cfg, signature=signature, model_refitted=False, selection_split='optimization_draws_only',
+                 run_started_at_utc=started, run_finished_at_utc=datetime.now(timezone.utc).isoformat(),
+                 compute_elapsed_seconds=round(perf_counter()-timer, 3), fresh_search_requested=fresh,
+                 searched_plan_families=searched_families, cached_plan_families=cached_families,
+                 checked_insertions=checked_insertions, candidate_cost_rows=len(candidates),
+                 selected_scenarios=len(selected), evaluated_events=len({r['event_date'] for r in selected}),
                  evaluation_used_for_selection=False, input_prediction_sha256=sha(ROOT/cfg['prediction_path']),
                  normalized_snapshot_sha256=sha(snapshot/'normalized.json'),
                  implementation_sha256=implementation, future_donors_allowed=False,
@@ -222,8 +237,12 @@ def run(cfg, out):
 
 def render_report(cfg, out):
     mileage_reference(cfg)
+    audit = json.loads((out/'audit.json').read_text(encoding='utf-8'))
+    if audit['config'] != cfg:
+        raise ValueError('Saved results use another configuration; rerun the calculation')
     chosen = pd.read_csv(out/'selected_plans.csv')
     candidates = pd.read_csv(out/'candidates.csv')
+    details = detailed_results(cfg, out, chosen, candidates)
     ref = chosen[(chosen.km_per_train == cfg['reference_km_per_train']) &
                  (chosen.waiting_weight == cfg['reference_waiting_cost_weight']) &
                  (chosen.capacity_case == 'same_as_regular') & (chosen.min_separation == 2)].copy()
@@ -286,6 +305,7 @@ def render_report(cfg, out):
         lines.append(f'| {r.event_date} | {r.donor_count} | {r.selected_n_extra} | {r.operating_cost_twd:,.0f} | '
                      f'{r.baseline_mean_wait_median:.2f} → {r.selected_mean_wait_median:.2f} | {r.evaluation_objective_change_twd:+,.0f} |')
     lines += ['', '總成本差＝新方案減原班表；負值表示在此估值下較好，並非營運現金節省。平均等待的中位數僅供解讀，選班數仍使用平均總等待人分鐘。', '',
+              details.replace('result/dispatch_cost/', ''), '',
               '![成本與候車比較](figures/cost_wait_comparison.png)', '', '![權重敏感度](figures/weight_sensitivity.png)', '',
               '## 與組員結果的關係及限制', '',
               '- 組員原版本借用其他八場（含較晚活動）的誤差；此版排除未來場。因此不應直接用兩份報告的數字當成單純加成本的效果。兩邊都沒有重訓人流模型。',
@@ -294,7 +314,8 @@ def render_report(cfg, out):
               '- 未接起站發車、備車、司機、折返、整條路線衝突及動態滾動更新；只以松山—新店全程服務估成本，沒有驗證列車能依時抵達北門。官方路線里程仍是相鄰站最短距離加總的近似值；完整新增里程及邊際成本未核實。此版不宣稱可執行營運。',
               '- 找到的是既有候選啟發式方案中的最小值；若選到 8 班，可能仍受搜尋上限影響。沒有證明全域最佳，也不能把無達標方案寫成已證明必須超過 8 班。', '',
               '## 重跑', '', '```powershell', 'uv sync --inexact --extra transit --group analysis',
-              'uv run --extra transit --group analysis python -X utf8 src/run_dispatch_cost.py', '```', '',
+              'uv run --extra transit --group analysis python -X utf8 src/run_dispatch_cost.py --fresh --update-readme', '```', '',
+              '`--fresh` 忽略方案快取，重新搜尋所有班次；不加此參數可續跑。`--update-readme` 同步根目錄結果摘要。相同資料、參數及亂數種子應重現相同數值，不代表新增獨立驗證。', '',
               '需要私下取得 `.local/forecast/predictions.csv` 與 `.local/transit_reference/20261015/` 原始官方快照；來源雜湊會核對。Git 不包含私有輸入。', '',
               '[成本候選比較](candidates.csv)／[選定方案及評估](selected_plans.csv)／[各班數時刻](plans.csv)／[跳過場次](skipped.csv)／[計算設定](../../configs/dispatch_cost.json)／[來源與稽核](audit.json)', '']
     (out/'report.md').write_text('\n'.join(lines), encoding='utf-8')
@@ -302,15 +323,21 @@ def render_report(cfg, out):
     audit['outputs'] = {str(p.relative_to(out)).replace('\\', '/'): sha(p) for p in sorted(out.rglob('*'))
                         if p.is_file() and p.name != 'audit.json'}
     (out/'audit.json').write_text(json.dumps(audit, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    return details
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--report-only', action='store_true')
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--report-only', action='store_true')
+    modes.add_argument('--fresh', action='store_true', help='Recompute every plan; do not load cached plans')
+    parser.add_argument('--update-readme', action='store_true')
     args = parser.parse_args()
     cfg = json.loads((ROOT/CONFIG).read_text(encoding='utf-8'))
     out = ROOT/cfg['output_dir']
     if not args.report_only:
-        run(cfg, out)
-    render_report(cfg, out)
+        run(cfg, out, fresh=args.fresh)
+    details = render_report(cfg, out)
+    if args.update_readme:
+        update_readme(ROOT/'README.md', details)
     print('Saved', out, flush=True)

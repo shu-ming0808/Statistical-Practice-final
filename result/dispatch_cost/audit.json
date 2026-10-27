@@ -71,21 +71,33 @@
     "scope": "Select among 0-8 extra-train heuristic plans; preserve baseline departures. No terminal dispatch readiness, full-line conflicts, fleet or crew constraints; no online feedback control.",
     "output_dir": "result/dispatch_cost"
   },
-  "signature": "e51500d6782e3d46e3e82b7f95702b87b56773e6cd2dee63a1df2c26166c9602",
+  "signature": "13d332970905d83dd754349de24a63e764533e83e75658d470337742d145b830",
   "model_refitted": false,
   "selection_split": "optimization_draws_only",
+  "run_started_at_utc": "2026-10-26T15:18:11.897176+00:00",
+  "run_finished_at_utc": "2026-10-26T15:22:53.333503+00:00",
+  "compute_elapsed_seconds": 281.437,
+  "fresh_search_requested": true,
+  "searched_plan_families": 32,
+  "cached_plan_families": 0,
+  "checked_insertions": 1152,
+  "candidate_cost_rows": 1728,
+  "selected_scenarios": 192,
+  "evaluated_events": 8,
   "evaluation_used_for_selection": false,
   "input_prediction_sha256": "96915ef02b9ebbf6fae909209f85b65cd9da1f2682dc87497d198bdb53daf3ef",
   "normalized_snapshot_sha256": "b395e542f9531bdf31a8ed31ac0306883af7e4d80954f6022bf7355585174d56",
   "implementation_sha256": {
     "configs/dispatch_cost.json": "51ed7bbbd3e19e4efabc678f50808d1e45cdc106d299d9422a02306e306c1e46",
-    "src/run_dispatch_cost.py": "f59c1089736a598020b25bc836ff1ab7411bc4da3df5dae49608be8a66c4df51",
+    "src/run_dispatch_cost.py": "fbea00ff7813ad3bda31b2d0135a867fd9604734bb99852c5a8b8cac6069e28b",
     "src/dispatch_optimization.py": "45d466a07081c5beb4565c169b446915e93745b14e9b824cd4d28f81dafe4176",
     "src/run_dispatch_optimization.py": "10fb01fbe4f2ba6e9559fd9b31c9a2ceb5ca49c2fcca9582d61c7182b7b184a6",
     "src/run_queue_uncertainty.py": "d82fc7b6d49bf8e9e87462e5d1be08902aa5c3c173390c2007039d50ba6a7081",
     "src/queue_waits.py": "ddf071d070b5e9f78533f4702c537158a12e707c1e8b3d9ca33bda5d6b40f064",
     "src/queue_scenarios.py": "806c190002a2b746fe9b163c99e770dfc1fa6034bb0f16b05ce6949f4353c917",
-    "src/queueing.py": "9d7267bca2a5896568bf911fae3e5c9391b10d755418471f3f0e2cb266e3a891"
+    "src/queueing.py": "9d7267bca2a5896568bf911fae3e5c9391b10d755418471f3f0e2cb266e3a891",
+    "src/metro_operations.py": "f5dc87731231302838d1808597a58cae95cf23439c45db31d2d357622d4bf816",
+    "src/report_dispatch_cost.py": "2c9b048789f885c159f95863aef07deb4f3161cffd62eafab1a6ae0c20bcc602"
   },
   "future_donors_allowed": false,
   "event_release_times_verified": false,
@@ -114,10 +126,14 @@
   "outputs": {
     "candidates.csv": "c737f29120e4e085fb759e0a7457fac90f4295fc5a99fc4749a2ea7d984abbfa",
     "figures/cost_wait_comparison.png": "88d6336c3102eaf1071548056725b016f4f7503af730b8ea6dd629a4668f8ec2",
+    "figures/p95_risk_comparison.png": "e621b42b68a472bcb7d326dde7aaaa688138859027559b8952bdc8709d55ac88",
     "figures/weight_sensitivity.png": "05a93afed0dd4a186d8bdd6b77e093a2514326b112c3ad4d7c5e9ef8ec044117",
     "plans.csv": "f0e835c4522a46cc970b1ffb2c4521d986eb679f3c4649d1c87d9485e05f38e0",
-    "report.md": "ee9858663a62421eb8fa48adc7569c2fd1806592ab1631723ece8f3c1978fe7d",
-    "selected_plans.csv": "030e47a44c9c752574d2ea600ecdd44c288e4893b3927015dd8d8226d8490fac",
+    "reference_summary.csv": "a2f5b4fca19c15b793c55aae0f3a05571e1013e1410ed7d083026e01b825c6c0",
+    "reference_timetable.csv": "3ebf3f063828727f669bb95354f476762124e5cdb1ea06fb18de6fb8b717999d",
+    "report.md": "848f2f60462f17d549c34a770f94eadeeb47b7868f9c3a2de46986913700a72f",
+    "scenario_summary.csv": "43c166333e996124ca5cb5bce7230d22a7e048d852c51b6e4797ecf5abee5737",
+    "selected_plans.csv": "b57d54b52f05b2ba64a072acf944a0f95499fe1585495e5326285eff7a33d0c9",
     "skipped.csv": "fba84e7df6d4615e0a0381b5e4cbd5a290af911f18f353fda9865ff188b597ac"
   }
 }

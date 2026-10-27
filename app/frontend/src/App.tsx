@@ -383,6 +383,9 @@ function Workspace() {
                     >
                       步行流向
                     </Button>
+                    <Button variant="outline" asChild>
+                      <Link to="/research?tab=dispatch">18–23 時增減班比較 <ArrowUpRight size={14}/></Link>
+                    </Button>
                   </div>
                   {error && (
                     <div role="alert" className="error-banner">

@@ -84,6 +84,9 @@ def export(repo=None, output=OUTPUT):
     write_json(output/'manifest.json', dict(**metadata, model=config['prediction_column'], model_refitted=False,
         prediction_sha256=config['prediction_sha256'], queue_scenarios=len(scenarios),
         outputs={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in output.iterdir() if p.is_file() and p.name!='manifest.json'}))
+    if (ROOT/'result/green_dispatch/public_summary.json').exists():
+        from app.export_dispatch import export as export_dispatch
+        export_dispatch(output)
     print(json.dumps(dict(events=len(events), flow_rows=len(flows), forecast_rows=len(hourly), scenarios=len(scenarios)), ensure_ascii=False))
 
 

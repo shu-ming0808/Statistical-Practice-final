@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { DispatchComparison } from "@/components/DispatchComparison";
 import {
   Activity,
   TrainFront,
@@ -49,7 +51,7 @@ const format = (v: unknown) =>
   v == null
     ? "—"
     : Number(v).toLocaleString("zh-TW", { maximumFractionDigits: 2 });
-type Tab = "model" | "queue" | "operations";
+type Tab = "model" | "queue" | "operations" | "dispatch";
 
 function Stat({
   label,
@@ -78,10 +80,12 @@ function ChartNote({ children }: { children: React.ReactNode }) {
 }
 
 export function ResearchPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<Research>();
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
-  const [tab, setTab] = useState<Tab>("model");
+  const requestedTab = searchParams.get("tab");
+  const tab: Tab = requestedTab === "dispatch" || requestedTab === "queue" || requestedTab === "operations" ? requestedTab : "model";
   const [event, setEvent] = useState("2024-08-10");
   useEffect(() => {
     const controller = new AbortController();
@@ -126,11 +130,11 @@ export function ResearchPage() {
       <div className="research-intro">
         <div>
           <h1>詳細預測資訊</h1>
-          <p>比較北門預測結果，探索到達形狀與可用運能對候車的影響。</p>
+          <p>比較預測、候車與 18:00–23:00 增減班方案，查看四站相關旅次的轉乘影響。</p>
         </div>
         <Badge variant="outline">公開成果快照</Badge>
       </div>
-      <div className="research-meta">
+      {tab !== "dispatch" && <div className="research-meta">
         更新：
         {new Date(data.generated_at).toLocaleString("zh-TW", {
           timeZone: "Asia/Taipei",
@@ -138,7 +142,7 @@ export function ResearchPage() {
         })}
         （臺北）<span>模型：{data.model.name}</span>
         <span>候車範圍：北門雙向</span>
-      </div>
+      </div>}
       <div className="research-toolbar">
         <div className="research-tabs" role="tablist" aria-label="研究成果分類">
           {(
@@ -146,6 +150,7 @@ export function ResearchPage() {
               { id: "model", label: "預測結果", icon: Activity },
               { id: "queue", label: "候車情境", icon: Clock3 },
               { id: "operations", label: "班表與調度", icon: TrainFront },
+              { id: "dispatch", label: "增減班比較", icon: Activity },
             ] as const
           ).map((t) => (
             <Button
@@ -153,14 +158,14 @@ export function ResearchPage() {
               role="tab"
               aria-selected={tab === t.id}
               variant={tab === t.id ? "secondary" : "ghost"}
-              onClick={() => setTab(t.id)}
+              onClick={() => setSearchParams({tab: t.id})}
             >
               <t.icon size={16} />
               {t.label}
             </Button>
           ))}
         </div>
-        {tab !== "operations" && (
+        {tab !== "operations" && tab !== "dispatch" && (
           <label className="research-filter">
             驗證場次
             <select value={event} onChange={(e) => setEvent(e.target.value)}>
@@ -174,6 +179,7 @@ export function ResearchPage() {
       {tab === "model" && <Model data={data} event={event} />}
       {tab === "queue" && <Queue data={data} event={event} />}
       {tab === "operations" && <Operations data={data} />}
+      {tab === "dispatch" && <DispatchComparison />}
       <div className="research-links">
         <a
           href={GITHUB + "result/forecast/report.md"}
