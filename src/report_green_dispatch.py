@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from dispatch_slots import write_slot_outputs
 
 ROOT=Path(__file__).resolve().parents[1]
 START='<!-- green-dispatch:start -->';END='<!-- green-dispatch:end -->'
@@ -21,6 +22,7 @@ def report(out,cfg,update_readme=False):
     comparison=pd.read_csv(out/'comparison.csv')
     stations=pd.read_csv(out/'station_impacts.csv')
     timetable=pd.read_csv(out/'timetable.csv').fillna('')
+    families=pd.read_csv(out/'candidate_family_comparison.csv')
     audit=json.loads((out/'audit.json').read_text('utf-8'))
     main=comparison[comparison.waiting_weight==cfg['reference_weight']].copy()
     totals=[]
@@ -39,7 +41,8 @@ def report(out,cfg,update_readme=False):
             evaluation_total_cost_change=float(g.evaluation_total_cost_change.sum())))
     pd.DataFrame(totals).to_csv(out/'summary.csv',index=False,encoding='utf-8-sig')
     figdir=out/'figures';figdir.mkdir(exist_ok=True)
-    plt.rcParams.update({'font.family':'Microsoft JhengHei','axes.unicode_minus':False,'figure.dpi':160})
+    plt.rcParams.update({'font.family':['Microsoft JhengHei','DejaVu Sans'],'axes.unicode_minus':False,'figure.dpi':160})
+    slots=write_slot_outputs(out,timetable,comparison,cfg['reference_weight'])
     x=np.arange(len(main));width=.36
     fig,axes=plt.subplots(1,2,figsize=(13,5),layout='constrained')
     for ax,left,right,title,unit in [(axes[0],'baseline_operating_twd','optimized_operating_twd','可變營運成本（萬元）',10000),
@@ -100,6 +103,7 @@ def report(out,cfg,update_readme=False):
         line='松山新店線',reference_weight=cfg['reference_weight'],waiting_weights=cfg['waiting_weights'],
         assumptions=assumptions,sources=sources,summary=totals,comparison=records(comparison),
         station_impacts=records(stations),timetable=records(timetable),
+        slot_counts=records(slots),candidate_family_comparison=records(families),
         training_draws=cfg['training_draws'],evaluation_draws=cfg['evaluation_draws'],
         no_wait_threshold=True,not_global_optimum=True)
     (out/'public_summary.json').write_text(json.dumps(bundle,ensure_ascii=False,allow_nan=False,separators=(',',':'))+'\n',encoding='utf-8')
@@ -108,7 +112,7 @@ def report(out,cfg,update_readme=False):
         '**這是列車載客守恆的回顧模擬與啟發式班表搜尋，不是已證明全域最佳或現場調度命令。**','',
         '## 方法','',r'$$\min_{x\in\mathcal P}\;\Delta C_{\rm op}(x)+\lambda\frac{196}{60}\frac1S\sum_s W_s(x).$$','',
         '- 原班表包含在候選中；允許增班、減班、前後移時。只選訓練情境中完成疏運的候選。',
-        '- 每場 200 次訓練情境，其中前 12 次搜尋並初篩每個 λ 前 10 名（另保留原班表），再用完整 200 次重新評分；獨立 300 次只評估，不反過來選方案。這是新亂數，不是 300 場新的實測活動。',
+        '- 每場 200 次訓練情境，其中前 12 次搜尋與初篩。先保留原搜尋在完整 200 次訓練中各 λ 的勝出方案，再加入 15 分鐘配置候選，以相同訓練情境選擇；獨立 300 次只評估，不反過來選方案。這是新亂數，不是 300 場新的實測活動。',
         '- 移時依最終時刻一對一配對（最多 5 分鐘）；同一移時服務不再被重複算成增班及減班。',
         '- P95 為合併模擬乘客的近似候車分位數，使用分鐘分箱；同組同時到達的背景旅次，其轉乘前等待以加權平均合併，未保留這部分組內變異。不是「情境 P95 超過某門檻的機率」。',
         '- 沿用凍結人流模型，不重新調參。2024-07-17 因沒有較早的同口徑預測誤差，未納入這次八場比較。',
@@ -143,6 +147,52 @@ def report(out,cfg,update_readme=False):
         transfer_lines.append(f'| {station} | {bg:.2f}→{ng:.2f} | {br:.2f}→{nr:.2f} |')
     transfer_lines+=['','按模擬旅次人數加權。紅／橘線段包含綠線前的候車與可推導後續轉乘；前段班表固定，後續可趕上的班次仍可能改變。這不代表已模擬紅／橘線全線容量或月台排隊。','']
     at=lines.index('## 假設與界線');lines[at:at]=transfer_lines
+    family_main=families[families.waiting_weight==cfg['reference_weight']]
+    family_totals=family_main.merge(
+        main[['event_date','waiting_weight','modeled_passengers']],
+        on=['event_date','waiting_weight'],validate='one_to_one')
+    family_demand=float(family_totals.modeled_passengers.sum())
+    family_old_wait=float(family_totals.original_wait_person_minutes.sum()/family_demand)
+    family_new_wait=float(family_totals.expanded_wait_person_minutes.sum()/family_demand)
+    family_old_cash=float(family_totals.original_operating_change_twd.sum())
+    family_new_cash=float(family_totals.expanded_operating_change_twd.sum())
+    family_cash_delta=family_new_cash-family_old_cash
+    family_total_delta=float(family_totals.evaluation_total_cost_difference.sum())
+    family_old_added=int(family_totals.original_added.sum())
+    family_new_added=int(family_totals.expanded_added.sum())
+    family_old_removed=int(family_totals.original_removed.sum())
+    family_new_removed=int(family_totals.expanded_removed.sum())
+    family_aggregate_lines=[
+        f'**{len(family_totals)} 場合計（λ={cfg["reference_weight"]:g}，同批獨立情境）：**', '',
+        '| 指標 | 原搜尋 | 擴充 15 分鐘候選後 |',
+        '|---|---:|---:|',
+        f'| 新增／取消班次 | +{family_old_added}／−{family_old_removed} | +{family_new_added}／−{family_new_removed} |',
+        f'| 相對原班表的可變支出差（元） | {family_old_cash:+,.0f} | {family_new_cash:+,.0f} |',
+        f'| 乘客加權平均候車（分鐘） | {family_old_wait:.4f} | {family_new_wait:.4f} |', '',
+        f'擴充候選後，相對原搜尋的可變支出差為 **{family_cash_delta:+,.0f} 元**，'
+        f'平均候車差為 **{(family_new_wait-family_old_wait)*60:+.2f} 秒／人**；'
+        f'營運加候車時間價值的加權總成本差為 **{family_total_delta:+,.0f} 元**。'
+        '總成本含換算的候車時間價值，不能當成營運現金支出的節省。',
+        ('本輪合計仍是增加營運支出換取候車改善，沒有同時降低現金支出。'
+         if family_cash_delta>0 and family_new_wait<family_old_wait else
+         '須分開判讀現金支出與候車時間，不能只憑加權總成本稱所有指標都改善。'),
+        f'擴充後實際取消 {family_new_removed} 班；熱圖藍格只表示該 15 分鐘格內班數較少，跨格移時也會形成藍格，不能直接解讀為取消整趟服務。',
+        '本次已固定一般日 OD 排序，避免轉乘 ID／cohort 次序改變同種子的抽樣對應。表中原搜尋是修正後重跑的同條件對照，不是先前發布的封存數字。', '']
+    family_lines=['## 15 分鐘配置與原搜尋的公平比較','',
+        '將 18:00–23:00 切成 20 個半開時段，分方向嘗試較密、較疏或空的班次配置。這是新增候選的方法；15 分鐘不是列車班距。每個候選均需檢查格外與決策窗外前後班距，並沿用全綠線載客守恆、轉乘與相同成本目標。',
+        '候選班距範圍只是有限搜尋設計，沒有把最長 10 分鐘或 5% 風險當成候車合格門檻。原搜尋的各權重訓練勝出方案仍在候選內，擴充後訓練目標不得更差；獨立評估仍可能較差，不能用評估答案換回另一方案。','',
+        '| 活動 | 原搜尋成本差（元） | 擴充搜尋成本差（元） | 原搜尋平均候車（分） | 擴充搜尋平均候車（分） | 最後候選來源 |',
+        '|---|---:|---:|---:|---:|---|']
+    for r in family_main.itertuples():
+        label={'original':'原搜尋','slot15':'15 分鐘配置'}.get(r.expanded_family,r.expanded_family)
+        family_lines.append(f'| {r.event_date} | {r.original_operating_change_twd:+,.0f} | {r.expanded_operating_change_twd:+,.0f} | {r.original_mean_wait:.2f} | {r.expanded_mean_wait:.2f} | {label} |')
+    family_lines+=['','兩個成本差皆相對原班表；「原搜尋」指加入分段候選前的搜尋程序，不是原班表。兩者使用同活動、同需求、同訓練／評估亂數、同容量與班距限制。平均候車定義與前表一致。','']+family_aggregate_lines+[
+        '[完整候選方法比較](candidate_family_comparison.csv)／[訓練候選紀錄](training_candidates.csv)','',
+        '## 每 15 分鐘班數熱圖','', '![每15分鐘班數淨變化](figures/slot_heatmap.png)','',
+        '橫軸是北門離站時段起點，縱軸是活動與方向。每格為新班表班數減原班表班數：橘色較多、藍色較少、灰色相同。18:15 歸入 18:15–18:30；23:00 不在調整窗內。',
+        '**格內正負差不等於實際增班與減班。** 例如一班由 18:14 移到 18:16，兩格分別 −1、＋1，但整晚沒有多一班；費用仍按逐班配對的增、減、移時算。CSV 另列實際新增、取消與移時進出格數，不能把所有正格相加當增班成本。',
+        '[逐格原班數、新班數與淨變化](slot_counts.csv)','']
+    at=lines.index('## 假設與界線');lines[at:at]=family_lines
     (out/'report.md').write_text('\n'.join(lines),encoding='utf-8')
     if update_readme:
         table='\n'.join(lines[lines.index('| 活動 | 原班數→新班數 | 增／減／移時 | 可變成本差（元） | 平均候車原→新（分） | 總等待變化 |'):lines.index('![成本與等待](figures/cost_wait.png)')])
@@ -152,6 +202,12 @@ def report(out,cfg,update_readme=False):
             '原班表也是候選；200 次訓練選擇、300 次獨立模擬評估，並非新活動實測驗證。下表 λ=1，成本包含新增服務的假設空車回送，減班只扣可避免的單程服務成本。', '',table,
             '![增減班成本與等待](result/green_dispatch/figures/cost_wait.png)','',
             '![原四站轉乘影響](result/green_dispatch/figures/station_impacts.png)','',
+            '### 每 15 分鐘配置候選與班數熱圖','',
+            '先保留原搜尋的訓練勝出方案，再加入每 15 分鐘調整班次密度的候選。所有方案都以相同全線需求、成本、容量及班距限制評分；只按過去資料與訓練情境選擇，獨立評估不反過來選班表。未加入 10 分鐘／5% 候車合格門檻。','',
+            *family_aggregate_lines,
+            '![每15分鐘班數淨變化](result/green_dispatch/figures/slot_heatmap.png)','',
+            '每格為該時段「新班數 − 原班數」：橘色較多、藍色較少、灰色相同。跨格移時也會出現一正一負，實際增／減／移時及成本仍依逐班配對；有藍格不代表整晚有取消班次。','',
+            '[原搜尋與擴充搜尋同條件比較](result/green_dispatch/candidate_family_comparison.csv)／[熱圖逐格數據](result/green_dispatch/slot_counts.csv)','',
             '**解讀界線：**這是過去活動配現行班表的情境比較；其他路線的車上容量、備車、司機與折返未完整納入。OD 最短路徑與步行時間是假設，不能稱為實際轉乘軌跡。','',
             '[完整方法與權重比較](result/green_dispatch/report.md)／[逐班增減及起站時刻](result/green_dispatch/timetable.csv)／[四站數據](result/green_dispatch/station_impacts.csv)',''])
         path=ROOT/'README.md';text=path.read_text('utf-8')

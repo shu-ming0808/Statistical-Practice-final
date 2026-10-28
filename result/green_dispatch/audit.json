@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T05:26:21.329948+00:00",
+  "generated_at": "2026-10-28T17:02:09.248600+00:00",
   "config": {
     "seed": 20261027,
     "decision_start": "18:00",
@@ -45,6 +45,22 @@
       5
     ],
     "search_passes": 2,
+    "slot_minutes": 15,
+    "slot_headways_minutes": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      10
+    ],
+    "slot_phase_offsets_minutes": [
+      0
+    ],
+    "slot_search_passes": 1,
+    "slot_include_baseline_start": false,
     "background_lookback_days": 56,
     "background_max_days": 6,
     "reference_weight": 1,
@@ -53,7 +69,7 @@
   },
   "events": [
     {
-      "od_sha256": "4f1902b17931e91f67f4cf8d3ae102e3e6a28736b84cee0ff81ad35e1f6fb494",
+      "od_sha256": "4bebf87c9709e1f5ff2ff1d7adfbce033ee0973a3c55f994255d2f12f58ce724",
       "months": [
         "202407"
       ],
@@ -63,13 +79,13 @@
       ],
       "day_type": "weekday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 865683.3271246308,
-      "green_projected_passengers": 240567.27167668505,
+      "all_projected_passengers": 865683.3271246307,
+      "green_projected_passengers": 240567.27167668543,
       "bypass_passengers": [
         0.0,
-        10629.790727813828,
-        15174.831038367718,
-        16706.9336817648,
+        10629.790727813854,
+        15174.831038367727,
+        16706.93368176479,
         582604.5
       ],
       "connections": 89,
@@ -81,17 +97,30 @@
       "donor_events": [
         "2024-07-17"
       ],
-      "candidates_evaluated": 3835,
-      "proposal_plans": 353,
-      "retained_candidates": 31,
+      "candidates_evaluated": 3772,
+      "proposal_plans": 352,
+      "retained_candidates": 43,
+      "slot_candidate_evaluations": 944,
+      "slot_proposal_plans": 12,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 29
+      },
+      "expanded_winners": {
+        "0.5": 35,
+        "1": 37,
+        "2": 42
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 148.62,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 162.69,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "1725ba11462c8f81a8ccef6c49400ed53dfeae9f68ba1b2115b5c5853ebe4609",
+      "od_sha256": "6663a6a3768567993a9cfba3217681afa7c8dbd57bffcf801095ad1b0c688454",
       "months": [
         "202407",
         "202408"
@@ -105,14 +134,14 @@
       ],
       "day_type": "saturday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 709667.6921565554,
-      "green_projected_passengers": 182784.26345246471,
+      "all_projected_passengers": 709667.6921565441,
+      "green_projected_passengers": 182784.2634524663,
       "bypass_passengers": [
         0.0,
-        10284.762248930252,
-        13245.877500958699,
-        11665.788954206557,
-        491687.000000022
+        10284.76224893025,
+        13245.877500958679,
+        11665.788954206577,
+        491687.0000000285
       ],
       "connections": 89,
       "cohorts": [
@@ -124,17 +153,30 @@
         "2024-07-17",
         "2024-07-31"
       ],
-      "candidates_evaluated": 3792,
-      "proposal_plans": 263,
-      "retained_candidates": 31,
+      "candidates_evaluated": 3836,
+      "proposal_plans": 295,
+      "retained_candidates": 50,
+      "slot_candidate_evaluations": 942,
+      "slot_proposal_plans": 19,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 33,
+        "1": 37,
+        "2": 49
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 105.33,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 133.5,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "80752d96bf7e3c7b1257c61cc951ffec7698cf14f11b96032ed6c759e4bc9e6f",
+      "od_sha256": "0ab16bbea476f388971ca95830839ddd6245cab6274d4d6ae840be3d7a03060d",
       "months": [
         "202507"
       ],
@@ -147,14 +189,14 @@
       ],
       "day_type": "weekday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 903381.2901175662,
-      "green_projected_passengers": 244798.40081700555,
+      "all_projected_passengers": 903381.2901175224,
+      "green_projected_passengers": 244798.40081701125,
       "bypass_passengers": [
         0.0,
-        10583.206750715142,
-        15545.237314157834,
-        18117.245235742757,
-        614337.2000000047
+        10583.206750715153,
+        15545.237314157845,
+        18117.2452357427,
+        614337.1999999866
       ],
       "connections": 89,
       "cohorts": [
@@ -167,17 +209,30 @@
         "2024-07-31",
         "2024-08-10"
       ],
-      "candidates_evaluated": 3842,
-      "proposal_plans": 341,
-      "retained_candidates": 31,
+      "candidates_evaluated": 3914,
+      "proposal_plans": 349,
+      "retained_candidates": 45,
+      "slot_candidate_evaluations": 947,
+      "slot_proposal_plans": 14,
+      "original_winners": {
+        "0.5": 10,
+        "1": 19,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 35,
+        "1": 39,
+        "2": 44
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 134.33,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 174.44,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "5b6ad90599ed02f7b2802f808cd9c889abf83cad2f3085260e591ee8399347e7",
+      "od_sha256": "0ab16bbea476f388971ca95830839ddd6245cab6274d4d6ae840be3d7a03060d",
       "months": [
         "202507"
       ],
@@ -190,14 +245,14 @@
       ],
       "day_type": "weekday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 903531.3111314551,
-      "green_projected_passengers": 244856.66597220468,
+      "all_projected_passengers": 903531.3111313911,
+      "green_projected_passengers": 244856.66597221268,
       "bypass_passengers": [
         0.0,
         10640.846291751355,
-        15604.95322538364,
-        18091.645642140888,
-        614337.200000006
+        15604.953225383657,
+        18091.64564214088,
+        614337.1999999866
       ],
       "connections": 89,
       "cohorts": [
@@ -211,17 +266,30 @@
         "2024-08-10",
         "2025-08-06"
       ],
-      "candidates_evaluated": 3820,
-      "proposal_plans": 342,
-      "retained_candidates": 31,
+      "candidates_evaluated": 3856,
+      "proposal_plans": 343,
+      "retained_candidates": 45,
+      "slot_candidate_evaluations": 941,
+      "slot_proposal_plans": 14,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 35,
+        "1": 40,
+        "2": 44
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 133.81,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 175.35,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "2799531db609789b7ca24c24d1a3a7981c23bad6d7c451fd846a7e0200e64626",
+      "od_sha256": "080685d8b290ff64500a41af335b1efd832acf28165e77e153cfda3b252c8bc2",
       "months": [
         "202507",
         "202508"
@@ -236,14 +304,14 @@
       ],
       "day_type": "saturday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 762500.7025586403,
-      "green_projected_passengers": 190913.22720398768,
+      "all_projected_passengers": 762500.7025586389,
+      "green_projected_passengers": 190913.22720398795,
       "bypass_passengers": [
         0.0,
-        14472.622160584611,
-        16915.23313584198,
-        13246.286724901593,
-        526953.3333333408
+        14472.622160584622,
+        16915.233135841987,
+        13246.286724901584,
+        526953.3333333426
       ],
       "connections": 89,
       "cohorts": [
@@ -258,17 +326,30 @@
         "2025-08-06",
         "2025-08-20"
       ],
-      "candidates_evaluated": 3442,
-      "proposal_plans": 282,
-      "retained_candidates": 31,
+      "candidates_evaluated": 3439,
+      "proposal_plans": 285,
+      "retained_candidates": 50,
+      "slot_candidate_evaluations": 939,
+      "slot_proposal_plans": 19,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 35,
+        "1": 20,
+        "2": 49
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 96.85,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 125.06,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "ba1fc2e2c88569aba1a3ae9554f9e8f2cb4add1f97f93a73be89ac0bf9cd0fcd",
+      "od_sha256": "336efe17095badc6e50379df9087c813b823245a222f221ab4af1d4310a814a4",
       "months": [
         "202607"
       ],
@@ -279,14 +360,14 @@
       ],
       "day_type": "saturday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 556762.2974970577,
-      "green_projected_passengers": 139847.48152301885,
+      "all_projected_passengers": 556762.2974970535,
+      "green_projected_passengers": 139847.48152301865,
       "bypass_passengers": [
         0.0,
-        11273.876309887663,
+        11273.876309887639,
         12901.94017632577,
-        10407.666154499044,
-        382331.33333332674
+        10407.666154499046,
+        382331.3333333222
       ],
       "connections": 89,
       "cohorts": [
@@ -302,17 +383,30 @@
         "2025-08-20",
         "2025-08-30"
       ],
-      "candidates_evaluated": 4010,
-      "proposal_plans": 272,
-      "retained_candidates": 31,
+      "candidates_evaluated": 4022,
+      "proposal_plans": 267,
+      "retained_candidates": 43,
+      "slot_candidate_evaluations": 947,
+      "slot_proposal_plans": 12,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 33,
+        "1": 37,
+        "2": 42
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 87.89,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 102.16,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "6b92d4ccfcdd4bd5bd8b6c40492b85e233eafe151bbb482ff6846ca037228295",
+      "od_sha256": "4dc2e1a4df2d1d74d5690f184964541c2e8c8ac3ed8eae234fd423f9e6464f6a",
       "months": [
         "202607"
       ],
@@ -325,14 +419,14 @@
       ],
       "day_type": "weekday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 926152.6137899664,
-      "green_projected_passengers": 248594.56950006942,
+      "all_projected_passengers": 926152.613789917,
+      "green_projected_passengers": 248594.5695000748,
       "bypass_passengers": [
         0.0,
-        11107.696979018983,
-        16351.721303640672,
-        18617.826007292348,
-        631480.799999998
+        11107.696979018989,
+        16351.721303640674,
+        18617.82600729232,
+        631480.7999999793
       ],
       "connections": 89,
       "cohorts": [
@@ -349,17 +443,30 @@
         "2025-08-30",
         "2026-07-25"
       ],
-      "candidates_evaluated": 3791,
-      "proposal_plans": 328,
-      "retained_candidates": 31,
+      "candidates_evaluated": 3813,
+      "proposal_plans": 330,
+      "retained_candidates": 44,
+      "slot_candidate_evaluations": 940,
+      "slot_proposal_plans": 13,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 35,
+        "1": 39,
+        "2": 43
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 133.14,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 175.55,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     },
     {
-      "od_sha256": "1cd3bb2760ed11b139645dd11930010ef5064a7fdac5c6a5e0f52b30cb251b61",
+      "od_sha256": "3c50050cdafa04647770fafe63047abb12a14570c513136c0d03ad5e85d7b5a4",
       "months": [
         "202607",
         "202608"
@@ -373,14 +480,14 @@
       ],
       "day_type": "saturday",
       "unrouted_passengers": 0.0,
-      "all_projected_passengers": 614615.5766266029,
-      "green_projected_passengers": 154203.02868490084,
+      "all_projected_passengers": 614615.5766266009,
+      "green_projected_passengers": 154203.02868490233,
       "bypass_passengers": [
         0.0,
-        12429.008830822204,
-        13916.068695298849,
-        11190.670415568,
-        422876.8000000204
+        12429.008830822228,
+        13916.068695298844,
+        11190.670415567994,
+        422876.80000002566
       ],
       "connections": 89,
       "cohorts": [
@@ -398,14 +505,27 @@
         "2026-07-25",
         "2026-08-05"
       ],
-      "candidates_evaluated": 4154,
-      "proposal_plans": 281,
-      "retained_candidates": 31,
+      "candidates_evaluated": 4094,
+      "proposal_plans": 275,
+      "retained_candidates": 48,
+      "slot_candidate_evaluations": 944,
+      "slot_proposal_plans": 17,
+      "original_winners": {
+        "0.5": 10,
+        "1": 20,
+        "2": 30
+      },
+      "expanded_winners": {
+        "0.5": 37,
+        "1": 42,
+        "2": 47
+      },
+      "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 93.67,
-      "fingerprint": "991fe408b8d2b3eb91eb5dc59089c6a541d2e03951d68ab68c906352cad763ab"
+      "seconds": 129.72,
+      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
     }
   ],
   "input_hashes": {

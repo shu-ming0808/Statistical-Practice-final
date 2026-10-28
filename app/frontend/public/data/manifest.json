@@ -19,14 +19,17 @@
   "outputs": {
     "arrival_queue_comparison.png": "d99e752c1ab57a275a9efb31564d3e71083596eb81b364c26e6c285041307b7d",
     "capacity_sensitivity.png": "a7ad85fc45de1028047ca8509cf7fe35d9750e83728bd23587d98821928122f5",
-    "dispatch-comparison.csv": "e40fd86dde352f1811461f37a96382da6f63e0c5f814bca26c17a38e5be3ba40",
-    "dispatch-cost_wait.png": "684e393cdc2ae0616941a267a3d4d2d54417baae886c6497d46c2449bc1b8d2a",
-    "dispatch-station_impacts.csv": "2900454d559e7f464c2d8e4ecc2370dd1ae9db4a16adc608a427696a130474b0",
-    "dispatch-station_impacts.png": "5b322172373c2756d93556cb1d30e74427485202d30bae3d84a71b3ebdb190f2",
-    "dispatch-summary.csv": "aafa567dd0bf0ec2bfc125f24c81f2987badb26f790bf6dd929f3f152cf12541",
-    "dispatch-timetable.csv": "e670331dd413c28b15f50a57d07870927fb5d21b7281e3fce9a92d9f5e54045c",
-    "dispatch-timetable.png": "7e723e883e4496d645725f4700a3ff86537efbf1604181b0dc4b3f1e9fc82fbc",
-    "dispatch.json": "a906f3436fef0c3a2128ef894aceca375767022342298d047b9418e240fd1828",
+    "dispatch-candidate_family_comparison.csv": "f265241bc94e69afe7fd4c440a407daf9e9c7fbc754e29dd61899a84f8f22cbb",
+    "dispatch-comparison.csv": "b61d86914cd567844ff17921b2755b487ad32623118a5efead6eb8444f030784",
+    "dispatch-cost_wait.png": "5a8a29bfe65cdd8511f913e32c161626f8a2b76354aee2424d621c3f821c8063",
+    "dispatch-slot_counts.csv": "583c97ae8dd2164c06f553bf3051163e18ff6cb9edafcea781be445edef73190",
+    "dispatch-slot_heatmap.png": "e6647511523c5d43343e553c5e4fda5ea7118f02f5d525d5060087d2e8934514",
+    "dispatch-station_impacts.csv": "820f199ef9c4cf92be8cb9dda86df866ae458cee5d1adc3e85df6c3d5c7a84fb",
+    "dispatch-station_impacts.png": "64347b230cb10b76e528bb9b8b9b2ad3086d7e2e5191f939fd654750bd74c21a",
+    "dispatch-summary.csv": "fb1eb9cb3e10779238d89fe11f5973eec672b5c8a40d7db41093c48b3fdd6985",
+    "dispatch-timetable.csv": "5b4f610c246d6a166dc71194a3eedb7fed51d5162d59aa87a50cdd7e0be721e5",
+    "dispatch-timetable.png": "600543957281ed7c283fab68e2616f7c8509a8509223e6ffae921446311226ae",
+    "dispatch.json": "4cba30741ab89fb1998468b35f805efa54108f188cb61756678761fc9d07319a",
     "flows-2017-08-26.csv": "c5b6391aef0290e018b293d0101043ecb2f6dcb4b96d52a69b235f4235cb47ef",
     "flows-2018-08-18.csv": "a770d9a47534bed8b174b3d935af91e2d9106e089ebea7ab687d79b7c87b19de",
     "flows-2019-08-03.csv": "51badf7e60e812aec1b452fe26726662d29cf33567ced5e85cd0f5c8098e75aa",
@@ -58,5 +61,5 @@
     "rail-replay.json": "028dab101dddb4615ed8c18c7142d82fa9af7c1c4719307f3f6cf374908ca9f2",
     "research.json": "e8e3d29dd8d336d6177a761485929a7da969c511f81fa976e152d258a887d32d"
   },
-  "dispatch_generated_at": "2026-10-27T05:26:21.329948+00:00"
+  "dispatch_generated_at": "2026-10-28T17:02:09.248600+00:00"
 }

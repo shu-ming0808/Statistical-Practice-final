@@ -17,7 +17,9 @@ from time import perf_counter
 import numpy as np
 import pandas as pd
 
-from green_dispatch import simulate_direction, search_plans, validate_plan, operating_change, match_changes, compact_scenarios
+from green_dispatch import (simulate_direction, search_plans, search_slot_plans,
+    validate_plan, operating_change, match_changes, compact_scenarios,
+    plan_key, minimum_changed_headway)
 from prepare_green_dispatch import ROOT, FOUR, GROUPS, Network, frozen_four, prepare_event, sample_mass, digest
 
 DIRECTIONS=['往新店','往松山']
@@ -67,6 +69,17 @@ def clock(t,start=17):
     return f'{int(minute//60)%24:02}:{int(minute%60):02}:{round((minute%1)*60):02}'
 
 
+def training_winners(ranked, cfg):
+    """Choose only from full-training scores; never inspect evaluation outcomes."""
+    finite = [r for r in ranked if np.isfinite(r['train_wait_person_minutes'])]
+    if not finite:
+        raise ValueError('No fully served training candidate')
+    return {weight:min(finite,key=lambda r:(
+        r['operating_change_twd']+weight*cfg['time_value_per_minute']*r['train_wait_person_minutes'],
+        r['added']+r['removed']+r['retimed']))['candidate']
+        for weight in cfg['waiting_weights']}
+
+
 def run(args):
     cfg_path=ROOT/'configs/green_dispatch.json'
     cfg=json.loads(cfg_path.read_text('utf-8'))
@@ -88,7 +101,7 @@ def run(args):
     if args.event: events=[e for e in events if e==args.event]
     fingerprint=hashlib.sha256((digest(cfg_path)+digest(ROOT/'src/prepare_green_dispatch.py')+
                                digest(ROOT/'src/green_dispatch.py')+digest(ROOT/'src/run_green_dispatch.py')+input_signature).encode()).hexdigest()
-    all_rows=[];station_rows=[];timetable=[];audits=[];tradeoffs=[]
+    all_rows=[];station_rows=[];timetable=[];audits=[];tradeoffs=[];family_comparison=[]
     window=(60,360)  # 18:00 inclusive, 23:00 exclusive, relative to 17:00.
     for event in events:
         tic=perf_counter();saved=cache/f'completed_{event}.pkl'
@@ -97,7 +110,8 @@ def run(args):
             if value['fingerprint']==fingerprint:
                 print(f'{event}: reuse checked results',flush=True)
                 all_rows+=value['rows'];station_rows+=value['stations'];timetable+=value['timetable']
-                audits.append(value['audit']);tradeoffs+=value['tradeoffs'];continue
+                audits.append(value['audit']);tradeoffs+=value['tradeoffs']
+                family_comparison+=value['family_comparison'];continue
         print(f'{event}: preparing past-only OD and frozen forecasts',flush=True)
         prepared=cache/f'prepared_{event}.pkl'
         prep_fingerprint=digest(ROOT/'src/prepare_green_dispatch.py')+digest(cfg_path)+input_signature
@@ -136,14 +150,33 @@ def run(args):
         for i,p in enumerate(candidates):
             wait=scoring(p,masses)
             cost,adds,removes,moves=operating_change(base,p,cfg)
-            ranked.append(dict(event_date=event,candidate=i,train_wait_person_minutes=wait,
+            ranked.append(dict(event_date=event,candidate=i,candidate_family='original',train_wait_person_minutes=wait,
                                operating_change_twd=cost,added=adds,removed=removes,retimed=moves))
-        winners={}
+        original_winners=training_winners(ranked,cfg)
+        starts={weight:[candidates[i]] for weight,i in original_winners.items()}
+        if cfg.get('slot_include_baseline_start',False):
+            for plans in starts.values():
+                if not any(plan_key(p)==plan_key(base) for p in plans): plans.append(base)
+        print(f'{event}: searching {cfg["slot_minutes"]}-minute slot configurations',flush=True)
+        slot_plans,slot_attempts=search_slot_plans(base,starts,scoring,cfg,window)
+        # Preserve every already-ranked original plan (including each old-family
+        # winner). New slot proposals only enlarge the final training choice set.
+        old_keys={plan_key(p) for p in candidates}
+        slot_plans=[p for p in slot_plans if plan_key(p) not in old_keys]
+        slot_wait=[scoring(p) for p in slot_plans]
+        slot_cost=[operating_change(base,p,cfg)[0] for p in slot_plans]
+        selected_slots=set()
         for weight in cfg['waiting_weights']:
-            finite=[r for r in ranked if np.isfinite(r['train_wait_person_minutes'])]
-            if not finite: raise ValueError(f'{event}: no fully served training candidate')
-            best=min(finite,key=lambda r:(r['operating_change_twd']+weight*cfg['time_value_per_minute']*r['train_wait_person_minutes'],r['added']+r['removed']+r['retimed']))
-            winners[weight]=best['candidate']
+            order=sorted(range(len(slot_plans)),key=lambda i:slot_cost[i]+weight*cfg['time_value_per_minute']*slot_wait[i])
+            selected_slots.update(order[:cfg['shortlist_per_weight']])
+        print(f'{event}: rank {len(selected_slots)} new slot plans on full training draws',flush=True)
+        for index in sorted(selected_slots):
+            p=slot_plans[index];i=len(candidates);candidates.append(p)
+            wait=scoring(p,masses)
+            cost,adds,removes,moves=operating_change(base,p,cfg)
+            ranked.append(dict(event_date=event,candidate=i,candidate_family='slot15',train_wait_person_minutes=wait,
+                               operating_change_twd=cost,added=adds,removed=removes,retimed=moves))
+        winners=training_winners(ranked,cfg)
         # Free large training matrices before generating independent evaluation data.
         # Release both the full training arrays and their compact proposal copies.
         del scoring,masses,proposal,proposal_packed;gc.collect()
@@ -152,13 +185,28 @@ def run(args):
         base_w=base_s[:,:,0].sum(axis=1);demand=base_s[:,:,1].sum(axis=1)
         base_count=sum(sum(window[0]<=t<window[1] for t in v) for v in base.values())
         base_op=base_count*cfg['service_km']*cfg['variable_cost_per_train_km']
-        rows=[];stations=[];times=[]
-        for weight,i in winners.items():
+        rows=[];stations=[];times=[];families=[];evaluated={}
+        # The two families use the same independent evaluation scenarios. Cache
+        # shared winners to avoid repeated evaluation when a new plan is rejected.
+        def evaluate_winner(i):
+            if i not in evaluated:
+                plan=candidates[i]
+                validate_plan(base,plan,window,cfg['minimum_headway_minutes'])
+                s,h,maxload=evaluate(packed,connections,evaluation,plan,cfg,True)
+                if maxload>cfg['capacity_persons']+1e-6:
+                    raise ValueError('Candidate exceeds train capacity')
+                evaluated[i]=(s,h,maxload)
+            return evaluated[i]
+
+        def make_row(weight,i):
             plan=candidates[i];validate_plan(base,plan,window,cfg['minimum_headway_minutes'])
-            s,h,maxload=evaluate(packed,connections,evaluation,plan,cfg,True)
+            s,h,maxload=evaluate_winner(i)
             cost,adds,removes,moves=operating_change(base,plan,cfg)
             w=s[:,:,0].sum(axis=1);paired=cost+weight*cfg['time_value_per_minute']*(w-base_w)
-            row=dict(event_date=event,waiting_weight=weight,candidate=i,baseline_services=base_count,
+            row=dict(event_date=event,waiting_weight=weight,candidate=i,
+                candidate_family=ranked[i]['candidate_family'],selected_by_training=True,
+                headway_valid=True,min_changed_headway_minutes=minimum_changed_headway(base,plan),
+                baseline_services=base_count,
                 optimized_services=base_count+adds-removes,added=adds,removed=removes,retimed=moves,
                 baseline_operating_twd=base_op,optimized_operating_twd=base_op+cost,operating_change_twd=cost,
                 baseline_wait_person_minutes=float(base_w.mean()),optimized_wait_person_minutes=float(w.mean()),
@@ -172,7 +220,30 @@ def run(args):
                 train_objective=float(ranked[i]['operating_change_twd']+weight*cfg['time_value_per_minute']*ranked[i]['train_wait_person_minutes']))
             if row['unserved_mean']>1e-6: row['optimized_p95']=None
             if row['baseline_unserved_mean']>1e-6: row['baseline_p95']=None
+            return row
+
+        for weight,i in winners.items():
+            plan=candidates[i]
+            row=make_row(weight,i)
+            old=make_row(weight,original_winners[weight])
+            if row['train_objective']>old['train_objective']+1e-6:
+                raise ValueError('Expanded training choice lost an incumbent winner')
+            family=dict(event_date=event,waiting_weight=weight,selected_by_training=True,
+                        baseline_services=base_count,baseline_mean_wait=row['baseline_mean_wait'])
+            fields={'candidate':'candidate','family':'candidate_family','added':'added','removed':'removed',
+                    'retimed':'retimed','services':'optimized_services',
+                    'operating_change_twd':'operating_change_twd','mean_wait':'optimized_mean_wait',
+                    'wait_person_minutes':'optimized_wait_person_minutes','unserved_mean':'unserved_mean',
+                    'max_train_load':'max_train_load','min_changed_headway_minutes':'min_changed_headway_minutes',
+                    'headway_valid':'headway_valid','train_objective':'train_objective',
+                    'evaluation_total_cost_change':'evaluation_total_cost_change'}
+            for prefix,values in [('original',old),('expanded',row)]:
+                family.update({prefix+'_'+dest:values[source] for dest,source in fields.items()})
+            family['evaluation_total_cost_difference']=row['evaluation_total_cost_change']-old['evaluation_total_cost_change']
+            family['evaluation_wait_difference']=row['optimized_wait_person_minutes']-old['optimized_wait_person_minutes']
+            families.append(family)
             rows.append(row)
+            s,h,maxload=evaluate_winner(i)
             for g,name in enumerate(GROUPS):
                 n=base_s[:,g,1].sum()
                 stations.append(dict(event_date=event,waiting_weight=weight,station=name,
@@ -191,16 +262,22 @@ def run(args):
                     old_origin=clock(None if old is None else old+p['offsets'][0]),
                     new_origin=clock(None if new is None else new+p['offsets'][0]),
                     new_terminal=clock(None if new is None else new+p['offsets'][-1])))
-            print(f'{event} lambda={weight}: +{adds}/-{removes}/move {moves}; cost {cost:,.0f}; wait {row["wait_change_percent"]:+.1f}%',flush=True)
+            print(f'{event} lambda={weight}: {row["candidate_family"]} +{row["added"]}/-{row["removed"]}/move {row["retimed"]}; cost {row["operating_change_twd"]:,.0f}; wait {row["wait_change_percent"]:+.1f}%',flush=True)
         audit.update(event_date=event,donor_events=donors,candidates_evaluated=attempts,
             proposal_plans=proposal_count,retained_candidates=len(candidates),
+            slot_candidate_evaluations=slot_attempts,slot_proposal_plans=len(slot_plans),
+            original_winners={str(w):i for w,i in original_winners.items()},
+            expanded_winners={str(w):i for w,i in winners.items()},
+            original_winners_preserved=True,
             training_draws=cfg['training_draws'],evaluation_draws=cfg['evaluation_draws'],
             chosen_from_training=True,seconds=round(perf_counter()-tic,2),fingerprint=fingerprint)
-        value=dict(fingerprint=fingerprint,rows=rows,stations=stations,timetable=times,audit=audit,tradeoffs=ranked)
+        value=dict(fingerprint=fingerprint,rows=rows,stations=stations,timetable=times,audit=audit,tradeoffs=ranked,
+                   family_comparison=families)
         saved.write_bytes(pickle.dumps(value))
-        all_rows+=rows;station_rows+=stations;timetable+=times;audits.append(audit);tradeoffs+=ranked
-        del evaluation,packed;gc.collect()
-    for name,rows in [('comparison',all_rows),('station_impacts',station_rows),('timetable',timetable),('training_candidates',tradeoffs)]:
+        all_rows+=rows;station_rows+=stations;timetable+=times;audits.append(audit);tradeoffs+=ranked;family_comparison+=families
+        del evaluate_winner,make_row,evaluated,evaluation,packed;gc.collect()
+    for name,rows in [('comparison',all_rows),('station_impacts',station_rows),('timetable',timetable),
+                      ('training_candidates',tradeoffs),('candidate_family_comparison',family_comparison)]:
         pd.DataFrame(rows).to_csv(out/f'{name}.csv',index=False,encoding='utf-8-sig')
     write_json(out/'audit.json',dict(generated_at=datetime.now(timezone.utc).isoformat(),config=cfg,events=audits,
         input_hashes=input_hashes,

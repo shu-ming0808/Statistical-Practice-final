@@ -3,13 +3,56 @@ import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxi
 import {Download, RefreshCw, ArrowUpRight} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {publicFile} from "@/lib/research";
-import {selectDispatch, type DispatchData} from "@/lib/dispatch";
+import {dispatchSlotLabel, selectDispatch, type DispatchData, type DispatchSlotCount} from "@/lib/dispatch";
 import "./DispatchComparison.css";
 
 const fmt = (v: number | null | undefined, digits = 0) => v == null ? "—" :
   v.toLocaleString("zh-TW", {maximumFractionDigits: digits});
 const signed = (v: number, digits = 0) => `${v > 0 ? "+" : ""}${fmt(v, digits)}`;
 const report = "https://github.com/shu-ming0808/Statistical-Practice-final/blob/main/result/green_dispatch/report.md";
+
+function DispatchSlotHeatmap({slots}: {slots: DispatchSlotCount[]}) {
+  const [activeKey, setActiveKey] = useState("");
+  const keyOf = (slot: DispatchSlotCount) => `${slot.direction}-${slot.slot_start}`;
+  const starts = [...new Set(slots.map(s => s.slot_start))].sort();
+  const active = slots.find(s => keyOf(s) === activeKey) ?? slots[0];
+  const directions = ["往松山", "往新店"] as const;
+  return <section className="dispatch-section dispatch-slots">
+    <div className="dispatch-section-title"><h3 id="dispatch-slots-heading">班次往哪個時段集中</h3><span>每格 15 分鐘</span></div>
+    <p>比較同一時段的新舊班數。橘色表示較多、藍色表示較少；點選色塊查看數字。這是北門離站時刻的分布，15 分鐘不是發車間隔。</p>
+    {!active ? <p className="dispatch-slot-empty">這組條件尚無時段班數資料，不以 0 代替。</p> : <>
+      <div className="dispatch-slot-legend" aria-label="時段淨變化色彩圖例">
+        <span><i className="slot-legend-more"/>班數增加</span><span><i className="slot-legend-fewer"/>班數減少</span><span><i className="slot-legend-same"/>班數相同</span>
+        <small>每格：淨變化／原 → 新</small>
+      </div>
+      <div className="dispatch-heatmap-scroll" tabIndex={0} aria-label="15 分鐘班數熱圖，可水平捲動">
+        <table className="dispatch-heatmap" aria-labelledby="dispatch-slots-heading">
+          <thead><tr><th scope="col" className="dispatch-direction">行車方向</th>{starts.map(start => <th scope="col" key={start}>{start}</th>)}</tr></thead>
+          <tbody>{directions.map(direction => <tr key={direction}>
+            <th scope="row" className="dispatch-direction">{direction}</th>
+            {starts.map(start => {
+              const slot = slots.find(s => s.direction === direction && s.slot_start === start);
+              if (!slot) return <td key={start} className="dispatch-slot-missing" aria-label={`${direction} ${start} 缺少資料`}>—</td>;
+              const tone = slot.net_change > 0 ? "more" : slot.net_change < 0 ? "fewer" : "same";
+              return <td key={start}><button type="button" className={`dispatch-slot-cell slot-${tone} slot-intensity-${Math.min(Math.abs(slot.net_change), 3)}`}
+                aria-label={dispatchSlotLabel(slot)} aria-pressed={keyOf(slot) === keyOf(active)}
+                title={dispatchSlotLabel(slot)} onClick={() => setActiveKey(keyOf(slot))}>
+                <strong>{signed(slot.net_change)}</strong><span>{slot.baseline_count} → {slot.optimized_count}</span>
+              </button></td>;
+            })}
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <div className="dispatch-slot-detail" aria-live="polite" aria-atomic="true">
+        <strong>{active.direction} · {active.slot_start}–{active.slot_end}</strong>
+        <span>原班表 <b>{active.baseline_count}</b> 班</span><span>新班表 <b>{active.optimized_count}</b> 班</span>
+        <span>時段淨變化 <b>{signed(active.net_change)}</b> 班</span>
+      </div>
+      <p className="dispatch-slot-note">移時跨過 15 分鐘邊界，也會讓一格減少、另一格增加；所以格內差值不能當成實際增班／減班數。實際動作請看下方逐班對照。</p>
+      <a href={publicFile("dispatch-slot_counts.csv")} download><Download size={14}/>下載各場 15 分鐘班數 CSV</a>
+    </>}
+  </section>;
+}
 
 export function DispatchComparison() {
   const [data, setData] = useState<DispatchData>();
@@ -38,6 +81,7 @@ export function DispatchComparison() {
   if (!data) return <div className="empty-state" aria-busy="true">正在載入增減班比較…</div>;
   const selected = selectDispatch(data, event, weight);
   const r = selected.comparison;
+  const candidate = selected.candidateComparison;
   const dates = [...new Set(data.comparison.map(v => v.event_date))];
   const changes = selected.timetable.filter(v => showAll || v.action !== "保留");
   return <div className="dispatch-results">
@@ -65,6 +109,22 @@ export function DispatchComparison() {
       </div>
       <p className="dispatch-caption">成本是可避免的營運支出代理，包含新增列車的假設空車回送。平均等待涵蓋綠線一般背景旅次及可推導紅／橘線轉乘，並非北門散場尖峰平均，也不是全網實測。</p>
       {(r.unserved_mean > 0 || r.baseline_unserved_mean > 0) && <p role="status">部分旅次在共同終點尚未完成，所列平均等待只累計至該終點，不能當成完整候車時間；P95 留空。</p>}
+      <DispatchSlotHeatmap slots={selected.slots}/>
+      {candidate && <section className="dispatch-section">
+        <div className="dispatch-section-title"><h3>加入 15 分鐘候選，有沒有更合適</h3><span>同一場、同一個 λ</span></div>
+        <p>「原搜尋」是原本的班表搜尋結果。兩套搜尋使用相同人流情境；擴充搜尋保留原有候選，再加入分時配置，依訓練情境的成本與等待選擇。下表呈現獨立模擬評估。</p>
+        <div className="dispatch-table-wrap"><table><thead><tr><th>比較項目</th><th>原搜尋</th><th>納入 15 分鐘候選</th></tr></thead><tbody>
+          <tr><td>服務班數</td><td>{candidate.original_services}</td><td>{candidate.expanded_services}</td></tr>
+          <tr><td>實際增／減／移時</td><td>+{candidate.original_added}／−{candidate.original_removed}／{candidate.original_retimed}</td><td>+{candidate.expanded_added}／−{candidate.expanded_removed}／{candidate.expanded_retimed}</td></tr>
+          <tr><td>相對原班表的可變成本差</td><td>{signed(candidate.original_operating_change_twd)} 元</td><td>{signed(candidate.expanded_operating_change_twd)} 元</td></tr>
+          <tr><td>平均候車</td><td>{fmt(candidate.original_mean_wait, 2)} 分</td><td>{fmt(candidate.expanded_mean_wait, 2)} 分</td></tr>
+          <tr><td>評估期末未完成旅次</td><td>{fmt(candidate.original_unserved_mean, 2)} 人／情境</td><td>{fmt(candidate.expanded_unserved_mean, 2)} 人／情境</td></tr>
+          <tr><td>評估情境最大列車載量</td><td>{fmt(candidate.original_max_train_load)}／2,220 人</td><td>{fmt(candidate.expanded_max_train_load)}／2,220 人</td></tr>
+          <tr><td>涉及調整班次的最短同向班距</td><td>{candidate.original_min_changed_headway_minutes == null ? "沒有調整班次" : `${fmt(candidate.original_min_changed_headway_minutes, 2)} 分`}</td><td>{candidate.expanded_min_changed_headway_minutes == null ? "沒有調整班次" : `${fmt(candidate.expanded_min_changed_headway_minutes, 2)} 分`}</td></tr>
+        </tbody></table></div>
+        <p>班距檢查包含窗口外的相鄰原班；120 秒是本研究設定。加入候選不保證會採用新配置，也不保證獨立評估的等待與支出同時下降。</p>
+        <a href={publicFile("dispatch-candidate_family_comparison.csv")} download><Download size={14}/>下載搜尋方式比較 CSV</a>
+      </section>}
       <section className="dispatch-section">
         <div className="dispatch-section-title"><h3>原四站，轉乘也一起看</h3><span>只比較涉及綠線的旅次</span></div>
         <p>不經綠線的旅次未調整；大橋頭、雙連、民權西路沒有直接減班。出發站優先歸屬，避免同一旅次重複計算。</p>

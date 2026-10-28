@@ -149,7 +149,7 @@ def past_od(event,cfg):
     months=sorted({d[:7].replace('-','') for d in days})
     files=[str(ROOT/f'data/interim/clean_od/{m}.parquet') for m in months]
     quoted=','.join('?' for _ in days)
-    d=con.execute(f"SELECT source_hour, origin_station, destination_station, SUM(passengers)/? AS passengers FROM read_parquet(?) WHERE service_date IN ({quoted}) AND source_hour BETWEEN 17 AND 22 GROUP BY ALL",[len(days),files,*days]).df()
+    d=con.execute(f"SELECT source_hour, origin_station, destination_station, SUM(passengers)/? AS passengers FROM read_parquet(?) WHERE service_date IN ({quoted}) AND source_hour BETWEEN 17 AND 22 GROUP BY ALL ORDER BY source_hour, origin_station, destination_station",[len(days),files,*days]).df()
     con.close()
     d.to_csv(path,index=False,encoding='utf-8-sig')
     return d,days,{'od_sha256':digest(path),'months':months}
@@ -158,6 +158,10 @@ def past_od(event,cfg):
 def prepare_event(event, forecasts, network, cfg):
     """Build sparse, sorted minute cohorts, preserving OD destinations and groups."""
     od,days,audit=past_od(event,cfg)
+    # GROUP BY without a stable row order can change connection IDs, cohort
+    # ordering and therefore which Poisson variate reaches each cohort even with
+    # an identical seed. Also enforce the order for supplied/cached OD frames.
+    od=od.sort_values(['source_hour','origin_station','destination_station'],kind='stable').reset_index(drop=True)
     day='saturday' if pd.Timestamp(event).weekday()==5 else 'weekday'
     prediction=forecasts[forecasts.event_date==pd.Timestamp(event)].set_index(['station','hour']).predicted
     totals=od.groupby(['origin_station','source_hour']).passengers.sum()

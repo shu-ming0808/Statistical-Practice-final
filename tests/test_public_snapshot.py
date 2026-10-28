@@ -1,9 +1,11 @@
 """Public build contract: no database, private inputs, or analysis dependencies."""
 import csv
+import copy
 import hashlib
 import json
 from pathlib import Path
 import unittest
+from app.export_dispatch import validate_slot_counts, validate_candidate_families
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'app/frontend/public/data'
@@ -61,6 +63,13 @@ class PublicSnapshotTests(unittest.TestCase):
         self.assertTrue(dispatch['not_global_optimum'])
         self.assertEqual(len(dispatch['comparison']),24)
         self.assertEqual(len({r['event_date'] for r in dispatch['comparison']}),8)
+        validate_slot_counts(dispatch)
+        validate_candidate_families(dispatch)
+        for name in ['slot_counts','candidate_family_comparison']:
+            self.assertEqual((DATA/f'dispatch-{name}.csv').read_bytes(),
+                             (ROOT/f'result/green_dispatch/{name}.csv').read_bytes())
+        self.assertEqual((DATA/'dispatch-slot_heatmap.png').read_bytes(),
+                         (ROOT/'result/green_dispatch/figures/slot_heatmap.png').read_bytes())
         for r in dispatch['comparison']:
             self.assertEqual(r['baseline_services']+r['added']-r['removed'],r['optimized_services'])
             self.assertLessEqual(r['max_train_load'],2220+1e-6)
@@ -104,5 +113,104 @@ class PublicSnapshotTests(unittest.TestCase):
             for direction in ['往松山','往新店']:
                 values=sorted(int(t['new_beimen'][:2])*60+int(t['new_beimen'][3:5]) for t in times if t['direction']==direction and t['new_beimen'])
                 self.assertTrue(all(b-a>=2 for a,b in zip(values,values[1:])))
+
+class DispatchAggregateContractTests(unittest.TestCase):
+    def retimed_fixture(self):
+        event='2024-08-10';weight=1
+        data={'comparison':[dict(event_date=event,waiting_weight=weight,
+                                 baseline_services=1,optimized_services=1,added=0,removed=0,retimed=1)],
+              'timetable':[dict(event_date=event,waiting_weight=weight,direction='往松山',
+                                action='移時',old_beimen='18:14:00',new_beimen='18:16:00')],
+              'slot_counts':[]}
+        for direction in ['往松山','往新店']:
+            for start in range(1080,1380,15):
+                old=int(direction=='往松山' and start==1080)
+                new=int(direction=='往松山' and start==1095)
+                data['slot_counts'].append(dict(event_date=event,waiting_weight=weight,direction=direction,
+                    slot_start=f'{start//60:02}:{start%60:02}',
+                    slot_end=f'{(start+15)//60:02}:{(start+15)%60:02}',
+                    baseline_count=old,optimized_count=new,net_change=new-old,
+                    added_services=0,removed_services=0,retimed_in=new,retimed_out=old))
+        return data
+
+    def test_cross_slot_retiming_is_not_an_added_or_removed_service(self):
+        data=self.retimed_fixture()
+        validate_slot_counts(data)
+        self.assertEqual(sum(max(r['net_change'],0) for r in data['slot_counts']),1)
+        self.assertEqual(data['comparison'][0]['added'],0)
+        self.assertEqual(sum(r['net_change'] for r in data['slot_counts']),0)
+
+    def test_departure_exactly_on_slot_boundary_goes_to_following_slot(self):
+        data=self.retimed_fixture()
+        data['timetable'][0]['new_beimen']='18:15:00'
+        validate_slot_counts(data)
+        data['timetable'][0]['new_beimen']='18:14:59'
+        with self.assertRaisesRegex(ValueError,'do not match'):
+            validate_slot_counts(data)
+
+    def test_decision_end_is_excluded_from_heatmap(self):
+        data=self.retimed_fixture()
+        data['timetable'][0]['new_beimen']='23:00:00'
+        with self.assertRaisesRegex(ValueError,'only covers'):
+            validate_slot_counts(data)
+
+    def test_missing_duplicate_and_private_slots_are_rejected(self):
+        for mutation in ['missing','duplicate','private']:
+            with self.subTest(mutation=mutation):
+                data=self.retimed_fixture()
+                if mutation=='missing': data['slot_counts'].pop()
+                elif mutation=='duplicate': data['slot_counts'].append(copy.deepcopy(data['slot_counts'][0]))
+                else: data['slot_counts'][0]['raw_od']=[123]
+                with self.assertRaises(ValueError): validate_slot_counts(data)
+
+    def family_fixture(self):
+        values={'added':0,'removed':0,'retimed':1,'services':1,'operating_change_twd':0,
+                'mean_wait':2,'wait_person_minutes':200,'unserved_mean':0,'max_train_load':100,
+                'min_changed_headway_minutes':2,'train_objective':100,'evaluation_total_cost_change':-100}
+        row=dict(event_date='2024-08-10',waiting_weight=1,original_candidate=0,expanded_candidate=1,
+                 original_family='original',expanded_family='slot',selected_by_training=True,
+                 baseline_services=1,baseline_mean_wait=3,original_headway_valid=True,expanded_headway_valid=True,
+                 evaluation_total_cost_difference=0,evaluation_wait_difference=0)
+        for prefix in ['original','expanded']:
+            row.update({f'{prefix}_{k}':v for k,v in values.items()})
+        comparison=dict(event_date=row['event_date'],waiting_weight=1,candidate=1,candidate_family='slot',
+                        headway_valid=True,baseline_services=1,baseline_mean_wait=3,**values)
+        for old,new in [('services','optimized_services'),('mean_wait','optimized_mean_wait'),
+                        ('wait_person_minutes','optimized_wait_person_minutes')]:
+            comparison[new]=comparison.pop(old)
+        return dict(comparison=[comparison],candidate_family_comparison=[row])
+
+    def test_family_comparison_uses_published_training_winner(self):
+        data=self.family_fixture()
+        validate_candidate_families(data)
+        data['candidate_family_comparison'][0]['selected_by_training']=False
+        with self.assertRaisesRegex(ValueError,'training'): validate_candidate_families(data)
+
+    def test_expanded_search_cannot_discard_better_original_training_solution(self):
+        data=self.family_fixture()
+        data['candidate_family_comparison'][0]['expanded_train_objective']=101
+        data['comparison'][0]['train_objective']=101
+        with self.assertRaisesRegex(ValueError,'lost the original'):
+            validate_candidate_families(data)
+
+    def test_family_capacity_headway_and_selected_metrics_are_checked(self):
+        for key,value in [('expanded_max_train_load',2221),('original_min_changed_headway_minutes',1.9),
+                          ('expanded_mean_wait',3),('raw_od',[123])]:
+            with self.subTest(field=key):
+                data=self.family_fixture();data['candidate_family_comparison'][0][key]=value
+                with self.assertRaises(ValueError): validate_candidate_families(data)
+
+    def test_no_changed_pair_has_null_not_invented_headway(self):
+        data=self.family_fixture()
+        row=data['candidate_family_comparison'][0]
+        for prefix in ['original','expanded']:
+            row[f'{prefix}_retimed']=0
+            row[f'{prefix}_min_changed_headway_minutes']=None
+        data['comparison'][0].update(retimed=0,min_changed_headway_minutes=None)
+        validate_candidate_families(data)
+        row['original_removed']=1
+        with self.assertRaisesRegex(ValueError,'measured headway'):
+            validate_candidate_families(data)
+
 
 if __name__=='__main__': unittest.main()

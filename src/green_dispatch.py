@@ -177,6 +177,106 @@ def operating_change(base, plan, cfg):
     return delta, added, removed, sum(r[1] == '移時' for r in rows)
 
 
+def plan_key(plan):
+    """Stable identity independent of dict insertion order."""
+    return tuple((d, tuple(plan[d])) for d in sorted(plan))
+
+
+def minimum_changed_headway(base, plan):
+    """Smallest gap involving a changed adjacent pair, or None if unchanged.
+
+Unchanged minute-rounded official pairs remain grandfathered by validate_plan.
+    """
+    gaps = []
+    for d in base:
+        original = set(zip(base[d], base[d][1:]))
+        gaps.extend(z-a for a,z in zip(plan[d],plan[d][1:]) if (a,z) not in original)
+    return float(min(gaps)) if gaps else None
+
+
+def slot_replacements(base, current, direction, start, end, cfg, window):
+    """Replace one half-open slot, preserving every departure outside that slot.
+
+Candidate headways are a finite search menu, not a service guarantee. Zero means
+an empty slot; the full-line waiting/capacity scorer decides whether it is useful.
+    """
+    lo, hi = window
+    if not lo <= start < end <= hi:
+        raise ValueError('Slot must lie inside the half-open decision window')
+    gap = cfg['minimum_headway_minutes']
+    outside = [t for t in current[direction] if not start <= t < end]
+    seen = set()
+    for headway in cfg['slot_headways_minutes']:
+        if headway < 0 or (headway and headway < gap):
+            raise ValueError('Slot headway must be zero or at least the minimum gap')
+        phases = [0] if not headway else cfg.get('slot_phase_offsets_minutes', [0])
+        for phase in phases:
+            if phase < 0 or (headway and phase >= headway):
+                continue
+            inside = [] if not headway else list(np.arange(start+phase, end, headway))
+            # Reject a generated point too close to either outside neighbour;
+            # never remove/move the neighbour to make the slot fit.
+            inside = [float(t) for t in inside if all(abs(t-b) >= gap-1e-8 for b in outside)]
+            trial = {d:list(v) for d,v in current.items()}
+            trial[direction] = sorted(outside+inside)
+            try:
+                validate_plan(base, trial, window, gap)
+            except ValueError:
+                continue
+            key = plan_key(trial)
+            if key not in seen:
+                seen.add(key)
+                yield trial
+
+
+def search_slot_plans(base, starts, evaluate, cfg, window):
+    """One or more 15-minute sweeps using training proposal scenarios only.
+
+starts maps each waiting weight to already valid incumbent plans. All accepted
+intermediate plans are returned for separate full-training ranking. Original
+family winners must be retained by the caller, so an expanded search cannot
+discard the incumbent on its training objective. No P95 acceptance gate exists.
+    """
+    lo, hi = window
+    size = cfg['slot_minutes']
+    if size <= 0 or int(size) != size:
+        raise ValueError('slot_minutes must be a positive integer')
+    cache, seen = {}, {}
+
+    def value(plan, weight):
+        cost, adds, _, _ = operating_change(base, plan, cfg)
+        if adds > cfg['maximum_added_services']:
+            return float('inf')
+        key = plan_key(plan)
+        if key not in cache:
+            cache[key] = evaluate(plan)
+        return cost + weight * cfg['time_value_per_minute'] * cache[key]
+
+    for weight in cfg['waiting_weights']:
+        for start in starts[weight]:
+            validate_plan(base, start, window, cfg['minimum_headway_minutes'])
+            current = {d:list(v) for d,v in start.items()}
+            seen[plan_key(current)] = current
+            best = value(current, weight)
+            for _ in range(cfg.get('slot_search_passes', 1)):
+                changed = False
+                for left in range(lo, hi, int(size)):
+                    right = min(left+size, hi)
+                    for d in sorted(base):
+                        winner = None
+                        for trial in slot_replacements(base,current,d,left,right,cfg,window):
+                            score = value(trial, weight)
+                            if score < best-1e-6:
+                                best, winner = score, trial
+                        if winner is not None:
+                            current = winner
+                            seen[plan_key(current)] = current
+                            changed = True
+                if not changed:
+                    break
+    return list(seen.values()), len(cache)
+
+
 def search_plans(base, evaluate, cfg, window):
     """Greedy add/remove/retime local search on proposal scenarios.
 
