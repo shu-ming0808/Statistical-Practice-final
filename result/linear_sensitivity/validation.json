@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "training_reproduced": false,
+  "evaluation_rows": 54,
+  "evaluation_events": 9,
+  "recomputed_metric_rows": 24,
+  "metrics_per_row": [
+    "mae",
+    "rmse",
+    "peak_abs",
+    "window_under"
+  ],
+  "maximum_absolute_metric_difference": 5.684341886080801e-13,
+  "annual_choices_checked": 12,
+  "tuning_rows_checked": 660,
+  "all_validation_years_precede_evaluation_year": true,
+  "selected_parameters_minimize_reported_past_event_mae": true,
+  "annual_path_rows": 126,
+  "path_summary_rows_checked": 42,
+  "limitations": [
+    "training code not furnished",
+    "full path hourly predictions not furnished",
+    "path aggregation verified from annual summaries, not refitted models",
+    "nine events repeatedly inspected; not a new independent test"
+  ]
+}

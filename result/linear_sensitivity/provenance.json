@@ -1,0 +1,80 @@
+{
+  "source_package": "Lasso_Ridge_實驗分享_2026-10-28",
+  "import_date": "2026-10-29",
+  "status": "teammate result import; no training reproduced",
+  "source_file_sha256": {
+    "factorial_choices.csv": "bd1ca0eb547e4e4f7f9244c1b0c4fca685b3c2cb305baec92f694f301173fd0d",
+    "factorial_metrics.csv": "1cecb68ceaba61bb617b96c7b07bd3856f0f06822192b003b3346c8d42b7f9df",
+    "factorial_penalty_comparison.png": "506843ff142e7cc0cfd9073d64a1240b11f46ffaddf640e923ae76c7c3e7fca9",
+    "factorial_penalty_path.csv": "b21d95f84fcd1b82953f4d5e0af1996b542f94d897023c749b4f35d9c5144621",
+    "factorial_penalty_summary.csv": "efa61e5b3369ed5d0e84d1d66d17591265b9e5d779afbebf91f3a4e44b66aed8",
+    "factorial_predictions.csv": "e123b57de1325f3407ba3b143230016566c44d3fd75160b401efac0fd05e0e8f",
+    "factorial_tuning.csv": "3d7579c86f2c277575849ced8d43903ee7ec7e66e880951dea6c9876b56701e8",
+    "method.md": "5802a17decee389e162c4661c7b2f62135e2bfd8dd01cfb33dcac60d5103867f",
+    "README.md": "0475a736f921d8c88bb226da2916e8580c88ae7c46e5c8b7559691cbd7fde8d6",
+    "report.md": "eed5b09cccfe8ca002b31d25ca515bd4f831cef18d5fadc3020b26627aaced59"
+  },
+  "copied_source_files": [
+    "factorial_metrics.csv",
+    "factorial_choices.csv",
+    "factorial_tuning.csv",
+    "factorial_penalty_path.csv",
+    "factorial_penalty_summary.csv"
+  ],
+  "frozen_metrics_source": "result/forecast/tables/metrics.csv",
+  "frozen_metrics_sha256": "1e0a4ec50f42ff26138c0b7dec30445ebca1ebce20a53ae377e9baffc8bcf0ce",
+  "prediction_projection": {
+    "source": "factorial_predictions.csv",
+    "kept": [
+      "event_date",
+      "station",
+      "hour",
+      "year",
+      "y",
+      "original_ridge",
+      "original_lasso",
+      "original_ols",
+      "all_standardized_ridge",
+      "all_standardized_lasso",
+      "all_standardized_ols"
+    ],
+    "derived": "window_weight_within_event: sum of two planned overlaps / event overlap sum",
+    "excluded": "all feature columns; no training input or raw OD copied"
+  },
+  "input_identity_at_import": {
+    "checked": true,
+    "rows": 54,
+    "events": 9,
+    "matching_value_columns": [
+      "year",
+      "y",
+      "is_weekend",
+      "day_of_year",
+      "year_index",
+      "planned_end_0_60_beimen",
+      "planned_end_0_60_daqiaotou",
+      "planned_end_0_60_shuanglian",
+      "planned_end_0_60_minquan_west",
+      "planned_end_60_120_beimen",
+      "planned_end_60_120_daqiaotou",
+      "planned_end_60_120_shuanglian",
+      "planned_end_60_120_minquan_west",
+      "retrospective_baseline_56d"
+    ],
+    "input_sha256": "2db20f52a107db121d0c02bdf1f721933473c5e09378f623b991a1d1f2e13435",
+    "private_input_copied": false
+  },
+  "missing_training_scripts": [
+    "src/run_lasso_ridge_experiment.py",
+    "src/run_lasso_ridge_robustness.py"
+  ],
+  "imported_file_sha256": {
+    "source/factorial_choices.csv": "bd1ca0eb547e4e4f7f9244c1b0c4fca685b3c2cb305baec92f694f301173fd0d",
+    "source/factorial_metrics.csv": "1cecb68ceaba61bb617b96c7b07bd3856f0f06822192b003b3346c8d42b7f9df",
+    "source/factorial_penalty_path.csv": "b21d95f84fcd1b82953f4d5e0af1996b542f94d897023c749b4f35d9c5144621",
+    "source/factorial_penalty_summary.csv": "efa61e5b3369ed5d0e84d1d66d17591265b9e5d779afbebf91f3a4e44b66aed8",
+    "source/factorial_tuning.csv": "3d7579c86f2c277575849ced8d43903ee7ec7e66e880951dea6c9876b56701e8",
+    "source/frozen_forecast_metrics.csv": "1e0a4ec50f42ff26138c0b7dec30445ebca1ebce20a53ae377e9baffc8bcf0ce",
+    "evaluation_predictions.csv": "3ba50ec4e3ebb6cb9327df8c7773ae6abebe99c74f87d83fdcf490e2d68c0095"
+  }
+}
