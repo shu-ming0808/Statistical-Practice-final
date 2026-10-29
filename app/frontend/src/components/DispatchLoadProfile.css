@@ -1,0 +1,11 @@
+.dispatch-load-controls { display:flex; flex-wrap:wrap; align-items:end; gap:16px 24px; margin:20px 0; }
+.dispatch-load-controls>span { color:#a4a4ad; font-size:12px; padding-bottom:8px; }
+.dispatch-load-charts { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:20px; }
+.dispatch-load-direction { min-width:0; }
+.dispatch-load-direction h4 { font-size:14px; font-weight:550; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.dispatch-load-direction h4 span { color:#a4a4ad; font-size:12px; font-weight:400; }
+.dispatch-load-chart { height:245px; margin-top:14px; }
+.dispatch-load-method { margin-top:20px; color:#b7b7c0; font-size:12px; line-height:1.9; }
+.dispatch-load-method summary { cursor:pointer; color:#dedee1; }
+.dispatch-load-method a { display:block; margin-top:8px; }
+@media(max-width:800px) { .dispatch-load-charts { grid-template-columns:1fr; gap:20px; } .dispatch-load-controls>span { padding-bottom:0; } }

@@ -1,0 +1,342 @@
+{
+  "generated_at": "2026-10-29T02:39:50.626698+00:00",
+  "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+  "diagnostic_fingerprint": "fef0af02ad231f74273823c916358e45d83a714b3de346b5f163d537907e084e",
+  "input_hashes": {
+    "configs/forecast.json": "d284a9445d10b8c2ad6218914f26caa6544db08d546b638b411a57fa1233abb3",
+    ".local/forecast/analysis_input.csv": "2db20f52a107db121d0c02bdf1f721933473c5e09378f623b991a1d1f2e13435",
+    ".local/forecast/predictions.csv": "96915ef02b9ebbf6fae909209f85b65cd9da1f2682dc87497d198bdb53daf3ef",
+    ".local/transit_reference/20261015/normalized.json": "b395e542f9531bdf31a8ed31ac0306883af7e4d80954f6022bf7355585174d56",
+    "data/interim/events_snapshot.json": "4bab703b6d37ea45e67a59af300e9f5f64dc3ce417258d2859b8943dae4e597a",
+    "data/processed/station_hourly.parquet": "2bc4c399d8a7ab8ae9672c5c7e31b5a459281acda9f05be6345258f2c3bdb85f",
+    ".local/forecast/models/2024_xgboost_weighted.joblib": "ebb3dee6766798f6f26033690bdc97c79029a00fec9f072f3c2a9537097ebbef",
+    ".local/forecast/models/2025_xgboost_weighted.joblib": "f9989a0343d12a41ba8f25de6832e9d2f3bb97632cfb22b9a9d598c7ff4d30ed",
+    ".local/forecast/models/2026_xgboost_weighted.joblib": "eaaab8a72454ba027332ad3f5a8976a88d4a74516dd740abf5222c09969438ad",
+    "data/interim/clean_od/201701.parquet": "ad3d4535f2acefed7b424f1b04554b0a47035d23bba9ec7a450d2897fd427a6a",
+    "data/interim/clean_od/201708.parquet": "3e821b3bb29de13bb2244ead9f43a31298f8d49a6fa6982482a6249b1d0cd415",
+    "data/interim/clean_od/201808.parquet": "220a6797455efa674357805e0c297cb83a3ef2f245801a9a69cdf153d33f4bd9",
+    "data/interim/clean_od/201907.parquet": "0357eecf10489860dff50b9b5ebd7aa9c2d7119629b3004cc21acddfaddecfa9",
+    "data/interim/clean_od/201908.parquet": "39ce0fae62a63d19cffc34ff89be7ea27b80f94acffeb1d0e8596fb3724a1890",
+    "data/interim/clean_od/202008.parquet": "15c31ef3bd87797ebad2b41e3ead8c67b7476ce91a93635e9f727861ae03c03c",
+    "data/interim/clean_od/202110.parquet": "afdd4f0a09c444d3b6030bcb3fbfdc2dad96beb7d469b5b542ac95ac2be21368",
+    "data/interim/clean_od/202207.parquet": "3ce0eeb6a1e3451b2e5f118a795feed1fcc45b711c3d1c89a2dde1a36adbdbfd",
+    "data/interim/clean_od/202306.parquet": "0fd053285539e67ecf2fa0e0f4f7488f81396fc37d910f457b6c7a44c953b7fe",
+    "data/interim/clean_od/202307.parquet": "71042365e2181feb5d6da4bfffd45c82827363de7da2745c5e1a4bf4cb488eb9",
+    "data/interim/clean_od/202308.parquet": "51724b00338d8051d8f0f611ab02beca06ffe07f1a350f23070bd92d7889fd28",
+    "data/interim/clean_od/202407.parquet": "faab8919ea20f64dd966990db059065171aa695fa42995ecb83c31bcd70b28b5",
+    "data/interim/clean_od/202408.parquet": "e5b502943f71395cce6847632416c67f628af86a74fc3ef735ba2950eb16f26c",
+    "data/interim/clean_od/202507.parquet": "5e3de479bcc63f7378976217f8ffe338cff6f2e9f06c75d3d8ed9cba37ceacbd",
+    "data/interim/clean_od/202508.parquet": "f0aa680909b5c81b8f1f0e798af161c7cf00123c2da8eedc84f7faa64f11c629",
+    "data/interim/clean_od/202607.parquet": "c3b20175772c9ccb46a314fe9fbe3de7bc7841ca615e82d9a92e5212a076d370",
+    "data/interim/clean_od/202608.parquet": "eed5b025f08d8750d65e4e8361d9df0bb3c3accd775bb0cbae1ec25363ad604e"
+  },
+  "configuration": {
+    "seed": 20261027,
+    "decision_start": "18:00",
+    "decision_end_exclusive": "23:00",
+    "time_reference": "Beimen departure; complete Songshan-Xindian service",
+    "simulation_start_hour": 17,
+    "simulation_end_hour": 26,
+    "training_draws": 200,
+    "proposal_draws": 12,
+    "shortlist_per_weight": 10,
+    "evaluation_draws": 300,
+    "minimum_headway_minutes": 2,
+    "minimum_headway_status": "research assumption, not a verified signalling safety limit",
+    "transfer_walk_minutes": 5,
+    "platform_access_minutes": 5,
+    "capacity_persons": 2220,
+    "waiting_weights": [
+      0.5,
+      1,
+      2
+    ],
+    "time_value_per_minute": 3.2666666666666666,
+    "variable_cost_per_train_km": 128.05,
+    "service_km": 18.77,
+    "extra_empty_return_multiplier": 1,
+    "maximum_added_services": 300,
+    "initial_headways_minutes": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      10
+    ],
+    "proposal_add_step_minutes": 5,
+    "shift_offsets_minutes": [
+      -5,
+      -2,
+      -1,
+      1,
+      2,
+      5
+    ],
+    "search_passes": 2,
+    "slot_minutes": 15,
+    "slot_headways_minutes": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      10
+    ],
+    "slot_phase_offsets_minutes": [
+      0
+    ],
+    "slot_search_passes": 1,
+    "slot_include_baseline_start": false,
+    "background_lookback_days": 56,
+    "background_max_days": 6,
+    "reference_weight": 1,
+    "wait_threshold": null,
+    "output": "result/green_dispatch"
+  },
+  "fixed_headways": [
+    8,
+    10
+  ],
+  "single_cancel_shortlist_per_weight": 3,
+  "training_draws": 200,
+  "proposal_draws": 12,
+  "evaluation_draws": 300,
+  "same_random_streams_as_published": true,
+  "diagnostic_only": true,
+  "adopted": false,
+  "events": [
+    {
+      "event_date": "2024-07-31",
+      "seconds": 16.82,
+      "donor_events": [
+        "2024-07-17"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 125,
+      "shortlisted_single_cancels": [
+        "cancel_d1_142",
+        "cancel_d1_149",
+        "cancel_d1_97"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_142",
+        "1": "cancel_d1_142",
+        "2": "cancel_d1_142"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2024-08-10",
+      "seconds": 15.06,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 88,
+      "shortlisted_single_cancels": [
+        "cancel_d1_344",
+        "cancel_d1_351",
+        "cancel_d1_358"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_358",
+        "1": "cancel_d1_358",
+        "2": "cancel_d1_358"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2025-08-06",
+      "seconds": 15.95,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31",
+        "2024-08-10"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 125,
+      "shortlisted_single_cancels": [
+        "cancel_d1_142",
+        "cancel_d1_149",
+        "cancel_d1_97"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_142",
+        "1": "cancel_d1_142",
+        "2": "cancel_d1_142"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2025-08-20",
+      "seconds": 16.46,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31",
+        "2024-08-10",
+        "2025-08-06"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 125,
+      "shortlisted_single_cancels": [
+        "cancel_d1_142",
+        "cancel_d1_149",
+        "cancel_d1_97"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_142",
+        "1": "cancel_d1_142",
+        "2": "cancel_d1_142"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2025-08-30",
+      "seconds": 13.17,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31",
+        "2024-08-10",
+        "2025-08-06",
+        "2025-08-20"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 88,
+      "shortlisted_single_cancels": [
+        "cancel_d1_344",
+        "cancel_d1_351",
+        "cancel_d1_358"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_358",
+        "1": "cancel_d1_358",
+        "2": "cancel_d1_358"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2026-07-25",
+      "seconds": 10.61,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31",
+        "2024-08-10",
+        "2025-08-06",
+        "2025-08-20",
+        "2025-08-30"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 88,
+      "shortlisted_single_cancels": [
+        "cancel_d1_344",
+        "cancel_d1_351",
+        "cancel_d1_358"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_358",
+        "1": "cancel_d1_358",
+        "2": "cancel_d1_358"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2026-08-05",
+      "seconds": 14.43,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31",
+        "2024-08-10",
+        "2025-08-06",
+        "2025-08-20",
+        "2025-08-30",
+        "2026-07-25"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 125,
+      "shortlisted_single_cancels": [
+        "cancel_d0_181",
+        "cancel_d1_142",
+        "cancel_d1_149"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_142",
+        "1": "cancel_d1_142",
+        "2": "cancel_d1_142"
+      },
+      "evaluation_used_for_selection": false
+    },
+    {
+      "event_date": "2026-08-15",
+      "seconds": 10.96,
+      "donor_events": [
+        "2024-07-17",
+        "2024-07-31",
+        "2024-08-10",
+        "2025-08-06",
+        "2025-08-20",
+        "2025-08-30",
+        "2026-07-25",
+        "2026-08-05"
+      ],
+      "baseline_matches_published": true,
+      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "fixed_patterns": [
+        "fixed_8",
+        "fixed_10"
+      ],
+      "single_cancel_proposals": 88,
+      "shortlisted_single_cancels": [
+        "cancel_d1_338",
+        "cancel_d1_344",
+        "cancel_d1_358"
+      ],
+      "training_selected_single_cancels": {
+        "0.5": "cancel_d1_358",
+        "1": "cancel_d1_358",
+        "2": "cancel_d1_358"
+      },
+      "evaluation_used_for_selection": false
+    }
+  ],
+  "method": "Fixed patterns evaluated; single cancellation chosen on training only; published policy unchanged"
+}

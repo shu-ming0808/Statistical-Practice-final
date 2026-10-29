@@ -3,7 +3,7 @@ name: Publish research website
 on:
   push:
     branches: [main]
-    paths: ['app/**', 'result/green_dispatch/**', 'tests/test_public_snapshot.py', '.gitattributes', '.github/workflows/pages.yml']
+    paths: ['app/**', 'result/green_dispatch/**', 'result/green_dispatch_diagnostics/**', 'result/green_load_profile/**', 'tests/test_public_snapshot.py', '.gitattributes', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:

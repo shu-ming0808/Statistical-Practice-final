@@ -152,8 +152,9 @@ function RailPlayback({ data, date }: { data: RailReplay; date: string }) {
           <h2>北門</h2>
           <span>高運量六節編組</span>
         </div>
-        <span className="rail-simulation-tag">模擬估計，非即時監控</span>
+        <span className="rail-simulation-tag">固定比例情境回放，非即時監控</span>
       </div>
+      <p className="rail-method-note">此回放保留每班固定剩餘空間的情境假設；新版全線調度已改由 OD 推估沿途上下車與逐班剩餘容量。<a href="#/research?tab=dispatch">查看動態載量與成本候車比較 →</a></p>
       <div className="rail-status-strip">
         <span>
           <Users size={15} />

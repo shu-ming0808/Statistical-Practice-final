@@ -320,6 +320,38 @@ $$\min_{x\in\mathcal P}\Delta C_{\rm op}(x)+\lambda(196/60)\,S^{-1}\sum_s W_s(x)
 
 <!-- green-dispatch:end -->
 
+<!-- dispatch-diagnostics:start -->
+### 為什麼沒有減班？成本與等待的實際取捨
+
+額外保留 8／10 分鐘配置，使用與原結果相同的獨立 300 次情境評估。**減班能完成本次模擬疏運，但會拉長等待；不是程式禁止減班。** 下表是八場合計，減班試算尚未採用。
+
+| 方案 | 增／減／移時 | 相對原表支出差（元） | 平均候車（分） |
+|---|---:|---:|---:|
+| 原班表 | +0／−0／0 | +0 | 3.895 |
+| λ=0.5 | +169／−0／615 | +812,382 | 3.308 |
+| λ=1 | +496／−0／608 | +2,384,271 | 2.868 |
+| λ=2 | +1069／−0／520 | +5,138,680 | 2.527 |
+| 8 分配置 | +0／−248／492 | -596,068 | 5.353 |
+| 10 分配置 | +0／−376／384 | -903,715 | 7.911 |
+
+λ=1 時，取消一班省約 2,403 元，但只要多出 736 人分鐘等待，候車時間成本就抵銷節省。背景組占模型旅次約 85.9%；因此目標也在改善沿線一般乘客候車。原搜尋另有初篩限制，不能據此宣稱所有減班組合都不值得。
+
+![成本與候車取捨](result/green_dispatch_diagnostics/figures/cost_wait_tradeoff.png)
+
+### 到站列車不必固定假設 50%
+
+舊回放的「剩餘空間 50%」及「方向各 50%」是分開的敏感度假設。新版全線調度已用過去 OD 推估起迄與方向，配合班表逐站先下後上；本次再公開逐班抵站、下車、上車、剩餘空間及情境分位數，沒有重新訓練或更換人流模型。
+
+![逐班剩餘空間](result/green_dispatch_diagnostics/figures/beimen_remaining_capacity.png)
+
+**仍是推估。** 小時 OD 無法唯一識別實際搭乘班次；路徑、分鐘到達與步行待校準。下一步可用列車運行與 AFC／載重資料校準，方法依據見下列文獻。色帶是模擬情境分位數，不是實測載量的信賴區間。
+
+[完整診斷與公式](result/green_dispatch_diagnostics/report.md)／[取捨數據](result/green_dispatch_diagnostics/tradeoff_points.csv)／[逐班載量](result/green_load_profile/beimen_load_profile.csv)
+
+參考：[Mo et al. (2020)：容量限制下的都市軌道網路載客模型](https://journals.sagepub.com/doi/abs/10.1177/0361198120914309)；[Zhu et al. (2017)：以實際班表與 AFC 推估乘客搭車選擇](https://onlinelibrary.wiley.com/doi/10.1155/2017/5824051)；[Su et al. (2022)：乘客與列車配對機率及網路人流分配](https://www.mdpi.com/1099-4300/24/8/1026)；[臺北捷運 TIMES：載重感測與 AFC 校準（PDF 第 8、10–13、19 頁）](https://www-ws.gov.taipei/001/Upload/799/relfile/10173/8554762/63923974-318f-4dd6-816a-b06607271d9b.pdf)。
+
+<!-- dispatch-diagnostics:end -->
+
 ## 快速開始
 
 ~~~powershell

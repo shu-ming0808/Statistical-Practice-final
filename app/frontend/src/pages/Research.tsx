@@ -368,11 +368,12 @@ function Queue({ data, event }: { data: Research; event: string }) {
       <div className="research-callout">
         <TrainFront size={22} />
         <div>
-          <strong>北門 G13｜高運量，六節編組</strong>
+          <strong>北門 G13｜固定剩餘空間的敏感度情境</strong>
           <p>
             官方整列容量上限參考值 2,220 人（370 ×
             6）。下方採「下車後仍可再載的空間」，不是把全列容量都留給北門。
           </p>
+          <p>本頁的剩餘空間 50% 與雙向各 50% 是兩個不同假設。新版全線模型用 OD 分配方向並累計沿途上下車，請見<a href="#/research?tab=dispatch">增減班比較與逐班載量</a>。</p>
         </div>
       </div>
       <div className="research-controls panel">

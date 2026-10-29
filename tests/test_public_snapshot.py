@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import unittest
 from app.export_dispatch import validate_slot_counts, validate_candidate_families
+from app.export_dispatch_diagnostics import validate_points, validate_loads, validate_provenance, read_rows, POINT_FIELDS, LOAD_FIELDS
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'app/frontend/public/data'
@@ -113,6 +114,81 @@ class PublicSnapshotTests(unittest.TestCase):
             for direction in ['往松山','往新店']:
                 values=sorted(int(t['new_beimen'][:2])*60+int(t['new_beimen'][3:5]) for t in times if t['direction']==direction and t['new_beimen'])
                 self.assertTrue(all(b-a>=2 for a,b in zip(values,values[1:])))
+
+class DispatchDiagnosticContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.main=json.loads((DATA/'dispatch.json').read_text('utf-8'))
+        cls.diagnostics=json.loads((DATA/'dispatch-diagnostics.json').read_text('utf-8'))
+        cls.loads=json.loads((DATA/'dispatch-load-profile.json').read_text('utf-8'))
+        cls.load_audit=json.loads((ROOT/'result/green_load_profile/audit.json').read_text('utf-8'))
+        cls.diagnostic_audit=json.loads((ROOT/'result/green_dispatch_diagnostics/audit.json').read_text('utf-8'))
+        cls.events={r['event_date'] for r in cls.main['comparison']}
+
+    def test_diagnostics_are_complete_unadopted_and_match_csv(self):
+        points=self.diagnostics['tradeoff_points']
+        self.assertEqual(len(points),48)
+        self.assertFalse(self.diagnostics['diagnostic_probes_adopted'])
+        self.assertTrue(self.diagnostics['not_global_frontier'])
+        self.assertEqual(points,read_rows(ROOT/'result/green_dispatch_diagnostics/tradeoff_points.csv',POINT_FIELDS))
+        validate_points(points,self.main)
+        for row in points: self.assertEqual(set(row),POINT_FIELDS)
+
+    def test_missing_probe_mislabeled_adoption_and_changed_winner_rejected(self):
+        for mutation in ('missing','kind','adopted','winner','headway'):
+            with self.subTest(mutation=mutation):
+                points=copy.deepcopy(self.diagnostics['tradeoff_points'])
+                probe=next(r for r in points if r['kind']=='reduction_probe')
+                if mutation=='missing': points.remove(probe)
+                elif mutation=='kind': probe['kind']='baseline'
+                elif mutation=='adopted': probe['diagnostic_only']=False
+                elif mutation=='headway': probe['min_changed_headway_minutes']=1.9
+                else: next(r for r in points if r['kind']=='current')['mean_wait']+=1
+                with self.assertRaises(ValueError): validate_points(points,self.main)
+
+    def test_loads_are_simulated_allowlisted_conserved_and_match_csv(self):
+        self.assertTrue(self.loads['simulation_not_observed'])
+        self.assertEqual(self.loads['evaluation_draws'],300)
+        rows=self.loads['rows']
+        self.assertEqual(len(rows),3336)
+        self.assertEqual(rows,read_rows(ROOT/'result/green_load_profile/beimen_load_profile.csv',LOAD_FIELDS))
+        validate_loads(rows,self.events,self.load_audit['expected_departures'])
+        validate_provenance(self.load_audit,self.diagnostic_audit,rows,self.main)
+        for row in rows: self.assertEqual(set(row),LOAD_FIELDS)
+        with (ROOT/'result/green_load_profile/reconciliation.csv').open(encoding='utf-8-sig') as f:
+            reconciliation=list(csv.DictReader(f))
+        self.assertEqual(len(reconciliation),16)
+
+    def test_missing_departure_or_stale_main_results_cannot_publish(self):
+        with self.assertRaisesRegex(ValueError,'departure set'):
+            validate_loads(self.loads['rows'][1:],self.events,self.load_audit['expected_departures'])
+        for field in ('source_timetable_sha256','source_comparison_sha256','source_audit_sha256','profile_csv_sha256'):
+            with self.subTest(field=field):
+                audit=copy.deepcopy(self.load_audit);audit[field]='0'*64
+                with self.assertRaises(ValueError):
+                    validate_provenance(audit,self.diagnostic_audit,self.loads['rows'],self.main)
+
+    def test_corrupted_capacity_clock_quantiles_and_duplicate_rejected(self):
+        for mutation in ('capacity','clock','conservation','quantile','nonfinite','duplicate'):
+            with self.subTest(mutation=mutation):
+                rows=copy.deepcopy(self.loads['rows']);row=rows[0]
+                if mutation=='capacity': row['capacity_persons']=3000
+                elif mutation=='clock': row['departure_time']='25:00:00'
+                elif mutation=='conservation': row['remaining_capacity_mean']-=10
+                elif mutation=='quantile': row['remaining_capacity_p05']=2221
+                elif mutation=='nonfinite': row['boarded_mean']=float('nan')
+                else: rows.append(copy.deepcopy(row))
+                with self.assertRaises(ValueError): validate_loads(rows,self.events)
+
+    def test_published_downloads_match_the_research_artifacts(self):
+        for published,source in [
+            ('dispatch-tradeoff_points.csv','green_dispatch_diagnostics/tradeoff_points.csv'),
+            ('dispatch-selected_removals.csv','green_dispatch_diagnostics/selected_removals.csv'),
+            ('dispatch-beimen_load_profile.csv','green_load_profile/beimen_load_profile.csv'),
+            ('dispatch-tradeoff.png','green_dispatch_diagnostics/figures/cost_wait_tradeoff.png'),
+            ('dispatch-load-profile.png','green_dispatch_diagnostics/figures/beimen_remaining_capacity.png')]:
+            self.assertEqual((DATA/published).read_bytes(),(ROOT/'result'/source).read_bytes())
+
 
 class DispatchAggregateContractTests(unittest.TestCase):
     def retimed_fixture(self):

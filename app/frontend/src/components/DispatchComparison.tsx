@@ -1,15 +1,92 @@
 import {useEffect, useState} from "react";
-import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis} from "recharts";
 import {Download, RefreshCw, ArrowUpRight} from "lucide-react";
 import {Button} from "@/components/ui/button";
+import {DispatchLoadProfile} from "@/components/DispatchLoadProfile";
 import {publicFile} from "@/lib/research";
-import {dispatchSlotLabel, selectDispatch, type DispatchData, type DispatchSlotCount} from "@/lib/dispatch";
+import {dispatchSlotLabel, selectDispatch, selectDispatchTradeoff, type DispatchData, type DispatchDiagnostics, type DispatchSlotCount, type DispatchTradeoffPoint} from "@/lib/dispatch";
 import "./DispatchComparison.css";
 
 const fmt = (v: number | null | undefined, digits = 0) => v == null ? "—" :
   v.toLocaleString("zh-TW", {maximumFractionDigits: digits});
 const signed = (v: number, digits = 0) => `${v > 0 ? "+" : ""}${fmt(v, digits)}`;
 const report = "https://github.com/shu-ming0808/Statistical-Practice-final/blob/main/result/green_dispatch/report.md";
+
+function DispatchTradeoff({points, weight, onSelect}: {
+  points: DispatchTradeoffPoint[]; weight: number; onSelect: (weight: number) => void;
+}) {
+  const costs = points.map(p => p.operating_change_twd);
+  const waits = points.map(p => p.mean_wait);
+  const costPad = Math.max(1000, (Math.max(...costs) - Math.min(...costs)) * .12);
+  const waitPad = Math.max(.15, (Math.max(...waits) - Math.min(...waits)) * .18);
+  return <section className="dispatch-section dispatch-tradeoff">
+    <div className="dispatch-section-title"><h3 id="dispatch-tradeoff-heading">多花多少，能少等多久</h3><span>成本與候車的取捨</span></div>
+    <p>同一場活動、相同需求情境。λ 方案先由訓練情境選定，再以獨立模擬評估；空心點是另外檢查的減班試算，尚未採用。越往左支出越少，越往下等待越短。</p>
+    {!points.length ? <p>這一場的完整比較尚未提供，不混用其他活動或以 0 代替缺值。</p> : <>
+      <div className="dispatch-tradeoff-options" aria-label="切換成本候車方案">
+        <span className="dispatch-baseline-key"><i/>原班表</span>
+        {points.some(p => p.kind === "reduction_probe") && <span className="dispatch-probe-key"><i/>減班試算（未採用）</span>}
+        {points.filter(p => p.waiting_weight !== null).map(p => <button type="button" key={p.label}
+          aria-pressed={weight === p.waiting_weight} onClick={() => onSelect(p.waiting_weight!)}>
+          {p.label}{weight === p.waiting_weight && <small>目前查看</small>}
+        </button>)}
+      </div>
+      <div className="dispatch-tradeoff-chart" role="img" aria-labelledby="dispatch-tradeoff-heading"
+        aria-describedby="dispatch-tradeoff-description">
+        <ResponsiveContainer width="100%" height="100%"><ScatterChart margin={{top: 34, right: 26, left: 0, bottom: 30}}>
+          <CartesianGrid stroke="#303034" strokeDasharray="3 5"/>
+          <XAxis type="number" dataKey="operating_change_twd" name="可變營運成本差"
+            domain={[Math.min(...costs) - costPad, Math.max(...costs) + costPad]}
+            stroke="#a8a8b1" tick={{fontSize: 11}} tickFormatter={v => fmt(Number(v) / 10000, 1)}
+            label={{value: "相較原班表的可變支出差（萬元）", position: "bottom", offset: 13, fill: "#b6b6bf", fontSize: 11}}/>
+          <YAxis type="number" dataKey="mean_wait" name="平均候車" unit="分" width={44}
+            domain={[Math.max(0, Math.min(...waits) - waitPad), Math.max(...waits) + waitPad]}
+            stroke="#a8a8b1" tick={{fontSize: 11}} tickFormatter={v => fmt(Number(v), 1)}/>
+          <ZAxis range={[110, 110]}/>
+          <Tooltip cursor={{strokeDasharray: "3 3"}} contentStyle={{background: "#202023", border: "1px solid #48484d", color: "#eee"}}
+            formatter={(value, name) => [fmt(Number(value), name === "平均候車" ? 3 : 0), name === "可變營運成本差" ? "可變營運成本差（元）" : name]}/>
+          {points.map(p => <Scatter key={p.label} name={p.label} data={[p]} isAnimationActive={false}
+            className={p.waiting_weight == null ? "dispatch-point-baseline" : "dispatch-point-option"}
+            shape={p.kind === "baseline" ? "diamond" : "circle"}
+            fill={p.kind === "reduction_probe" || p.unserved_mean > 0 ? "#151518" : p.waiting_weight === weight ? "#ecece8" : "#777780"}
+            stroke={p.unserved_mean > 0 ? "#c5a17d" : p.waiting_weight === weight ? "#ecece8" : "#b0b0b9"} strokeWidth={p.waiting_weight === weight ? 3 : 1.5}
+            onClick={() => {if (p.waiting_weight !== null) onSelect(p.waiting_weight);}}>
+            <LabelList dataKey="label" content={({viewBox}) => {
+              if (!viewBox || !("x" in viewBox)) return <g/>;
+              const x = Number(viewBox.x) + Number(viewBox.width ?? 0) / 2;
+              const y = Number(viewBox.y) + Number(viewBox.height ?? 0) / 2;
+              const baseline = p.kind === "baseline";
+              const probe = p.kind === "reduction_probe";
+              const label = probe ? p.label.includes("10") ? "10 分配置" : "8 分配置" : p.label;
+              return <text x={baseline ? x - 12 : probe ? x + 13 : x} y={baseline ? y + 4 : y - 12}
+                textAnchor={baseline ? "end" : probe ? "start" : "middle"}
+                fill={p.waiting_weight === weight ? "#f1f1ed" : "#b7b7bf"} fontSize={12}>{label}</text>;
+            }}/>
+          </Scatter>)}
+        </ScatterChart></ResponsiveContainer>
+      </div>
+      <p id="dispatch-tradeoff-description" className="dispatch-tradeoff-note">縱軸為模型涵蓋旅次平均候車（分鐘），包含綠線背景旅次與可推導轉乘。不同 λ 是時間價值偏好，這些點不是全域最優前緣；圖中沒有把加權總成本當成營運現金支出。</p>
+      <div className="dispatch-table-wrap" tabIndex={0} aria-label="可捲動的成本與候車比較數值">
+        <table><thead><tr><th scope="col">方案</th><th scope="col">可變支出差</th><th scope="col">平均候車</th><th scope="col">增／減／移時</th><th scope="col">期末未完成旅次</th></tr></thead>
+          <tbody>{points.map(p => <tr key={p.label} className={p.waiting_weight === weight ? "dispatch-tradeoff-current" : undefined}>
+            <th scope="row">{p.label}{p.waiting_weight === weight && <small>目前查看</small>}{p.kind === "reduction_probe" && <small>未採用</small>}</th>
+            <td>{signed(p.operating_change_twd)} 元</td><td>{fmt(p.mean_wait, 3)} 分</td>
+            <td>{p.kind === "baseline" ? "原有服務" : `+${p.added}／−${p.removed}／${p.retimed}`}</td><td>{fmt(p.unserved_mean, 2)} 人／情境</td>
+          </tr>)}</tbody></table>
+      </div>
+      {points.some(p => p.unserved_mean > 0) && <p>褐色外框表示仍有未完成旅次，其等待只累計至共同終點，不能當成完整候車時間。</p>}
+      {!points.some(p => p.kind === "reduction_probe") && <p>減班試算尚未載入，目前顯示原班表與已發布的三種權重方案。</p>}
+      {points.some(p => p.kind === "reduction_probe") && <>
+        <p>減班試算能完成模型疏運，但會拉長等待。目前目標計算全線乘客的時間成本；八場背景旅次占約 85.9%，因此即使列車未滿，加密仍可能划算。λ＝1 時，取消一班省約 2,403 元，卻只能抵銷約 736 人分鐘的額外等待。原搜尋也有初篩限制，不能推論所有減班組合都較差。</p>
+        <div className="dispatch-tradeoff-links">
+          <a href={publicFile("dispatch-tradeoff_points.csv")} download><Download size={14}/>下載各場成本與候車比較</a>
+          <a href="https://github.com/shu-ming0808/Statistical-Practice-final/blob/main/result/green_dispatch_diagnostics/report.md" target="_blank" rel="noreferrer">減班診斷、成本公式與資料限制<ArrowUpRight size={14}/></a>
+        </div>
+      </>}
+      <p>這裡的全綠線模型依 OD 旅次推估沿途上下車、逐站更新車上人數，不把每班到北門前的載量固定為 50%。這仍是模型估計，尚未以逐班實測載量校準。</p>
+    </>}
+  </section>;
+}
 
 function DispatchSlotHeatmap({slots}: {slots: DispatchSlotCount[]}) {
   const [activeKey, setActiveKey] = useState("");
@@ -56,6 +133,7 @@ function DispatchSlotHeatmap({slots}: {slots: DispatchSlotCount[]}) {
 
 export function DispatchComparison() {
   const [data, setData] = useState<DispatchData>();
+  const [diagnostics, setDiagnostics] = useState<DispatchDiagnostics>();
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const [event, setEvent] = useState("2024-08-10");
@@ -73,6 +151,11 @@ export function DispatchComparison() {
         if (value.schema_version !== 1 || !value.no_wait_threshold) throw new Error("成果格式不符，請查看完整報告。");
         setData(value);
       }).catch(e => {if (!abort.signal.aborted) setError(e.message);});
+    fetch(publicFile("dispatch-diagnostics.json"), {signal: abort.signal})
+      .then(r => r.ok && r.headers.get("content-type")?.includes("application/json") ? r.json() : undefined)
+      .then((value: DispatchDiagnostics | undefined) => {
+        if (value?.schema_version === 1 && Array.isArray(value.tradeoff_points)) setDiagnostics(value);
+      }).catch(() => { /* The already-published comparison stays available without the optional diagnostic bundle. */ });
     return () => abort.abort();
   }, [reload]);
   if (error) return <div className="empty-state" role="alert"><p>{error}</p>
@@ -109,6 +192,8 @@ export function DispatchComparison() {
       </div>
       <p className="dispatch-caption">成本是可避免的營運支出代理，包含新增列車的假設空車回送。平均等待涵蓋綠線一般背景旅次及可推導紅／橘線轉乘，並非北門散場尖峰平均，也不是全網實測。</p>
       {(r.unserved_mean > 0 || r.baseline_unserved_mean > 0) && <p role="status">部分旅次在共同終點尚未完成，所列平均等待只累計至該終點，不能當成完整候車時間；P95 留空。</p>}
+      <DispatchTradeoff points={selectDispatchTradeoff(data, event, diagnostics)} weight={weight} onSelect={setWeight}/>
+      <DispatchLoadProfile event={event}/>
       <DispatchSlotHeatmap slots={selected.slots}/>
       {candidate && <section className="dispatch-section">
         <div className="dispatch-section-title"><h3>加入 15 分鐘候選，有沒有更合適</h3><span>同一場、同一個 λ</span></div>

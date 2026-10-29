@@ -494,3 +494,5 @@ summary:focus-visible {
     padding: 24px 18px;
   }
 }
+.rail-method-note { margin:0 0 18px; color:#b7b7c0; font-size:12px; line-height:1.9; }
+.rail-method-note a { color:#e1e1e3; text-decoration:underline; text-underline-offset:3px; margin-left:6px; }

@@ -19,9 +19,14 @@
   "outputs": {
     "arrival_queue_comparison.png": "d99e752c1ab57a275a9efb31564d3e71083596eb81b364c26e6c285041307b7d",
     "capacity_sensitivity.png": "a7ad85fc45de1028047ca8509cf7fe35d9750e83728bd23587d98821928122f5",
+    "dispatch-beimen_load_profile.csv": "0de4b220147d42fc068ab8993fdf73ea84e9a7118db67dfbf88e32faebfb3d36",
     "dispatch-candidate_family_comparison.csv": "f265241bc94e69afe7fd4c440a407daf9e9c7fbc754e29dd61899a84f8f22cbb",
     "dispatch-comparison.csv": "b61d86914cd567844ff17921b2755b487ad32623118a5efead6eb8444f030784",
     "dispatch-cost_wait.png": "5a8a29bfe65cdd8511f913e32c161626f8a2b76354aee2424d621c3f821c8063",
+    "dispatch-diagnostics.json": "fa2a56c2de934ed8bd7a80a50ca8604b6a77b45724bee4bbbb1614ee815c4974",
+    "dispatch-load-profile.json": "da70c93a3a0c07cf819fef4656536a2e70be5de89fa9041fc3cfa07ca4f98750",
+    "dispatch-load-profile.png": "cc4890753297b76d35f85742d02dfd08d7e593f66d1da154432bf1286bc9a51f",
+    "dispatch-selected_removals.csv": "9199dc1532917036672e0c96af9570f74027cbf580904dcc2c9405256eb83fa7",
     "dispatch-slot_counts.csv": "583c97ae8dd2164c06f553bf3051163e18ff6cb9edafcea781be445edef73190",
     "dispatch-slot_heatmap.png": "e6647511523c5d43343e553c5e4fda5ea7118f02f5d525d5060087d2e8934514",
     "dispatch-station_impacts.csv": "820f199ef9c4cf92be8cb9dda86df866ae458cee5d1adc3e85df6c3d5c7a84fb",
@@ -29,6 +34,8 @@
     "dispatch-summary.csv": "fb1eb9cb3e10779238d89fe11f5973eec672b5c8a40d7db41093c48b3fdd6985",
     "dispatch-timetable.csv": "5b4f610c246d6a166dc71194a3eedb7fed51d5162d59aa87a50cdd7e0be721e5",
     "dispatch-timetable.png": "600543957281ed7c283fab68e2616f7c8509a8509223e6ffae921446311226ae",
+    "dispatch-tradeoff.png": "9443c9b12cd83e027d39701ca391ccf96958d6e4f44bf21eb5ccb88d441cd7fc",
+    "dispatch-tradeoff_points.csv": "a6b5a0bedfe03d9a536fd3e70973a2e959b1c35f00248a479513a11efa75136a",
     "dispatch.json": "4cba30741ab89fb1998468b35f805efa54108f188cb61756678761fc9d07319a",
     "flows-2017-08-26.csv": "c5b6391aef0290e018b293d0101043ecb2f6dcb4b96d52a69b235f4235cb47ef",
     "flows-2018-08-18.csv": "a770d9a47534bed8b174b3d935af91e2d9106e089ebea7ab687d79b7c87b19de",
@@ -61,5 +68,6 @@
     "rail-replay.json": "028dab101dddb4615ed8c18c7142d82fa9af7c1c4719307f3f6cf374908ca9f2",
     "research.json": "e8e3d29dd8d336d6177a761485929a7da969c511f81fa976e152d258a887d32d"
   },
-  "dispatch_generated_at": "2026-10-28T17:02:09.248600+00:00"
+  "dispatch_generated_at": "2026-10-28T17:02:09.248600+00:00",
+  "dispatch_diagnostics_generated_at": "2026-10-29T02:39:50.626698+00:00"
 }

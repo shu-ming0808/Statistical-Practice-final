@@ -1,8 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {dispatchSlotLabel, selectDispatch} from '../src/lib/dispatch.ts';
+import {dispatchSlotLabel, selectDispatch, selectDispatchTradeoff} from '../src/lib/dispatch.ts';
 const data=JSON.parse(readFileSync(new URL('../public/data/dispatch.json',import.meta.url),'utf8'));
+const diagnostics=JSON.parse(readFileSync(new URL('../public/data/dispatch-diagnostics.json',import.meta.url),'utf8'));
+
+test('published tradeoff has six consistent points for every event, including two reduction-only probes',()=>{
+  for(const event of new Set(data.comparison.map(r=>r.event_date))){
+    const points=selectDispatchTradeoff(data,event,diagnostics);
+    assert.equal(points.length,6,event);
+    assert.ok(points.every(p=>p.event_date===event));
+    for(const point of points){
+      const source=diagnostics.tradeoff_points.find(p=>p.event_date===event && p.kind===point.kind &&
+        (point.kind==='reduction_probe'?p.scenario_id===point.scenario_id:p.waiting_weight===point.waiting_weight));
+      assert.ok(source);
+      assert.ok(Math.abs(point.mean_wait-source.mean_wait)<1e-8);
+      assert.ok(Math.abs(point.operating_change_twd-source.operating_change_twd)<1e-6);
+      assert.equal(point.services,source.services);
+    }
+    const probes=points.filter(p=>p.kind==='reduction_probe');
+    assert.equal(probes.length,2);
+    assert.ok(probes.every(p=>p.waiting_weight===null && p.removed>0 && p.operating_change_twd<0));
+  }
+});
 
 test('each event/weight resolves its own comparison, four stations, and timetable',()=>{
   for(const row of data.comparison){
@@ -101,4 +121,54 @@ test('weight totals use the same eight events, not mixed comparisons',()=>{
     assert.equal(rows.reduce((s,r)=>s+r.removed,0),total.removed);
     assert.ok(Math.abs(rows.reduce((s,r)=>s+r.operating_change_twd,0)-total.operating_change_twd)<1e-4);
   }
+});
+
+test('cost-wait comparison uses one common baseline and all preferences for the selected event',()=>{
+  for (const event of new Set(data.comparison.map(r=>r.event_date))) {
+    const rows=data.comparison.filter(r=>r.event_date===event).sort((a,b)=>a.waiting_weight-b.waiting_weight);
+    const points=selectDispatchTradeoff(data,event);
+    assert.equal(points.length,rows.length+1);
+    assert.ok(points.every(p=>p.event_date===event));
+    assert.equal(points[0].kind,'baseline');
+    assert.equal(points[0].operating_change_twd,0);
+    assert.equal(points[0].mean_wait,rows[0].baseline_mean_wait);
+    assert.equal(points[0].waiting_weight,null);
+    for (const [i,row] of rows.entries()) {
+      const point=points[i+1];
+      assert.equal(point.waiting_weight,row.waiting_weight);
+      assert.equal(point.operating_change_twd,row.operating_change_twd);
+      assert.equal(point.mean_wait,row.optimized_mean_wait);
+      assert.equal(point.services,row.optimized_services);
+    }
+  }
+  assert.deepEqual(selectDispatchTradeoff(data,'1900-01-01'),[]);
+});
+
+test('incomplete or inconsistent comparisons are not plotted as a common cost-wait experiment',()=>{
+  const event=data.comparison[0].event_date;
+  const rows=data.comparison.filter(r=>r.event_date===event);
+  assert.deepEqual(selectDispatchTradeoff({...data,comparison:rows.slice(1)},event),[]);
+  assert.deepEqual(selectDispatchTradeoff({...data,comparison:[...rows,rows[0]]},event),[]);
+  assert.deepEqual(selectDispatchTradeoff({...data,comparison:rows.map((r,i)=>i? r:{...r,baseline_mean_wait:r.baseline_mean_wait+1})},event),[]);
+  assert.deepEqual(selectDispatchTradeoff({...data,comparison:rows.map((r,i)=>i? r:{...r,optimized_mean_wait:null})},event),[]);
+});
+
+test('reduction probes stay separate from adopted preferences and preserve incomplete-wait status',()=>{
+  const event=data.comparison[0].event_date;
+  const base={event_date:event,scenario_id:'fixed-8',label:'8 分鐘試算',kind:'reduction_probe',waiting_weight:null,
+    services:80,added:0,removed:45,retimed:40,operating_change_twd:-100000,mean_wait:5,
+    unserved_mean:0,max_train_load:2220,headway_valid:true};
+  const diagnostics={schema_version:1,generated_at:'2026-10-29',tradeoff_points:[
+    base,{...base,scenario_id:'fixed-10',label:'10 分鐘試算',unserved_mean:12},
+    {...base,event_date:'1900-01-01',scenario_id:'wrong-event'},
+    {...base,kind:'current',scenario_id:'diagnostic-current',mean_wait:999},
+  ]};
+  const points=selectDispatchTradeoff(data,event,diagnostics);
+  assert.equal(points.length,6);
+  assert.deepEqual(points.slice(0,4),selectDispatchTradeoff(data,event));
+  assert.ok(points.slice(4).every(p=>p.waiting_weight===null && p.kind==='reduction_probe'));
+  assert.equal(points[4].operating_change_twd,-100000);
+  assert.equal(points[5].unserved_mean,12);
+  assert.equal(selectDispatchTradeoff(data,event,{...diagnostics,schema_version:999}).length,4);
+  assert.equal(selectDispatchTradeoff(data,event,{...diagnostics,tradeoff_points:[{...base,max_train_load:3000}]}).length,4);
 });

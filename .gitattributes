@@ -4,6 +4,8 @@ app/frontend/public/data/* -text whitespace=cr-at-eol
 result/dispatch_cost/** -text whitespace=cr-at-eol
 result/metro_distances/** -text whitespace=cr-at-eol
 result/green_dispatch/** -text whitespace=cr-at-eol
+result/green_dispatch_diagnostics/** -text whitespace=cr-at-eol
+result/green_load_profile/** -text whitespace=cr-at-eol
 result/linear_sensitivity/** -text whitespace=cr-at-eol
 # Matplotlib emits trailing spaces inside SVG path coordinates.
 *.svg whitespace=-blank-at-eol
