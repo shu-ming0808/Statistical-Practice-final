@@ -166,6 +166,8 @@ MySQL 沿用 128 MiB buffer pool，DuckDB 專案設定為 4 執行緒／2 GB；�
 [逐次耗時](result/duckdb_benchmark/timings.csv)／[量測程式](scripts/benchmark_duckdb_mysql.py)
 <!-- duckdb-benchmark:end -->
 
+北門九場預測尖峰小時的分鐘權重倍率、雙向誤差與小時 MAE 分析，連同圖表、逐場資料及程式，見[分鐘權重倍率整合報告](result/minute_weight_integrated_report/integrated_report.md)。
+
 ## 候車與網站
 
 北門為高運量六節編組。保留 1,134 組「均勻／寬峰／集中峰 × 剩餘容量等」候車情境與四站官方班表。最大容量 2,220 人不等於本站可上車人數；進站前背景載量仍是假設，離站才加入上車人數。同方向有滯留時必已用滿可用容量。
