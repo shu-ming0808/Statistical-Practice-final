@@ -97,6 +97,6 @@ def write_slot_outputs(out, timetable, comparison, reference_weight):
     ax.spines[['top', 'right', 'left', 'bottom']].set_visible(False)
     bar = fig.colorbar(im, ax=ax, orientation='horizontal', shrink=.5, pad=.06)
     bar.set_label('藍：該時段班數較少　灰：相同　橘：較多；跨時段移時也會造成正負格')
-    fig.savefig(out / 'figures' / 'slot_heatmap.png', dpi=160, bbox_inches='tight')
+    fig.savefig(out / 'figures' / 'slot_heatmap.png', dpi=160, bbox_inches='tight', transparent=True)
     plt.close(fig)
     return slots

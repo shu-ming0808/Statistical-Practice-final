@@ -278,7 +278,7 @@ def plots(out, joined, hourly, primary):
     ax.invert_yaxis(); ax.set_xlabel("18–24 時起站 OD 人次")
     ax.set_title("北門：已舉行活動的晚間總量與歷史基準\n* 基準不足 2 日，僅描述、未納入主要檢定",loc="left")
     ax.legend(loc="lower right"); ax.grid(axis="x",alpha=.15)
-    fig.savefig(out/"01_beimen_event_totals.png"); plt.close(fig)
+    fig.savefig(out/"01_beimen_event_totals.png", transparent=True); plt.close(fig)
     eligible_dates=set(joined.loc[joined.station.eq("北門")&joined.eligible,"event_date"])
     profile=hourly.loc[hourly.event_date.isin(eligible_dates)&hourly.origin_complete.eq(1)].copy()
     profile_stats=profile.groupby(["station","hour"]).origin_count.agg(n="count",median="median",q25=lambda x:x.quantile(.25),q75=lambda x:x.quantile(.75)).reset_index()
@@ -291,7 +291,7 @@ def plots(out, joined, hourly, primary):
         ax.set_title(station); ax.set_xticks(range(18,24)); ax.grid(alpha=.16)
         ax.set_xlabel("來源時段"); ax.set_ylabel("起站 OD 人次")
     fig.suptitle(f"四站同場配對描述（{len(eligible_dates)} 場）｜中位數與四分位範圍，非信賴區間")
-    fig.savefig(out/"02_station_hour_profiles.png"); plt.close(fig)
+    fig.savefig(out/"02_station_hour_profiles.png", transparent=True); plt.close(fig)
     fig,axes=plt.subplots(1,2,figsize=(11,4.7),layout="constrained")
     stats.probplot(primary.log1p_difference.to_numpy(),dist="norm",plot=axes[0])
     axes[0].set_title("主要對比的常態 Q–Q 圖"); axes[0].set_xlabel("理論常態分位數"); axes[0].set_ylabel("事件 log1p 差")
@@ -299,7 +299,7 @@ def plots(out, joined, hourly, primary):
     axes[1].axhline(0,color="#999",linestyle="--")
     axes[1].set_title("各事件 log1p 差與年份"); axes[1].set_ylabel("log(觀測+1) - log(基準+1)")
     axes[1].tick_params(axis="x",rotation=30)
-    fig.savefig(out/"03_contrast_diagnostics.png"); plt.close(fig)
+    fig.savefig(out/"03_contrast_diagnostics.png", transparent=True); plt.close(fig)
 
 
 def run(args):

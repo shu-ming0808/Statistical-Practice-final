@@ -142,8 +142,8 @@ def build_chart(records: list[dict], target: Path, font: Path) -> None:
     for y, line in zip((0.157, 0.124, 0.091, 0.052), notes):
         fig.text(0.075, y, line, fontsize=11.3, color=muted, va="top")
     # Keep the slide ratio and all source/missingness notes in the export.
-    fig.savefig(target.with_suffix(".png"), dpi=200, facecolor=bg)
-    fig.savefig(target.with_suffix(".svg"), facecolor=bg)
+    fig.savefig(target.with_suffix(".png"), dpi=200, transparent=True)
+    fig.savefig(target.with_suffix(".svg"), transparent=True)
     plt.close(fig)
 
 
@@ -229,8 +229,8 @@ def build_smooth_area(records: list[dict], target: Path, font: Path) -> None:
     ]
     for y, line in zip((0.143, 0.103, 0.063), notes):
         fig.text(0.075, y, line, fontsize=11.3, color=muted, va="top")
-    fig.savefig(target.with_suffix(".png"), dpi=200, facecolor=bg)
-    fig.savefig(target.with_suffix(".svg"), facecolor=bg)
+    fig.savefig(target.with_suffix(".png"), dpi=200, transparent=True)
+    fig.savefig(target.with_suffix(".svg"), transparent=True)
     plt.close(fig)
     print("Verified smooth anchors, nonnegative areas and noncrossing boundaries.")
 

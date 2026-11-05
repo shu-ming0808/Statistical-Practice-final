@@ -241,7 +241,7 @@ def plots(out, contrast_matrix, shares, time_df):
     ax.set_ylabel("log(活動觀測總量+1) - log(本站基準總量+1)")
     ax.set_title(f"四站增幅的同場比較（{len(contrast_matrix)} 場）\n每條灰線代表同一場活動；高度比較相對本站基準的增幅", loc="left")
     ax.grid(axis="y", alpha=.15); ax.legend()
-    fig.savefig(out/"01_paired_station_contrasts.png"); plt.close(fig)
+    fig.savefig(out/"01_paired_station_contrasts.png", transparent=True); plt.close(fig)
 
     s = shares.loc[shares.eligible]
     fig, axes = plt.subplots(2,2, figsize=(10,7), sharex=True, sharey=True, layout="constrained")
@@ -258,7 +258,7 @@ def plots(out, contrast_matrix, shares, time_df):
         ax.yaxis.set_major_formatter(PercentFormatter(1)); ax.grid(alpha=.15)
     axes[0,0].legend()
     fig.suptitle("同一組可比活動的逐時占比\n線為各場占比的中位數；陰影為四分位範圍，非信賴區間")
-    fig.savefig(out/"02_hourly_share_profiles.png"); plt.close(fig)
+    fig.savefig(out/"02_hourly_share_profiles.png", transparent=True); plt.close(fig)
 
     b = time_df.loc[time_df.station.eq("北門") & time_df.eligible].sort_values("event_date")
     fig, ax = plt.subplots(figsize=(9,6.5), layout="constrained")
@@ -271,7 +271,7 @@ def plots(out, contrast_matrix, shares, time_df):
     ax.xaxis.set_major_formatter(PercentFormatter(1)); ax.set_xlabel("21–23 時三個分箱合計／18–23 時六個分箱合計")
     ax.set_title("北門：晚間人流是否更集中在 21:00–24:00？\n同場配對的來源時段占比；不是實際散場時間", loc="left")
     ax.grid(axis="x",alpha=.15); ax.legend(loc="lower right")
-    fig.savefig(out/"03_beimen_late_share_pairs.png"); plt.close(fig)
+    fig.savefig(out/"03_beimen_late_share_pairs.png", transparent=True); plt.close(fig)
 
 
 def self_test():

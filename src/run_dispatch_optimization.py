@@ -144,7 +144,7 @@ def main():
     axes[0].yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1))
     fig.suptitle(f'北門加開班次與候車（最小間隔 {main_sep} 分；以獨立 {cfg["evaluation_draws_per_event"]} 次情境評估）\n'
                  '紅線＝不加開時超過 5% 門檻的場次；灰線＝其他場次。情境假設，非實際可行班表',fontsize=11)
-    fig.savefig(out/'figures/extra_trains_tradeoff.png');plt.close(fig)
+    fig.savefig(out/'figures/extra_trains_tradeoff.png', transparent=True);plt.close(fig)
 
     capacity_text=('與該情境的一般班次剩餘空間相同（保守；空車折返可能更多）' if extra=='same_as_regular' else
                    f'固定為 2,220 人的 {extra["remaining_fraction"]:.0%}（接近空車的樂觀界線；往新店方向自松山發車途經多站，未必成立）')

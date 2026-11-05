@@ -54,7 +54,7 @@ def report(out,cfg,update_readme=False):
     handles,labels=axes[0].get_legend_handles_labels()
     fig.legend(handles,labels,loc='lower center',bbox_to_anchor=(.5,-.06),ncol=2,frameon=False)
     fig.suptitle('松山新店線 18:00–23:00｜λ=1｜獨立 300 次模擬評估',fontsize=13)
-    fig.savefig(figdir/'cost_wait.png',bbox_inches='tight');plt.close(fig)
+    fig.savefig(figdir/'cost_wait.png',bbox_inches='tight', transparent=True);plt.close(fig)
     focus=stations[(stations.waiting_weight==cfg['reference_weight'])&(stations.station!='其他旅次')]
     fig,axes=plt.subplots(2,2,figsize=(12,7),layout='constrained')
     for ax,(station,g) in zip(axes.ravel(),focus.groupby('station',sort=False)):
@@ -65,7 +65,7 @@ def report(out,cfg,update_readme=False):
     handles,labels=axes[0,0].get_legend_handles_labels()
     fig.legend(handles,labels,loc='lower center',bbox_to_anchor=(.5,-.04),ncol=2,frameon=False)
     fig.suptitle('四站相關旅次的綠線候車與可推導紅／橘線轉乘等待',fontsize=13)
-    fig.savefig(figdir/'station_impacts.png',bbox_inches='tight');plt.close(fig)
+    fig.savefig(figdir/'station_impacts.png',bbox_inches='tight', transparent=True);plt.close(fig)
     case='2024-08-10' if '2024-08-10' in set(main.event_date) else main.event_date.iloc[0]
     rows=timetable[(timetable.event_date==case)&(timetable.waiting_weight==cfg['reference_weight'])]
     fig,ax=plt.subplots(figsize=(12,4),layout='constrained')
@@ -76,7 +76,7 @@ def report(out,cfg,update_readme=False):
             ax.vlines(tt,i+shift-.08,i+shift+.08,color=color,label=label if i==0 else None)
     ax.set_yticks([.14,1.14],['往松山','往新店']);ax.set_xticks(range(1080,1381,30),[f'{t//60:02}:{t%60:02}' for t in range(1080,1381,30)])
     ax.set_xlim(1075,1385);ax.set_title(case+' 北門離站時刻｜上下對照原班表與新班表');ax.legend(frameon=False,loc='center right')
-    ax.spines[['top','right']].set_visible(False);fig.savefig(figdir/'timetable.png');plt.close(fig)
+    ax.spines[['top','right']].set_visible(False);fig.savefig(figdir/'timetable.png', transparent=True);plt.close(fig)
     assumptions=[
         '只調整北門離站落在 18:00（含）至 23:00（不含）的松山—新店完整服務；其他時段與紅／橘線班表固定。',
         '四站採封存年度四站 XGBoost 預測；各場誤差只抽較早活動。其他 OD 採前 56 日內最多六個同星期、非活動日均值。歷史發布時點未全面核實。',

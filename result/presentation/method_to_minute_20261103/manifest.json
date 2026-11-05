@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-03",
+  "refit": false,
+  "figures": [
+    {
+      "file": "P09_GAM年內日期平滑曲線.png",
+      "sources": [
+        "result/forecast/tables/gam_components_2026.csv"
+      ],
+      "note": "只畫既有中心化部分預測貢獻，不重新擬合",
+      "sha256": "32500bade38563cffb09c4f8cfde4de648390954d0340de4475072c1529f3b89",
+      "source_sha256": {
+        "result/forecast/tables/gam_components_2026.csv": "e7d67b7c7341a2db906f8d362b345069159f262d440ff539ca81a3b14e11beea"
+      }
+    },
+    {
+      "file": "P10_XGBoost特徵使用情形.png",
+      "sources": [
+        "result/forecast/tables/tree_importance_2026.csv"
+      ],
+      "note": "2026 折訓練重要度，不宣稱因果",
+      "sha256": "286c97ac8a0ca6f1d05c95bb9a7c33b8367f64a4c54a8902669a35e4e3e06b5b",
+      "source_sha256": {
+        "result/forecast/tables/tree_importance_2026.csv": "bc93c13ca3b5026c7d0f48cef13b109295bf809d3daa978692b28e116b15e904"
+      }
+    },
+    {
+      "file": "P15_四模型MAE與RMSE.png",
+      "sources": [
+        "result/forecast/tables/metrics.csv"
+      ],
+      "note": "不混入隊友重新調參程序",
+      "sha256": "2d9bae4aafb8234f1a98e98940b899fb321e6cf4f8d826769ffc9c44ac3b507b",
+      "source_sha256": {
+        "result/forecast/tables/metrics.csv": "1e0a4ec50f42ff26138c0b7dec30445ebca1ebce20a53ae377e9baffc8bcf0ce"
+      }
+    },
+    {
+      "file": "P16_各場最高時段實際與預測.png",
+      "sources": [
+        "result/forecast/tables/actual_peaks.csv"
+      ],
+      "note": "同一個實際最高時段配對比較",
+      "sha256": "7c7f386514c7b979b0e9a4f5aaa32b5db079608053360b038c0b47bf509a5561",
+      "source_sha256": {
+        "result/forecast/tables/actual_peaks.csv": "d6e62c74a4e97638c4df5ce4cefc3f3f62ef4b9f578a4d1379fe3a09a2744907"
+      }
+    },
+    {
+      "file": "P05_變數相關熱力圖.png",
+      "sources": [
+        "result/forecast/figures/feature_correlations.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "c9e40281db1897a9f09216c6fe4b71768f9f1a6b9c68f8de42d3c2619152c287",
+      "source_sha256": {
+        "result/forecast/figures/feature_correlations.png": "c9e40281db1897a9f09216c6fe4b71768f9f1a6b9c68f8de42d3c2619152c287"
+      }
+    },
+    {
+      "file": "P13_Lasso懲罰路徑.png",
+      "sources": [
+        "result/linear_sensitivity/figures/lasso_penalty_sensitivity.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "bce30f5b43375a4c3dd79a5b6985de30c38719e74536a74302c7db819cde06fd",
+      "source_sha256": {
+        "result/linear_sensitivity/figures/lasso_penalty_sensitivity.png": "bce30f5b43375a4c3dd79a5b6985de30c38719e74536a74302c7db819cde06fd"
+      }
+    },
+    {
+      "file": "P19_分鐘到達與候車隊伍.png",
+      "sources": [
+        "result/queue_dispatch_v1/figures/arrival_queue_comparison.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "ec023f6970d48d629b0789007cb4106c1d954190cd32085c735dada81c610611",
+      "source_sha256": {
+        "result/queue_dispatch_v1/figures/arrival_queue_comparison.png": "ec023f6970d48d629b0789007cb4106c1d954190cd32085c735dada81c610611"
+      }
+    },
+    {
+      "file": "P20_分鐘情境與剩餘容量.png",
+      "sources": [
+        "result/queue_dispatch_v1/figures/capacity_sensitivity.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "7d43688cd6c35c946c01da7637ad3307ad3cda064c80042bfb8f519b41ae47b8",
+      "source_sha256": {
+        "result/queue_dispatch_v1/figures/capacity_sensitivity.png": "7d43688cd6c35c946c01da7637ad3307ad3cda064c80042bfb8f519b41ae47b8"
+      }
+    },
+    {
+      "file": "P21_候車情境區間.png",
+      "sources": [
+        "result/queue_uncertainty_v1/figures/event_intervals.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "09ac08c3257ad4f7c4c28d0c3f4f4ab972bd8a7e41f2ba0f762c39c627254bb6",
+      "source_sha256": {
+        "result/queue_uncertainty_v1/figures/event_intervals.png": "09ac08c3257ad4f7c4c28d0c3f4f4ab972bd8a7e41f2ba0f762c39c627254bb6"
+      }
+    },
+    {
+      "file": "備用_預測誤差分布.png",
+      "sources": [
+        "result/forecast/figures/prediction_diagnostics.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "13fede9b878c08f7fa32ef248261f1035003fe479a03abe1cf3af85cb7e4cc83",
+      "source_sha256": {
+        "result/forecast/figures/prediction_diagnostics.png": "13fede9b878c08f7fa32ef248261f1035003fe479a03abe1cf3af85cb7e4cc83"
+      }
+    },
+    {
+      "file": "備用_九場逐時走勢.png",
+      "sources": [
+        "result/forecast/figures/hourly_profiles.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "84eeb51a7d007f8bfd9a933d9d605de1710f84de650565e1b57a0b43580d5749",
+      "source_sha256": {
+        "result/forecast/figures/hourly_profiles.png": "84eeb51a7d007f8bfd9a933d9d605de1710f84de650565e1b57a0b43580d5749"
+      }
+    },
+    {
+      "file": "備用_分鐘假設敏感度.png",
+      "sources": [
+        "result/queue_uncertainty_v1/figures/factor_effects.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "0de3c1a06bb296bd11ecfa0341d3711bbbc8e21f6856affa70917cea731b31e2",
+      "source_sha256": {
+        "result/queue_uncertainty_v1/figures/factor_effects.png": "0de3c1a06bb296bd11ecfa0341d3711bbbc8e21f6856affa70917cea731b31e2"
+      }
+    }
+  ]
+}

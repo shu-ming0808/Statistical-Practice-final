@@ -325,7 +325,7 @@ def write_comparison_and_report(root,private,frozen,out,report_path=None):
     axes[2].set_ylabel("整年留出 MAE（log1p尺度）");axes[2].set_title("回顧性比較\n訓練含未來年份，非forecasting");axes[2].legend(fontsize=8)
     for ax in axes:ax.set_xticks(x,labels);ax.grid(axis="y",alpha=.15)
     fig.suptitle("沿用既有方法：擴充樣本與基準規則敏感度分開解讀")
-    fig.savefig(out/"comparison_overview.png",dpi=160);plt.close(fig)
+    fig.savefig(out/"comparison_overview.png",dpi=160, transparent=True);plt.close(fig)
     b,s,w=summaries["2026-10-07 四週19場"];b8,s8,w8=summaries["2026-10-07 八週21場（敏感度）"]
     f=b["primary_F_test"];fy=b["year_equal_weight_sensitivity"];reg=w["baseline_regression"]
     north=next(r for r in s["station_descriptive"] if r["station"]=="北門")

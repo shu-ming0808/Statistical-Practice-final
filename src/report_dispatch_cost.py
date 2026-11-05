@@ -57,7 +57,7 @@ def detailed_results(cfg, out, chosen, candidates):
     ax.legend(frameon=False,loc='upper left',fontsize=9)
     ax.set_ylim(0,max(12,ref.baseline_p95_exceed_share.max()*100+9))
     fig.suptitle('降低加權總成本，不保證消除長時間候車\n120 秒、一般剩餘容量、單程服務里程、λ=1；300 次獨立模擬評估',fontsize=11)
-    fig.savefig(out/'figures/p95_risk_comparison.png',dpi=170);plt.close(fig)
+    fig.savefig(out/'figures/p95_risk_comparison.png',dpi=170, transparent=True);plt.close(fig)
     lines=[f"**完整比較結果。**{chosen.event_date.nunique()} 場 × {chosen.min_separation.nunique()} 種班距 × {chosen.capacity_case.nunique()} 種容量 × {chosen.km_per_train.nunique()} 種里程成本 × {chosen.waiting_weight.nunique()} 種候車權重，共 {len(chosen)} 組選擇；每組比較 0–{cfg['max_extra_trains']} 班，共 {len(candidates):,} 筆成本比較。最早一場缺過去誤差而跳過。", '',
            f"**下表條件：**120 秒、加班車剩餘容量同一般列車、僅計單程服務 {cfg['reference_km_per_train']:g} km、$\\lambda={cfg['reference_waiting_cost_weight']:g}$。", '',
            '| 活動 | 增班 | 總等待降低 | 平均候車中位數：原→新（分） | P95 > 10 分情境：原→新 | 加權總成本差（元） |',

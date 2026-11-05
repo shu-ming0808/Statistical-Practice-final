@@ -111,14 +111,14 @@ def main():
     axes[1].set_ylabel('候車人數');axes[1].set_xlabel('時刻（24 表示次日 00:00）')
     for ax in axes:ax.grid(alpha=.18);ax.set_xlim(18,24.85)
     fig.suptitle('北門｜2024-08-10 預測需求 × 2026-08-30 一般週六班表\n情境假設示範，非活動當日實測候車',fontsize=12)
-    fig.savefig(out/'figures/arrival_queue_comparison.png');plt.close(fig)
+    fig.savefig(out/'figures/arrival_queue_comparison.png', transparent=True);plt.close(fig)
     fig,ax=plt.subplots(figsize=(9,5),layout='constrained')
     for shape in cfg['shapes']:
         g=summary[summary['shape']==shape].sort_values('remaining_fraction')
         ax.plot(g.remaining_fraction*100,g.mean_wait_minutes,marker='o',color=COLORS[shape],label=LABELS[shape])
         for r in g.itertuples():ax.annotate(f'{r.mean_wait_minutes:.2f}',(r.remaining_fraction*100,r.mean_wait_minutes),xytext=(5,-13 if shape=='uniform' else 6),textcoords='offset points',fontsize=9,color=COLORS[shape])
     ax.set(xlabel='每班剩餘空間／2,220 人上限（%）',ylabel='平均候車（分鐘）',title='北門九場預測需求：每場等權平均候車情境\n方向各 50%、峰中心在該小時第 30 分鐘；不是已校準的實際等候時間')
-    ax.set_xticks([25,50,75]);ax.grid(alpha=.2);ax.legend();fig.savefig(out/'figures/capacity_sensitivity.png');plt.close(fig)
+    ax.set_xticks([25,50,75]);ax.grid(alpha=.2);ax.legend();fig.savefig(out/'figures/capacity_sensitivity.png', transparent=True);plt.close(fig)
     example=cohort[(cohort.event_date==cfg['display_event'])&(cohort.remaining_fraction==.5)]
     lines=['# 北門候車情境與四站營運資料（第一版）','',
     '**已執行：固定 V14 四站 XGBoost 的北門預測，沒有重新訓練。這是現行一般班表的壓力情境，不是歷史活動候車重建。**','',

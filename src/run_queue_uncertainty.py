@@ -173,7 +173,7 @@ def main():
     axes[0].set_yticks(order.index,order.event_date)
     fig.suptitle(f'北門九場：每場 {cfg["draws_per_event"]:,} 次情境的 5–95% 區間（點＝中位數）\n'
                  '情境混合區間，不是已校準的實際候車預測區間',fontsize=11)
-    fig.savefig(out/'figures/event_intervals.png');plt.close(fig)
+    fig.savefig(out/'figures/event_intervals.png', transparent=True);plt.close(fig)
 
     fig,axes=plt.subplots(1,3,figsize=(12,4.6),sharey=True,layout='constrained')
     panels=[('shape',[s for s in shapes],[LABELS[s] for s in shapes],'到達形狀'),
@@ -187,7 +187,7 @@ def main():
         ax.set_xticks(range(1,len(ticks)+1),ticks);ax.set_title(title);ax.grid(axis='y',alpha=.2)
     axes[0].set_ylabel('P95 候車（分鐘）')
     fig.suptitle('哪個假設最影響 P95 候車？（箱＝四分位，鬚＝5–95%；九場所有情境合併）',fontsize=11)
-    fig.savefig(out/'figures/factor_effects.png');plt.close(fig)
+    fig.savefig(out/'figures/factor_effects.png', transparent=True);plt.close(fig)
 
     overall={m:interval(draws[m]).to_dict() for m in metrics}
     lines=['# 北門候車不確定性模擬（第一版）','',

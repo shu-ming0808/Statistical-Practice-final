@@ -34,7 +34,7 @@ def report():
         ax.grid(axis='y',color='#eeeeee');ax.spines[['top','right']].set_visible(False)
     fig.suptitle('同一需求下的成本與候車取捨｜每場獨立 300 次模擬',fontsize=16)
     fig.supxlabel('空心菱形＝額外減班試算，未採用；各點是有限方案比較，不是全域最優前緣。',fontsize=11)
-    fig.savefig(figdir/'cost_wait_tradeoff.png',bbox_inches='tight');plt.close(fig)
+    fig.savefig(figdir/'cost_wait_tradeoff.png',bbox_inches='tight', transparent=True);plt.close(fig)
 
     case='2024-08-10'; subset=loads[(loads.event_date==case)&loads.within_decision_window]
     fig,axes=plt.subplots(1,2,figsize=(13,4.7),layout='constrained')
@@ -52,7 +52,7 @@ def report():
     axes[0].legend(frameon=False,fontsize=9,loc='lower left')
     fig.suptitle(case+'｜OD 推估逐班剩餘空間，並非實測載量',fontsize=14)
     fig.supxlabel('線＝300 次情境平均；色帶＝5–95 百分位，非信賴區間。原班表與 λ=1 使用相同需求情境。',fontsize=10)
-    fig.savefig(figdir/'beimen_remaining_capacity.png',bbox_inches='tight');plt.close(fig)
+    fig.savefig(figdir/'beimen_remaining_capacity.png',bbox_inches='tight', transparent=True);plt.close(fig)
 
     n=float(drivers.modeled_passengers.sum()); background=float(drivers.background_passengers.sum()/n)
     total=[]

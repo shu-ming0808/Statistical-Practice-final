@@ -125,9 +125,9 @@
   ],
   "outputs": {
     "candidates.csv": "c737f29120e4e085fb759e0a7457fac90f4295fc5a99fc4749a2ea7d984abbfa",
-    "figures/cost_wait_comparison.png": "88d6336c3102eaf1071548056725b016f4f7503af730b8ea6dd629a4668f8ec2",
-    "figures/p95_risk_comparison.png": "e621b42b68a472bcb7d326dde7aaaa688138859027559b8952bdc8709d55ac88",
-    "figures/weight_sensitivity.png": "05a93afed0dd4a186d8bdd6b77e093a2514326b112c3ad4d7c5e9ef8ec044117",
+    "figures/cost_wait_comparison.png": "34af06f1475b8856546982a7bafceb15ca53b9d4eb2614397d02603075a9ed69",
+    "figures/p95_risk_comparison.png": "a4d101dd96b7c58551d2d79f67bda0c899e8264938030bf743863b97e3eab951",
+    "figures/weight_sensitivity.png": "28d9fffdfc94c56ee7cd805e4dc3d3d6e16f1406aa3ea248f03e07da8657796b",
     "plans.csv": "f0e835c4522a46cc970b1ffb2c4521d986eb679f3c4649d1c87d9485e05f38e0",
     "reference_summary.csv": "a2f5b4fca19c15b793c55aae0f3a05571e1013e1410ed7d083026e01b825c6c0",
     "reference_timetable.csv": "3ebf3f063828727f669bb95354f476762124e5cdb1ea06fb18de6fb8b717999d",

@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-29",
+  "refit": false,
+  "figures": [
+    {
+      "file": "P09_凍結模型_MAE與RMSE.png",
+      "sources": [
+        "result/forecast/tables/metrics.csv"
+      ],
+      "note": "原模型指標；非新增模型實驗",
+      "sha256": "c65f924bc7c71317382718f177be46ef56d962c2a2bd4e57e1e9459107df204b",
+      "source_sha256": {
+        "result/forecast/tables/metrics.csv": "1e0a4ec50f42ff26138c0b7dec30445ebca1ebce20a53ae377e9baffc8bcf0ce"
+      }
+    },
+    {
+      "file": "P10_每場實際尖峰與預測.png",
+      "sources": [
+        "result/forecast/tables/actual_peaks.csv"
+      ],
+      "note": "同一實際尖峰時段配對比較；非各自最大值",
+      "sha256": "8f32204c607ec091a01a783b3802579ab4c15f0cecac4fc631ab19f4f14d9c53",
+      "source_sha256": {
+        "result/forecast/tables/actual_peaks.csv": "d6e62c74a4e97638c4df5ce4cefc3f3f62ef4b9f578a4d1379fe3a09a2744907"
+      }
+    },
+    {
+      "file": "P14_單場15分鐘班數熱圖.png",
+      "sources": [
+        "result/green_dispatch/slot_counts.csv",
+        "result/green_dispatch/comparison.csv"
+      ],
+      "note": "節錄 2024-07-31，λ=1；未修改班表",
+      "sha256": "c47d699f1414327e01c22f984f6b2cdb27b18a36413da011f4172430fa36d14b",
+      "source_sha256": {
+        "result/green_dispatch/slot_counts.csv": "583c97ae8dd2164c06f553bf3051163e18ff6cb9edafcea781be445edef73190",
+        "result/green_dispatch/comparison.csv": "b61d86914cd567844ff17921b2755b487ad32623118a5efead6eb8444f030784"
+      }
+    },
+    {
+      "file": "P15_八場成本候車取捨.png",
+      "sources": [
+        "result/green_dispatch_diagnostics/tradeoff_summary.csv"
+      ],
+      "note": "只重繪既有 300 次評估彙總；不據評估重新選方案",
+      "sha256": "e496968e1b80f084d28712c5427472e4f5034552f8e443f6f9579852b224e73b",
+      "source_sha256": {
+        "result/green_dispatch_diagnostics/tradeoff_summary.csv": "44b8ab4f2835175413d3d0afb1d519e5e3abd6d4ddcf313fba83671a4e65d84e"
+      }
+    },
+    {
+      "file": "P08_Lasso懲罰敏感度.png",
+      "sources": [
+        "result/linear_sensitivity/figures/lasso_penalty_sensitivity.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "bce30f5b43375a4c3dd79a5b6985de30c38719e74536a74302c7db819cde06fd",
+      "source_sha256": {
+        "result/linear_sensitivity/figures/lasso_penalty_sensitivity.png": "bce30f5b43375a4c3dd79a5b6985de30c38719e74536a74302c7db819cde06fd"
+      }
+    },
+    {
+      "file": "P12_逐班剩餘容量.png",
+      "sources": [
+        "result/green_dispatch_diagnostics/figures/beimen_remaining_capacity.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "d2a95af5bd27ac6434afd1e75c1d21c5fe9d36986f2489b60c8a4b43d5217555",
+      "source_sha256": {
+        "result/green_dispatch_diagnostics/figures/beimen_remaining_capacity.png": "d2a95af5bd27ac6434afd1e75c1d21c5fe9d36986f2489b60c8a4b43d5217555"
+      }
+    },
+    {
+      "file": "備用_特徵相關熱力圖.png",
+      "sources": [
+        "result/forecast/figures/feature_correlations.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "c9e40281db1897a9f09216c6fe4b71768f9f1a6b9c68f8de42d3c2619152c287",
+      "source_sha256": {
+        "result/forecast/figures/feature_correlations.png": "c9e40281db1897a9f09216c6fe4b71768f9f1a6b9c68f8de42d3c2619152c287"
+      }
+    },
+    {
+      "file": "備用_預測誤差分布.png",
+      "sources": [
+        "result/forecast/figures/prediction_diagnostics.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "13fede9b878c08f7fa32ef248261f1035003fe479a03abe1cf3af85cb7e4cc83",
+      "source_sha256": {
+        "result/forecast/figures/prediction_diagnostics.png": "13fede9b878c08f7fa32ef248261f1035003fe479a03abe1cf3af85cb7e4cc83"
+      }
+    },
+    {
+      "file": "備用_四站轉乘影響.png",
+      "sources": [
+        "result/green_dispatch/figures/station_impacts.png"
+      ],
+      "note": "既有圖完整複製，未改數值",
+      "sha256": "87f31beea07b516b9e40373402c40f318212033121a58c2e63a685690ffbec46",
+      "source_sha256": {
+        "result/green_dispatch/figures/station_impacts.png": "87f31beea07b516b9e40373402c40f318212033121a58c2e63a685690ffbec46"
+      }
+    }
+  ]
+}

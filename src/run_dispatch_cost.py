@@ -266,7 +266,7 @@ def render_report(cfg, out):
         ax.grid(axis='y', alpha=.15); ax.set_axisbelow(True)
     fig.suptitle(f"北門成本方案比較：120 秒、每班計價 {cfg['reference_km_per_train']:g} km、λ=1\n"
                  '訓練情境選班數；獨立模擬評估。成本含時間估值，不是實際現金節省。', fontsize=11)
-    fig.savefig(out/'figures/cost_wait_comparison.png', dpi=170); plt.close(fig)
+    fig.savefig(out/'figures/cost_wait_comparison.png', dpi=170, transparent=True); plt.close(fig)
     small = chosen[(chosen.capacity_case == 'same_as_regular') & (chosen.min_separation == 2)]
     fig, axes = plt.subplots(1, len(cfg['incremental_km_per_train_scenarios']), figsize=(11, 5.6), layout='constrained', sharey=True, squeeze=False)
     axes = axes.ravel()
@@ -282,7 +282,7 @@ def render_report(cfg, out):
     fig.colorbar(im, ax=axes, label='選定新增班數')
     fig.suptitle('成本與候車權重敏感度（120 秒；加班車剩餘容量同一般列車）\n'
                  '格內為訓練情境選定班數；沿線里程有官方來源，回送與單位成本仍為假設。', fontsize=11)
-    fig.savefig(out/'figures/weight_sensitivity.png', dpi=170); plt.close(fig)
+    fig.savefig(out/'figures/weight_sensitivity.png', dpi=170, transparent=True); plt.close(fig)
     lines = ['# 北門增班成本與候車加權比較', '',
              '**保留原班表，在每個班數的啟發式方案中選加權總成本最低者。不是完整重排班表、全域最佳證明或可直接執行的調度命令。**', '',
              '## 方法與輸入', '',

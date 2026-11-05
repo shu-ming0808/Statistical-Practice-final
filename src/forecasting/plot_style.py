@@ -15,5 +15,5 @@ def style():
 
 
 def save(fig, path):
-    fig.savefig(path, dpi=170, bbox_inches="tight")
+    fig.savefig(path, dpi=170, bbox_inches="tight", transparent=True)
     plt.close(fig)

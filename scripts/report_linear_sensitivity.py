@@ -214,7 +214,7 @@ def render_figure(summary, metrics):
     fig.text(.5, .015, "固定比例仍按訓練折重算 alpha；曲線點不是按年選參的合併成績。非零數是編碼欄位數，並非原始變數數。", ha="center", fontsize=9)
     fig.subplots_adjust(left=.075, right=.98, top=.9, bottom=.1, hspace=.3, wspace=.23)
     (OUT / "figures").mkdir(exist_ok=True)
-    fig.savefig(OUT / "figures" / "lasso_penalty_sensitivity.png", dpi=180, facecolor="white")
+    fig.savefig(OUT / "figures" / "lasso_penalty_sensitivity.png", dpi=180, transparent=True)
     plt.close(fig)
 
 

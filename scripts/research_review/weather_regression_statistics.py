@@ -265,7 +265,7 @@ def draw(out, merged, correlations, regression, residuals, loyo, caption=None):
         ax.set_title(f"n={result['n']}，Spearman rho={result['rho']:.3f}\n兩項 Holm p={result['holm_two_tests_p']:.3f}" if result["rho"] is not None else "樣本不足，不計算檢定")
         ax.set_xlabel(LABELS[idx]); ax.set_ylabel("log(北門觀測+1) - log(歷史基準+1)"); ax.grid(alpha=.15); ax.margins(x=.1,y=.12)
     fig.suptitle(caption or ("天氣與相對人流：標籤摘要的探索性關聯（每點代表一場活動）" if len(merged)>13 else "天氣與相對人流：標籤摘要的探索性關聯（數字標籤為年份）"))
-    fig.savefig(out/"01_weather_associations.png"); plt.close(fig)
+    fig.savefig(out/"01_weather_associations.png", transparent=True); plt.close(fig)
     fig,axes=plt.subplots(1,2,figsize=(11,4.8),layout="constrained")
     x=residuals.x_log1p_baseline; y=residuals.y_log1p_observed
     axes[0].scatter(x,y,color="#343b42"); grid=np.linspace(x.min(),x.max(),100)
@@ -278,7 +278,7 @@ def draw(out, merged, correlations, regression, residuals, loyo, caption=None):
     axes[1].set_xlabel("留出事件的 log(觀測+1)"); axes[1].set_ylabel("留整年模型的預估 log(人次+1)")
     axes[1].set_title("留一年敏感度｜訓練可能含未來，非事前預測"); axes[1].legend()
     for ax in axes: ax.grid(alpha=.15)
-    fig.savefig(out/"02_baseline_regression.png"); plt.close(fig)
+    fig.savefig(out/"02_baseline_regression.png", transparent=True); plt.close(fig)
     fig,axes=plt.subplots(1,2,figsize=(11,4.8),layout="constrained")
     axes[0].scatter(residuals.fitted_log1p,residuals.residual_log1p,color="#343b42")
     axes[0].axhline(0,color="#999",linestyle="--")
@@ -291,7 +291,7 @@ def draw(out, merged, correlations, regression, residuals, loyo, caption=None):
     axes[0].set_xlabel("樣本內預估 log(人次+1)"); axes[0].set_ylabel("殘差（log1p 尺度）"); axes[0].set_title("殘差與擬合值\n日期標示：|殘差|最高3場與Cook最大場" if len(merged)>13 else "殘差與擬合值")
     stats.probplot(residuals.residual_log1p,plot=axes[1])
     axes[1].set_title("殘差常態 Q-Q 圖"); axes[1].set_xlabel("理論常態分位數"); axes[1].set_ylabel("殘差（log1p 尺度）")
-    fig.savefig(out/"03_regression_diagnostics.png"); plt.close(fig)
+    fig.savefig(out/"03_regression_diagnostics.png", transparent=True); plt.close(fig)
 
 
 def self_test():
