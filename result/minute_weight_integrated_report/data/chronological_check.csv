@@ -1,0 +1,3 @@
+﻿test_year,training_events,test_events,past_selected_scale,baseline_test_mae,scaled_test_mae,test_mae_change
+2025,3,3,1.0,259.8853980170356,259.8853980170356,0.0
+2026,6,3,1.0,399.71178860134546,399.71178860134546,0.0
