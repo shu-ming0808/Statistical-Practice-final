@@ -1,0 +1,121 @@
+\section{Discussion}
+\subsection{What the comparisons establish}
+The new simple benchmarks answer an important omission in the earlier manuscript: a model should not only be compared with other fitted models, but also with rules that would be easy to deploy and inspect. On the shared nine-event cohort, the retained XGBoost predicts more accurately than each tested simple rule for hourly MAE, RMSE, observed-peak absolute error and scheduled-dispersal underprediction. The most serious peak underprediction nevertheless remains large enough to matter for supply planning. The benchmark study was prespecified after an initial paper review but conducted on an already inspected cohort; it improves transparency, not the independence of the validation sample.
+
+The queue study does not observe minute arrivals. It demonstrates a conditional operational consequence of two plausible axes of uncertainty: arrival concentration and remaining spaces. Likewise, the full-line timetable results demonstrate that, \emph{within the simulator and its candidate set}, lower passenger waiting can be purchased with more service. The 26.4\% simulated waiting reduction comes with TWD 2.384 million greater variable operating expenditure, not with simultaneous cash savings. Any claim of cost effectiveness depends on the time-value conversion, the number of background passengers, the service-cost proxy, and actual train capacities.
+
+\subsection{Statistical and operational limitations}
+There are only 21 event dates and nine repeatedly examined final Beimen events; 54 hourly test rows are not 54 independent festivals. Event-level bootstrap intervals from nine events are descriptive and do not address dependence within year, model-selection bias, uncertain publication times or future festival mix. The original ordinary-day comparator can itself be noisy when only two to four days qualify. A formal prospective study must archive source release times and hold out new events before inspecting their outcomes.
+
+Hourly OD does not reveal minute platform arrivals or actual transfer paths. The current 2026 timetable edition is applied to earlier demand as a counterfactual reference rather than a certified historical reconstruction. The 2,220-person capacity, two-minute altered-service gap, walking times, operating cost and empty-return distance are assumptions or proxies. Existing train occupancy is inferred from OD, not observed. Fleet, crew, depot, turnback and complete signaling constraints are unavailable. Consequently, minimizing Equation~\eqref{eq:objective} over the generated plans does not yield an implementation-ready control-room order.
+
+\subsection{Research priorities}
+The next data collection should target (i) event-day minute gate or platform counts, (ii) matched per-train loads or sufficiently granular crowding proxies, (iii) actual historical timetable changes and depot/turnback feasibility, and (iv) verified source-publication timestamps. A newly occurring event can then provide a truly untouched forecast test. With these measurements, the queue input distribution and capacity transition can be calibrated and supply choices compared in an operating simulator that represents fleet and crew. Only after the information and feasibility layers are reliable would it be justified to test rolling-horizon rescheduling or to infer an operator's preference weight from observed decisions.
+
+\section{Conclusion}
+This retrospective case study connects event-day rail-demand prediction, conditional minute-level queues and a limited cost--waiting timetable comparison. It adds three transparent, same-fold forecast benchmarks missing from the previous paper draft. Across nine already inspected Beimen events, the frozen weighted XGBoost has MAE 440.28 entries per hour, compared with 1,233.76 for the strongest simple event-excess rule, but it still underestimates the largest observed 2024 peak by approximately 2,742 entries. In the full-line eight-event simulation, the selected $\gamma=1$ schedules reduce average modeled waiting from 3.895 to 2.868 minutes while adding 496 services and increasing modeled variable operating expenditure by TWD 2.384 million. The modeled combined objective improves, but this is not observed historical savings. The principal remaining scientific work is prospective validation and measurement of within-hour demand, train loading and deployable operating constraints.
+
+\appendix
+\section{Mathematical results and scope}\label{sec:proofs}
+\subsection{Ridge and penalized additive model existence}
+\begin{theorem}[Ridge existence and uniqueness]
+Suppose $\lambda_R>0$, $Z$ and $Y$ are finite, and the intercept is unpenalized. Equation~\eqref{eq:ridge} has a unique coefficient vector and intercept, even if the columns of $Z$ are linearly dependent.
+\end{theorem}
+\begin{proof}
+Let $H=I-\mathbf1\mathbf1^\top/n$, $Z_c=HZ$, and $Y_c=HY$. Minimizing over the intercept gives $\beta_0=\bar Y-\bar Z^\top\beta$. The remaining Hessian is $2(Z_c^\top Z_c/n+\lambda_R I)$, and for any nonzero $u$,
+\[
+u^\top(Z_c^\top Z_c/n+\lambda_R I)u
+=\|Z_cu\|^2/n+\lambda_R\|u\|^2>0.
+\]
+The objective is strictly convex and coercive. Its unique coefficient minimum is
+$\widehat\beta=(Z_c^\top Z_c+n\lambda_R I)^{-1}Z_c^\top Y_c$, with the corresponding unique intercept.
+\end{proof}
+
+\begin{proposition}[Penalized GAM coefficients]
+For fixed spline bases, let $B$ be the design matrix and $D$ a second-difference penalty matrix. On a parameterization with duplicate intercept directions removed, the objective $\|Y-B\theta\|^2+\lambda_s\|D\theta\|^2+\lambda_c\|\theta\|^2$ has a unique minimum whenever $\lambda_c>0$.
+\end{proposition}
+\begin{proof}
+Its Hessian is $2(B^\top B+\lambda_sD^\top D+\lambda_c I)$. For nonzero $u$, its quadratic form equals $2(\|Bu\|^2+\lambda_s\|Du\|^2+\lambda_c\|u\|^2)>0$ for $\lambda_s\geq0$. Hence the objective is coercive and strictly convex. An unpenalized intercept can be separated by centering or a full-rank identifiability constraint.
+\end{proof}
+
+\begin{proposition}[Lasso existence, not guaranteed coefficient uniqueness]
+For finite $Z,Y$ and $\lambda_L>0$, the Lasso objective with an unpenalized intercept attains a minimum, although correlated design columns may allow several minimizing coefficient vectors.
+\end{proposition}
+\begin{proof}
+Eliminate the intercept by centering as above. The objective $\|Y_c-Z_c\beta\|^2/n+\lambda_L\|\beta\|_1$ is continuous and coercive in $\beta$ because the penalty tends to infinity as $\|\beta\|\to\infty$. A compact nonempty sublevel set therefore contains a minimum. Strict convexity need not hold.
+\end{proof}
+
+\subsection{Fusion-weight existence and scale}
+Let $P\in\R^{n\times3}$ contain out-of-fold base-model predictions, and consider squared-error weights. On the nonnegative simplex $\mathcal S_c=\{w\geq0:\mathbf1^\top w=c\}$ for any fixed $c>0$, the continuous loss $\|Y-Pw\|^2$ attains a minimum by compactness. If predictions are divided by $c$ and $w=cu$, the fitted combination is $Pu$ with $u\in\mathcal S_1$; thus $c=2$ or $3$ changes only representation under this normalization. If the sum is changed to $c$ \emph{without} dividing predictions, the loss becomes $\|Y-cPu\|^2$ and the reoptimized proportions need not equal those at $c=1$.
+
+Without a sum constraint, $P\R_+^3$ is a finitely generated closed convex cone, so the Euclidean projection of finite $Y$ onto it exists. Coefficients need not be unique when columns are dependent. Adding $\eta\|w\|^2$ for $\eta>0$ makes the constrained objective coercive and strictly convex, yielding a unique weight vector. These existence results do not imply that stacking outperforms XGBoost on new events, nor do they estimate the timetable preference multiplier $\gamma$.
+
+\subsection{Waiting identity and finite-candidate dispatch}
+For finitely many passengers, the proof of Equation~\eqref{eq:area} is an identity of indicators:
+\[
+\int_0^T\sum_\ell\ind\{a_\ell\leq t<\min(b_\ell,T)\}\,dt
+=\sum_\ell[\min(b_\ell,T)-a_\ell]_+.
+\]
+It holds under arbitrary time-varying arrivals and train capacities. It does not infer stochastic stationarity, and an uncleared passenger contributes only waiting accumulated through $T$.
+
+\begin{proposition}[Existence of a best generated timetable]
+If the generated feasible candidate set $\mathcal P$ is finite, nonempty and includes the reference timetable, and $J_\gamma(x)$ is finite for each $x\in\mathcal P$, then $\argmin_{x\in\mathcal P}J_\gamma(x)$ is nonempty for fixed $\gamma\geq0$.
+\end{proposition}
+\begin{proof}
+The finite nonempty set $\{J_\gamma(x):x\in\mathcal P\}$ has a smallest real value. At least one candidate attains it. The result says nothing about omitted timetables, omitted constraints or future stochastic realizations.
+\end{proof}
+For a single cancellation saving $c_-$ and increasing expected waiting by $\Delta W$, the objective difference from keeping that trip is $-c_-+\gamma(196/60)\Delta W$. This local algebraic comparison is valid only when the other services and the demand model are fixed. It is not a necessary-and-sufficient criterion for a multi-service network optimum.
+
+\section{Model interpretation and reproducibility}
+\subsection{A numeric Ridge example}
+The 2026 evaluation-fold Ridge is trained only through 30 August 2025 ($n=432$). The penalty in Equation~\eqref{eq:ridge} is $\lambda_R=0.177827941$; in the unnormalized squared-loss convention used by the estimator, $\alpha=n\lambda_R=76.8216705$. Its intercept is 1,589.8432 under the archived coding and training scaling, not an observed baseline event count. Table~\ref{tab:ridgecoeff} shows selected coefficients; the complete 36-column encoded formula, reference categories, imputation values and scales are stored in the result JSON. Interactions and the remaining coefficients cannot be omitted when making a prediction. No coefficient is a causal effect.
+\begin{table}[htbp]\centering\small
+\caption{Selected 2026-fold Ridge coefficients; partial predictive associations.}
+\label{tab:ridgecoeff}
+\begin{tabularx}{\linewidth}{p{49mm}rX}\toprule
+Encoded feature & Coefficient & Conditional interpretation\\\midrule
+Weekend indicator & +278.50 & Change from 0 to 1, holding the other design columns fixed.\\
+Ordinary-day reference & +532.87 & Increase by one training standard deviation, about 709.71 entries.\\
+Beimen: first scheduled dispersal hour & +452.73 & One unit increase in the standardized overlap column.\\
+Beimen: second scheduled dispersal hour & +623.29 & One unit increase in the standardized overlap column.\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Auditable artifacts and data access}
+\begin{longtable}{p{54mm}p{94mm}}
+\caption{Principal reproducibility artifacts. Paths are relative to the project root.}\label{tab:paths}\\
+\toprule
+Purpose & Artifact and scope\\\midrule\endfirsthead
+\toprule Purpose & Artifact and scope\\\midrule\endhead
+Frozen forecast inputs & \texttt{.local/forecast/analysis\_input.csv}; private, SHA-256 recorded in \texttt{configs/forecast.json}.\\
+Frozen 2024--2026 forecasts & \texttt{.local/forecast/all\_predictions.csv}; private, same nine Beimen evaluation events.\\
+Existing model results & \texttt{result/forecast/tables/metrics.csv}, \texttt{result/forecast/fits.json}, and \texttt{result/forecast/ridge\_equation\_2026.json}.\\
+New benchmark program & \texttt{scripts/research\_paper/benchmark\_baselines.py}; rerun with the project analysis environment and matching private files.\\
+New benchmark outputs & \texttt{result/forecast/baselines/summary.csv}, \texttt{per\_event.csv}, \texttt{paired\_mae\_differences.csv}, \texttt{manifest.json}.\\
+Minute-arrival scenarios & \texttt{result/queue\_dispatch\_v1/summary.csv} and \texttt{scenarios.csv}; distinct from the later full-line model.\\
+Current full-line dispatch & \texttt{result/green\_dispatch/summary.csv}, \texttt{comparison.csv}, and source/assumption details in \texttt{report.md}.\\
+Older add-only comparator & \texttt{result/dispatch\_cost/reference\_summary.csv}; different population and horizon, not a comparable actual-cost record.\\
+Benefit decomposition & \texttt{result/green\_dispatch\_diagnostics/tradeoff\_split/}; model group allocation, not observed passenger survey.\\
+Editable manuscript and flow & \texttt{docs/research\_paper/main\_en.tex}, files in \texttt{en/}, and \texttt{workflow\_en.mmd}.\\\bottomrule
+\end{longtable}
+Re-running the benchmark requires the matching private snapshot because the public repository intentionally excludes original sensitive/large inputs. The benchmark script verifies the archived input hash, identical 54 evaluation keys and the 440.281671 frozen MAE before producing aggregate outputs. This check confirms reproduction of the stored comparison, not independent field validation. Other simulations require the timetable and OD snapshots identified by their project manifests.
+
+\section{References and original data sources}
+\begingroup\small
+\begin{thebibliography}{99}\setlength{\itemsep}{1pt}
+\bibitem{ridge} Hoerl, A. E., and Kennard, R. W. (1970). Ridge regression: Biased estimation for nonorthogonal problems. \emph{Technometrics} 12(1), 55--67. \href{https://doi.org/10.1080/00401706.1970.10488634}{doi:10.1080/00401706.1970.10488634}. Used in Section 4.3 for the regularization rationale; the fixed-design existence proof is derived here.
+\bibitem{lasso} Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. \emph{Journal of the Royal Statistical Society B} 58(1), 267--288. \href{https://doi.org/10.1111/j.2517-6161.1996.tb02080.x}{doi:10.1111/j.2517-6161.1996.tb02080.x}. Used in Section 4.3 for the $L_1$ penalty and possible sparsity.
+\bibitem{gam} Hastie, T., and Tibshirani, R. (1986). Generalized additive models. \emph{Statistical Science} 1(3), 297--310. \href{https://doi.org/10.1214/ss/1177013604}{doi:10.1214/ss/1177013604}. Used in Section 4.3 for additive partial effects; the project's chosen penalty is not attributed wholly to this paper.
+\bibitem{pspline} Eilers, P. H. C., and Marx, B. D. (1996). Flexible smoothing with B-splines and penalties. \emph{Statistical Science} 11(2), 89--102. \href{https://doi.org/10.1214/ss/1038425655}{doi:10.1214/ss/1038425655}. Used in Section 4.3 for difference-penalized spline bases.
+\bibitem{xgb} Chen, T., and Guestrin, C. (2016). XGBoost: A scalable tree boosting system. \emph{Proceedings of KDD}, 785--794. \href{https://arxiv.org/abs/1603.02754}{Author preprint}. Used for the fixed-tree quadratic leaf calculation in Equation~\eqref{eq:leaf}.
+\bibitem{fpp} Hyndman, R. J., and Athanasopoulos, G. (2021). \emph{Forecasting: Principles and Practice}, third edition, Section 5.10. \href{https://otexts.com/fpp3/tscv.html}{Online text}. Used for forward-origin evaluation; whole-event annual grouping is a project design.
+\bibitem{cawley} Cawley, G. C., and Talbot, N. L. C. (2010). On over-fitting in model selection and subsequent selection bias in performance evaluation. \emph{Journal of Machine Learning Research} 11, 2079--2107. \href{https://www.jmlr.org/papers/v11/cawley10a.html}{Original article}. Used for the caveat on repeated inspection of the nine events.
+\bibitem{little} Little, J. D. C. (1961). A proof for the queuing formula $L=\lambda W$. \emph{Operations Research} 9(3), 383--387. \href{https://doi.org/10.1287/opre.9.3.383}{doi:10.1287/opre.9.3.383}. Contrasted with the finite-horizon identity independently derived in Section 6.2.
+\bibitem{pan} Pan, H., Liu, Y., Liu, Z., and Hu, H. (2022). Passenger inflow control along rail corridor for recurrent heavy passenger flow mitigation. \emph{Transportation Research Record} 2676(9), 59--75. \href{https://doi.org/10.1177/03611981221085527}{doi:10.1177/03611981221085527}. Its publisher-indexed abstract jointly considers waiting and operating cost; Equation~\eqref{eq:objective} is the present study's own simplified objective.
+\bibitem{metrodata} Taipei City Government Open Data Platform. Hourly Taipei Metro station origin--destination flows. \href{https://data.taipei/dataset/detail?id=63f31c7e-7fc3-418b-bd82-b95158755b4d}{Official dataset}. Original source for Section 3; historical release-time audit remains incomplete.
+\bibitem{timetable} Taipei Metro. Green-line service timetable, \href{https://web.metro.taipei/img/ALL/timetables/105a.PDF}{official PDF, one direction}. Used as a reference timetable edition, not an authenticated historical event-day operating log.
+\bibitem{weather} Central Weather Administration. \href{https://codis.cwa.gov.tw/StationData}{CODiS station observations}. Contextual and ex-post observed weather source; not a day-before weather forecast.
+\bibitem{wage} Ministry of Labor, Taiwan. \href{https://english.mol.gov.tw/21139/40790/87087/}{2026 minimum wage adjustment announcement}. Source of TWD 196/hour; use as passenger waiting value is a project assumption.
+\bibitem{crowding} Taipei Metro. \href{https://www.metro.taipei/cp.aspx?n=BDEB860F2BE3E249}{Train crowding information interface}. Potential data-access lead, not measured numeric loads for this cohort.
+\end{thebibliography}
+\endgroup

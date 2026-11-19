@@ -1,0 +1,18 @@
+{
+  "raw_input_sha256": "2db20f52a107db121d0c02bdf1f721933473c5e09378f623b991a1d1f2e13435",
+  "frozen_predictions_sha256": "ff969a1351be51aa53121c6ca1559cc580d5d6faf471878b4b0062f84676284c",
+  "years": [
+    2024,
+    2025,
+    2026
+  ],
+  "train_only_event_analogs": true,
+  "same_nine_event_folds": true,
+  "ordinary_day_source": "retrospective_baseline_56d",
+  "ordinary_day_historical_publication_verified": false,
+  "bootstrap_seed": 20261119,
+  "bootstrap_draws": 20000,
+  "baseline_formulas_not_tuned_on_nine_event_holdout": true,
+  "frozen_xgboost_4x_weight_selected_after_inspecting_nine_events": true,
+  "paired_bootstrap_is_descriptive_not_formal_future_coverage": true
+}

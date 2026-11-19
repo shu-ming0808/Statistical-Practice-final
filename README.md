@@ -1,6 +1,6 @@
 # 大稻埕煙火人流分析與捷運班次模擬
 
-**[公開網站：稻埕觀測室](https://shu-ming0808.github.io/Statistical-Practice-final/)** · [詳細預測資訊](https://shu-ming0808.github.io/Statistical-Practice-final/#/research) · [18–23 時增減班比較](https://shu-ming0808.github.io/Statistical-Practice-final/#/research?tab=dispatch)
+**[公開網站：稻埕觀測室](https://shu-ming0808.github.io/Statistical-Practice-final/)** · [英文研究論文 PDF](output/pdf/Dadaocheng_Metro_Demand_and_Timetable_Research_Manuscript.pdf) · [詳細預測資訊](https://shu-ming0808.github.io/Statistical-Practice-final/#/research) · [18–23 時增減班比較](https://shu-ming0808.github.io/Statistical-Practice-final/#/research?tab=dispatch)
 
 目前人流預測先告一段落，**保留四站訓練、北門散場加權 XGBoost**，接續做候車情境與列車調度。Ridge、GAM 保留作比較及解釋，未加權 XGBoost 作加權效果對照；融合未採用。逐版實驗入口與重複圖表已移除，歷程仍可由 Git 查閱。
 

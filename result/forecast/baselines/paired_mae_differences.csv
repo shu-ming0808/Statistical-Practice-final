@@ -1,0 +1,4 @@
+﻿comparison,mean_mae_difference,bootstrap_p025,bootstrap_p975,resampling_unit,events,interpretation
+ordinary_day minus frozen weighted XGBoost,1587.2214153902028,1138.2774770807334,2052.2067890685275,event,9,descriptive paired resampling; not new-event coverage
+past_event_median minus frozen weighted XGBoost,898.9775882297091,649.2524126406067,1164.13124601576,event,9,descriptive paired resampling; not new-event coverage
+ordinary_plus_event_increment minus frozen weighted XGBoost,793.4760450198327,566.2488158237786,1034.9243869122163,event,9,descriptive paired resampling; not new-event coverage

@@ -1,0 +1,11 @@
+flowchart TD
+  A[Hourly OD, event schedules, calendars, timetables] --> B[Validate keys and time stamps]
+  B --> C[Define the day-before information set]
+  C --> D[Forward-year forecast evaluation]
+  D --> E[Simple benchmarks and regression / GAM / XGBoost]
+  E --> F[Freeze four-station hourly demand forecast]
+  F --> G[Minute-arrival and capacity scenarios]
+  G --> H[Train-by-train flow conservation and waiting]
+  H --> I[18:00–23:00 add / cancel / retime candidate plans]
+  I --> J[Select on training scenarios; evaluate on independent draws]
+  J --> K[Cost–waiting trade-off and validity audit]

@@ -1,0 +1,62 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=22mm,headheight=16pt,footskip=10mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=.87]
+\usepackage{amsmath,amssymb,amsthm,graphicx,booktabs,tabularx,longtable,array}
+\usepackage{setspace,titlesec,fancyhdr,caption,enumitem,needspace,placeins}
+\usepackage[hidelinks,unicode,bookmarksnumbered]{hyperref}
+\usepackage{xurl}
+\setstretch{1.22}
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{2em}
+\clubpenalty=10000
+\widowpenalty=10000
+\renewcommand{\arraystretch}{1.13}
+\setlength{\tabcolsep}{4.5pt}
+\titleformat{\section}{\Large\sffamily\bfseries}{\thesection}{.7em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries}{\thesubsection}{.7em}{}
+\titlespacing*{\section}{0pt}{15pt}{7pt}
+\titlespacing*{\subsection}{0pt}{10pt}{5pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Event-day metro demand and timetable adjustment}
+\fancyhead[R]{\small Research manuscript}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{.3pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\numberwithin{equation}{section}
+\captionsetup{font=small,labelfont=bf}
+\newcommand{\R}{\mathbb R}
+\newcommand{\E}{\mathbb E}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\ind}{\mathbf 1}
+\hypersetup{pdftitle={Event-Day Metro Demand Forecasting and Timetable Adjustment: A Retrospective Dadaocheng Study},
+ pdfauthor={Statistical Practice Research Group},
+ pdfsubject={Forecast benchmarks, queueing simulation, timetable search, proofs, and empirical limitations}}
+\begin{document}
+\begin{center}
+{\LARGE\sffamily\bfseries Event-Day Metro Demand Forecasting\\and Timetable Adjustment}\\[6pt]
+{\large\sffamily\bfseries A Retrospective Study of Dadaocheng Fireworks Events}\\[8pt]
+Statistical Practice Research Group\\
+Research manuscript, 19 November 2026
+\end{center}
+\vspace{4pt}
+\noindent\textbf{Abstract.}
+We study a linked planning problem for special-event rail service: forecast station-level hourly entries before an event, examine plausible within-hour arrival patterns, and compare Green-line timetables under capacity and waiting assumptions. The event panel contains 21 events, four stations and six evening hours per event (504 station-hour observations). Nine Beimen events in 2024--2026 (54 hours) are evaluated by forward-year splits. Three newly computed, past-only forecasting benchmarks are compared on exactly these folds: an ordinary-day profile, a prior-year event median, and an ordinary-day profile plus a historical event excess. Their Beimen mean absolute errors (MAEs) are 2,027.50, 1,339.26 and 1,233.76 entries per hour, respectively; the archived weighted XGBoost model obtains 440.28. However, the nine events were repeatedly inspected during earlier model development, and historical source-publication times are not fully certified, so these are retrospective comparisons, not an unbiased prospective deployment test. Minute-level queueing is evaluated under assumed uniform, broad-peak and concentrated-peak arrivals. A later full-line simulation compares the reference Green-line timetable with candidate add, cancel and retime plans over 18:00--23:00. At the illustrative waiting-value multiplier of one, an eight-event independent-scenario evaluation finds a decrease in mean waiting from 3.895 to 2.868 minutes, together with 496 added and zero cancelled services and an increase of TWD 2.384 million in modeled variable operating expenditure. We derive the relevant penalized-estimation and finite-horizon queue identities, prove existence only for the stated estimation and finite-candidate problems, and identify data and operating constraints that prevent interpretation as a field-ready dispatch instruction.
+
+\noindent\textbf{Keywords:} special-event ridership; forward validation; simple benchmarks; XGBoost; batch-service queue; metro timetable; cost--waiting trade-off.
+\vspace{7pt}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\input{en/01_introduction_data}
+\input{en/02_forecast}
+\input{en/03_queue_dispatch}
+\input{en/04_discussion_appendix}
+\end{document}
