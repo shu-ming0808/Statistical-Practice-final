@@ -6,6 +6,13 @@ A_{dshm}=\widehat N_{dsh}p_{dshm}.
 \label{eq:minute}
 \end{equation}
 The first Beimen experiment compares uniform allocation with truncated broad and concentrated peaks (standard deviations 20 and 5 minutes), alternative peak centers at minute 15, 30 or 45, and directional splits near 40:60, 50:50 and 60:40. Only the model-predicted highest hour receives a nonuniform shape in this early experiment; other hours remain uniform. This is a sensitivity design, \emph{not} an estimate that actual fireworks passengers follow a Gaussian minute profile. A five-minute access-to-platform delay is an assumption rather than a measured distribution.
+Figure~\ref{fig:minute-arrivals} shows one archived example. All three curves preserve the same predicted hourly totals, but their minute concentrations produce different queues when the timetable and available spaces are held fixed.
+\begin{figure}[H]\centering
+\includegraphics[width=.91\linewidth]{../../result/research_paper/figures/minute_arrival_queue.png}
+\caption{Illustrative minute arrivals (both directions) and southbound waiting at Beimen on 10 August 2024. Only the predicted highest hour changes shape. The 30-minute peak center, 50:50 direction split, five-minute access delay, 1,110 spaces per train and later general Saturday timetable are assumptions, not observed event-day conditions.}
+\label{fig:minute-arrivals}
+\end{figure}
+\FloatBarrier
 
 \subsection{Batch-service queue and passenger-minute identity}
 Let $Q_{j-1}$ be passengers left after train $j-1$, $A_j$ new arrivals before train $j$, and $C_j$ the space available to this queue on train $j$. With alighting before boarding, the fluid-count recurrence is

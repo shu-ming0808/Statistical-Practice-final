@@ -1,5 +1,8 @@
 """Rebuild paper figures from archived project outputs without model selection."""
 from pathlib import Path
+import hashlib
+import json
+import sys
 
 import matplotlib
 
@@ -64,7 +67,78 @@ def peak_profile():
     ax.set_ylabel("Beimen entries (passengers/hour)")
     ax.set_title("10 Aug 2024: the principal underpredicted peak")
     ax.legend(frameon=False, ncol=3, fontsize=7.6)
+    fig.tight_layout()
+    fig.savefig(OUT / "peak_profile.png", dpi=300, bbox_inches="tight", transparent=True)
     save(fig, "peak_profile.pdf")
+
+
+def minute_arrival_queue():
+    """Reproduce the archived Beimen example, using exported schedule rows."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from queue_scenarios import shaped_arrivals
+    from queueing import simulate_bulk_queue
+
+    cfg = json.loads((ROOT / "configs/queue_dispatch_v1.json").read_text(encoding="utf-8"))
+    source = ROOT / cfg["prediction_path"]
+    if hashlib.sha256(source.read_bytes()).hexdigest() != cfg["prediction_sha256"]:
+        raise ValueError("Archived queue-scenario forecast hash mismatch")
+    panel = pd.read_csv(source)
+    event = panel.loc[(panel.event_date == cfg["display_event"]) & panel.station.eq("北門")].sort_values("hour")
+    if len(event) != 6 or event.hour.tolist() != list(range(18, 24)):
+        raise ValueError("Archived six-hour Beimen example missing")
+    hourly = event[cfg["prediction_column"]].to_numpy(float)
+    schedule = pd.read_csv(ROOT / "result/queue_dispatch_v1/metro_timetable.csv")
+    departures = pd.read_csv(ROOT / "result/queue_dispatch_v1/metro_departure.csv")
+    archived = pd.read_csv(ROOT / "result/queue_dispatch_v1/scenarios.csv")
+    south = schedule.loc[schedule.station_label.eq("北門") & ~schedule.direction_text.str.contains("松山")]
+    if len(south) != 1:
+        raise ValueError("Expected one southbound Beimen source timetable")
+    source_id = south.iloc[0].source_id
+    trains = sorted((departures.loc[
+        departures.source_id.eq(source_id)
+        & departures.day_type.eq("saturday")
+        & departures.departure_minute.ge(18 * 60), "departure_minute"
+    ] - 18 * 60).to_numpy(float))
+    if not trains:
+        raise ValueError("Archived Saturday departures missing")
+    styles = {
+        "uniform": ("Uniform", "#7a8c8e", "-"),
+        "broad": ("Broad peak (SD 20 min)", "#ac8458", "--"),
+        "concentrated": ("Concentrated peak (SD 5 min)", "#9b4b51", "-"),
+    }
+    fig, axes = plt.subplots(2, 1, figsize=(6.9, 5.2), sharex=True)
+    for shape, (label, color, line_style) in styles.items():
+        arrivals = shaped_arrivals(hourly, shape, cfg["shapes"][shape], 30,
+                                    cfg["platform_delay_minutes"])
+        queue = simulate_bulk_queue(arrivals * .5, trains, [1110] * len(trains))
+        check = archived.loc[
+            archived.event_date.eq(cfg["display_event"])
+            & archived["shape"].eq(shape)
+            & archived.center_minute.eq(30)
+            & archived.northbound_share.eq(.5)
+            & archived.remaining_fraction.eq(.5)
+            & archived.direction.eq("往新店／台電大樓")
+        ]
+        if len(check) != 1 or not np.isclose(queue["max_queue"], check.iloc[0].max_queue, atol=1e-6):
+            raise ValueError("Figure queue differs from archived scenario result")
+        x = 18 + (np.arange(len(arrivals)) + .5) / 60
+        axes[0].plot(x, arrivals, color=color, linestyle=line_style, linewidth=1.5, label=label)
+        trace = queue["trace"]
+        qx = [18 + r["time_minutes"] / 60 for r in trace for _ in (0, 1)]
+        qy = [v for r in trace for v in (r["queue_before_service"], r["queue_after_service"])]
+        axes[1].plot(qx, qy, color=color, linestyle=line_style, linewidth=1.25)
+    axes[0].set_ylabel("Two-direction arrivals\n(passengers/min)")
+    axes[1].set_ylabel("Southbound queue\n(passengers)")
+    axes[1].set_xlabel("Clock time (24:00 denotes next day)")
+    axes[1].set_xticks([18, 19, 20, 21, 22, 23, 24],
+                       ["18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "24:00"])
+    for ax in axes:
+        ax.set_xlim(18, 24.6)
+        ax.grid(axis="y", color="#dedede", linewidth=.6)
+    axes[0].legend(frameon=False, fontsize=7.3, ncol=1, loc="upper left")
+    fig.tight_layout()
+    fig.savefig(OUT / "minute_arrival_queue.png", dpi=300, bbox_inches="tight", transparent=True)
+    plt.close(fig)
 
 
 def queue_shapes():
@@ -116,6 +190,7 @@ def benefit_split():
 if __name__ == "__main__":
     forecast_benchmark()
     peak_profile()
+    minute_arrival_queue()
     queue_shapes()
     dispatch_tradeoff()
     benefit_split()

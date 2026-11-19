@@ -51,6 +51,14 @@ Let $P\in\R^{n\times3}$ contain out-of-fold base-model predictions, and consider
 Without a sum constraint, $P\R_+^3$ is a finitely generated closed convex cone, so the Euclidean projection of finite $Y$ onto it exists. Coefficients need not be unique when columns are dependent. Adding $\eta\|w\|^2$ for $\eta>0$ makes the constrained objective coercive and strictly convex, yielding a unique weight vector. These existence results do not imply that stacking outperforms XGBoost on new events, nor do they estimate the timetable preference multiplier $\gamma$.
 
 \subsection{Waiting identity and finite-candidate dispatch}
+For each station, direction and source hour, Equation~\eqref{eq:minute} preserves the predicted total because
+\[
+\sum_{m=0}^{59}A_{dshm}
+=\widehat N_{dsh}\sum_{m=0}^{59}p_{dshm}
+=\widehat N_{dsh}.
+\]
+An integer-minute access delay only shifts these arrivals in time; it does not change their sum. Splitting directions with shares summing to one also preserves the combined total. This is a conservation identity conditional on the chosen profiles, not evidence that the profiles match observed minute arrivals. Equation~\eqref{eq:queue} then preserves queue mass at each train: $Q_j=Q_{j-1}+A_j-B_j\geq0$ because $0\leq B_j\leq Q_j^-$. These identities test internal accounting, not operating feasibility.
+
 For finitely many passengers, the proof of Equation~\eqref{eq:area} is an identity of indicators:
 \[
 \int_0^T\sum_\ell\ind\{a_\ell\leq t<\min(b_\ell,T)\}\,dt
@@ -100,6 +108,7 @@ Editable manuscript and flow & \texttt{docs/research\_paper/main\_en.tex}, files
 \end{longtable}
 Re-running the benchmark requires the matching private snapshot because the public repository intentionally excludes original sensitive/large inputs. The benchmark script verifies the archived input hash, identical 54 evaluation keys and the 440.281671 frozen MAE before producing aggregate outputs. This check confirms reproduction of the stored comparison, not independent field validation. Other simulations require the timetable and OD snapshots identified by their project manifests.
 
+\clearpage
 \section{References and original data sources}
 \begingroup\small
 \begin{thebibliography}{99}\setlength{\itemsep}{1pt}
