@@ -455,11 +455,14 @@
   .research-tabs {
     gap: 2px;
     padding: 3px;
+    max-width: 100%;
+    overflow-x: auto;
   }
   .research-tabs button {
     font-size: 13px;
-    flex: 1;
+    flex: 0 0 auto;
     padding-inline: 8px;
+    white-space: nowrap;
   }
   .research-toolbar > .research-filter {
     flex-direction: row;

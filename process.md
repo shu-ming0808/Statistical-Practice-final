@@ -451,3 +451,30 @@ uv run --group analysis python -X utf8 -m app.export_dispatch_diagnostics
 診斷與載量重播需要本機私人快照，公開匯出與網站驗證則不需資料庫。正式結果及說明見 `result/green_dispatch_diagnostics/report.md`；`result/green_load_profile/audit.json` 保存主結果及逐班資料雜湊、完整預期時刻和模擬限制。
 
 本輪 41 項調度測試、5 項載量讀值測試、22 項公開快照檢查及 20 項前端測試通過；lint 與正式建置通過（保留原有警告）。實際檢查 390 px 與桌面寬度、六點比較、活動／λ 切換及兩方向原表／λ=1 載量，無整頁水平溢出或主控台錯誤。圖表與 CSV 核對相同活動與相同情境，沒有將減班診斷點採用成正式班表。
+
+## 調度目標與逐班空位校核（2026-11-06）
+
+`scripts/report_dispatch_tradeoff_split.py` 只讀取既有的獨立評估表，不重新調參或選班表。它將各場原班表、λ=0.5／1／2 與 8／10 分鐘診斷方案的可變支出和北門、其餘三站、沿線其他旅次候車分開。各群組的「人數 × 平均候車」加總須與 `tradeoff_points.csv` 的總人分鐘一致，否則停止。固定 8／10 分鐘方案是診斷，不能標成已入選或全域最優。輸出 `result/green_dispatch_diagnostics/tradeoff_split/`。
+
+`scripts/calibrate_beimen_capacity.py` 預設產生資料可得性審核及 CSV 範本；不會以 OD 模擬值冒充列車實測。若取得合法的歷史逐班數值，CSV 須有活動日期、方向、離站時間、北門下客後上客前的人數與來源紀錄。工具只對齊原班表同方向且時間差不超過兩分鐘的列車；一筆實測不能配到多班。校準因子為較早活動資料上非負最小平方比值 `max(0, sum(x*y)/sum(x*x))`，後續活動的預測截在 0–2,220 人，對比未校準與校準後的剩餘空位 MAE。至少三個不同活動日期才有向前評估。此因子僅是基線診斷，不自動移植到增減班方案；實際車組、路徑及乘客選班仍需另行驗證。
+
+重跑：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 scripts/report_dispatch_tradeoff_split.py
+.\.venv\Scripts\python.exe -X utf8 scripts/calibrate_beimen_capacity.py
+```
+
+## 事前預測與事後人數的候車重播（2026-11-20）
+
+`scripts/report_queue_replay.py` 核對 `configs/queue_dispatch_v1.json` 的封存預測 SHA-256，要求北門九場、每場 18–23 時六筆。以預測最高小時決定寬峰或集中峰的位置，並為該小時產生分鐘權重；事後實際人數**只乘上同一組權重**，不按事後最高小時重新挑峰。兩條路徑用相同的一般週三／週六班表、方向各半、站內延遲 5 分鐘及 25%／50%／75% 假設剩餘容量，逐方向由 `simulate_bulk_queue` 計算候車人分鐘、最大隊伍及窗口尾端滯留。逐時質量守恆與候車質量守恆都須成立。
+
+輸出 324 條單方向路徑，即九場 × 三種形狀 × 三種容量 × 兩個方向 × 預測／事後。`result/queue_replay/comparison.csv` 為 162 組配對差額，`event_summary.csv` 只以寬峰與 50% 容量展示九場，沒有按結果選最佳假設。`app.export_queue_replay` 檢查場次、敏感度網格及回顧標記，只發布彙總 JSON，並更新公開 manifest 雜湊；`app.export_snapshot` 重建快照時也會執行此匯出。網站的單場案例圖依相同公開 JSON 顯示。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 scripts/report_queue_replay.py
+.\.venv\Scripts\python.exe -X utf8 -m app.export_queue_replay
+.\.venv\Scripts\python.exe -m unittest tests.test_queue_replay tests.test_public_snapshot
+```
+
+本檢查只回答「若唯一變動是已知的逐時人數，模型候車指標會相差多少」。它沒有活動當天實際班表、分鐘刷卡、方向比例或逐班空位，因此不能叫作歷史實際候車或全線調度政策的 out-of-sample 回測。九場已反覆參與模型開發；日後應新增未見過的活動並取得營運觀測資料。

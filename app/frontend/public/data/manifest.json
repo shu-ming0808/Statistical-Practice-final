@@ -66,7 +66,8 @@
     "observations.json": "c1e0b962a5d9958614cb2c6815506385053abf46445582c372e28aa093adc172",
     "queue-scenarios.csv": "d5722776871b9f42311cdf09bd1c5cb9887451bae04b5e74557dc0371b8623d6",
     "rail-replay.json": "028dab101dddb4615ed8c18c7142d82fa9af7c1c4719307f3f6cf374908ca9f2",
-    "research.json": "e8e3d29dd8d336d6177a761485929a7da969c511f81fa976e152d258a887d32d"
+    "research.json": "e8e3d29dd8d336d6177a761485929a7da969c511f81fa976e152d258a887d32d",
+    "queue-replay.json": "128b6acef3b507c0e072fc5fe2b6beca2d9012851f6e256f282b755c1bf8d2a0"
   },
   "dispatch_generated_at": "2026-10-28T17:02:09.248600+00:00",
   "dispatch_diagnostics_generated_at": "2026-10-29T02:39:50.626698+00:00"

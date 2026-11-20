@@ -1,0 +1,766 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "event_date": "2024-07-17",
+      "predicted_demand": 13936,
+      "observed_demand": 12395,
+      "predicted_wait_person_minutes": 37875,
+      "hindsight_wait_person_minutes": 33499,
+      "wait_person_minutes_difference": -4376,
+      "predicted_max_queue": 324,
+      "hindsight_max_queue": 257,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "predicted_demand": 14605,
+      "observed_demand": 12574,
+      "predicted_wait_person_minutes": 39998,
+      "hindsight_wait_person_minutes": 33877,
+      "wait_person_minutes_difference": -6121,
+      "predicted_max_queue": 353,
+      "hindsight_max_queue": 239,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "predicted_demand": 18115,
+      "observed_demand": 26423,
+      "predicted_wait_person_minutes": 65516,
+      "hindsight_wait_person_minutes": 95520,
+      "wait_person_minutes_difference": 30004,
+      "predicted_max_queue": 764,
+      "hindsight_max_queue": 1014,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "predicted_demand": 13492,
+      "observed_demand": 13913,
+      "predicted_wait_person_minutes": 36674,
+      "hindsight_wait_person_minutes": 37599,
+      "wait_person_minutes_difference": 925,
+      "predicted_max_queue": 343,
+      "hindsight_max_queue": 324,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "predicted_demand": 13528,
+      "observed_demand": 13992,
+      "predicted_wait_person_minutes": 36778,
+      "hindsight_wait_person_minutes": 37947,
+      "wait_person_minutes_difference": 1169,
+      "predicted_max_queue": 322,
+      "hindsight_max_queue": 340,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "predicted_demand": 23930,
+      "observed_demand": 23848,
+      "predicted_wait_person_minutes": 86524,
+      "hindsight_wait_person_minutes": 86936,
+      "wait_person_minutes_difference": 412,
+      "predicted_max_queue": 952,
+      "hindsight_max_queue": 937,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "predicted_demand": 18747,
+      "observed_demand": 19330,
+      "predicted_wait_person_minutes": 67638,
+      "hindsight_wait_person_minutes": 69829,
+      "wait_person_minutes_difference": 2191,
+      "predicted_max_queue": 853,
+      "hindsight_max_queue": 904,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "predicted_demand": 15697,
+      "observed_demand": 14044,
+      "predicted_wait_person_minutes": 43514,
+      "hindsight_wait_person_minutes": 38178,
+      "wait_person_minutes_difference": -5336,
+      "predicted_max_queue": 365,
+      "hindsight_max_queue": 359,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "predicted_demand": 20472,
+      "observed_demand": 21230,
+      "predicted_wait_person_minutes": 73802,
+      "hindsight_wait_person_minutes": 76527,
+      "wait_person_minutes_difference": 2725,
+      "predicted_max_queue": 901,
+      "hindsight_max_queue": 996,
+      "both_cleared": true
+    }
+  ],
+  "sensitivity": [
+    {
+      "event_date": "2024-07-17",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 37809,
+      "hindsight_wait_person_minutes": 33447,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 37809,
+      "hindsight_wait_person_minutes": 33447,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 37809,
+      "hindsight_wait_person_minutes": 33447,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 37875,
+      "hindsight_wait_person_minutes": 33499,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 37875,
+      "hindsight_wait_person_minutes": 33499,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 37875,
+      "hindsight_wait_person_minutes": 33499,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 47136,
+      "hindsight_wait_person_minutes": 36611,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 38369,
+      "hindsight_wait_person_minutes": 33891,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-17",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 38369,
+      "hindsight_wait_person_minutes": 33891,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 39926,
+      "hindsight_wait_person_minutes": 33830,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 39926,
+      "hindsight_wait_person_minutes": 33830,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 39926,
+      "hindsight_wait_person_minutes": 33830,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 39998,
+      "hindsight_wait_person_minutes": 33877,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 39998,
+      "hindsight_wait_person_minutes": 33877,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 39998,
+      "hindsight_wait_person_minutes": 33877,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 53446,
+      "hindsight_wait_person_minutes": 35495,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 40537,
+      "hindsight_wait_person_minutes": 34237,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-07-31",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 40537,
+      "hindsight_wait_person_minutes": 34237,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 65423,
+      "hindsight_wait_person_minutes": 157985,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 65392,
+      "hindsight_wait_person_minutes": 95355,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 65392,
+      "hindsight_wait_person_minutes": 95355,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 82597,
+      "hindsight_wait_person_minutes": 199699,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 65516,
+      "hindsight_wait_person_minutes": 95520,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 65516,
+      "hindsight_wait_person_minutes": 95520,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 198054,
+      "hindsight_wait_person_minutes": 410288,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 97126,
+      "hindsight_wait_person_minutes": 176307,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2024-08-10",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 74979,
+      "hindsight_wait_person_minutes": 127745,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 36710,
+      "hindsight_wait_person_minutes": 37634,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 36710,
+      "hindsight_wait_person_minutes": 37634,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 36710,
+      "hindsight_wait_person_minutes": 37634,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 36674,
+      "hindsight_wait_person_minutes": 37599,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 36674,
+      "hindsight_wait_person_minutes": 37599,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 36674,
+      "hindsight_wait_person_minutes": 37599,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 46309,
+      "hindsight_wait_person_minutes": 45131,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 36460,
+      "hindsight_wait_person_minutes": 37397,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-06",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 36460,
+      "hindsight_wait_person_minutes": 37397,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 36812,
+      "hindsight_wait_person_minutes": 37982,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 36812,
+      "hindsight_wait_person_minutes": 37982,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 36812,
+      "hindsight_wait_person_minutes": 37982,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 36778,
+      "hindsight_wait_person_minutes": 37947,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 36778,
+      "hindsight_wait_person_minutes": 37947,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 36778,
+      "hindsight_wait_person_minutes": 37947,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 44127,
+      "hindsight_wait_person_minutes": 47175,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 36577,
+      "hindsight_wait_person_minutes": 37735,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-20",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 36577,
+      "hindsight_wait_person_minutes": 37735,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 121357,
+      "hindsight_wait_person_minutes": 116298,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 86369,
+      "hindsight_wait_person_minutes": 86783,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 86369,
+      "hindsight_wait_person_minutes": 86783,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 161088,
+      "hindsight_wait_person_minutes": 156614,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 86524,
+      "hindsight_wait_person_minutes": 86936,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 86524,
+      "hindsight_wait_person_minutes": 86936,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 347704,
+      "hindsight_wait_person_minutes": 344448,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 153149,
+      "hindsight_wait_person_minutes": 150517,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2025-08-30",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 112455,
+      "hindsight_wait_person_minutes": 111338,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 70646,
+      "hindsight_wait_person_minutes": 86565,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 67499,
+      "hindsight_wait_person_minutes": 69682,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 67499,
+      "hindsight_wait_person_minutes": 69682,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 105447,
+      "hindsight_wait_person_minutes": 124163,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 67638,
+      "hindsight_wait_person_minutes": 69829,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 67638,
+      "hindsight_wait_person_minutes": 69829,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 255858,
+      "hindsight_wait_person_minutes": 285495,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 114514,
+      "hindsight_wait_person_minutes": 126848,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-07-25",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 83680,
+      "hindsight_wait_person_minutes": 90937,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 43440,
+      "hindsight_wait_person_minutes": 38106,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 43440,
+      "hindsight_wait_person_minutes": 38106,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 43440,
+      "hindsight_wait_person_minutes": 38106,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 43514,
+      "hindsight_wait_person_minutes": 38178,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 43514,
+      "hindsight_wait_person_minutes": 38178,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 43514,
+      "hindsight_wait_person_minutes": 38178,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 58624,
+      "hindsight_wait_person_minutes": 52360,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 44071,
+      "hindsight_wait_person_minutes": 38725,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-05",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 44071,
+      "hindsight_wait_person_minutes": 38725,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "uniform",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 89950,
+      "hindsight_wait_person_minutes": 129190,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "uniform",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 73655,
+      "hindsight_wait_person_minutes": 76364,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "uniform",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 73655,
+      "hindsight_wait_person_minutes": 76364,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "broad",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 129236,
+      "hindsight_wait_person_minutes": 169775,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "broad",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 73802,
+      "hindsight_wait_person_minutes": 76527,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "broad",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 73802,
+      "hindsight_wait_person_minutes": 76527,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "concentrated",
+      "remaining_fraction": 0.25,
+      "predicted_wait_person_minutes": 303754,
+      "hindsight_wait_person_minutes": 366979,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "concentrated",
+      "remaining_fraction": 0.5,
+      "predicted_wait_person_minutes": 130241,
+      "hindsight_wait_person_minutes": 153122,
+      "both_cleared": true
+    },
+    {
+      "event_date": "2026-08-15",
+      "shape": "concentrated",
+      "remaining_fraction": 0.75,
+      "predicted_wait_person_minutes": 94619,
+      "hindsight_wait_person_minutes": 106938,
+      "both_cleared": true
+    }
+  ],
+  "assumptions": {
+    "shape": "broad",
+    "peak_sigma_minutes": 20,
+    "remaining_capacity_fraction": 0.5,
+    "northbound_share": 0.5,
+    "platform_delay_minutes": 5,
+    "timetable": "2026-08-30 general timetable counterfactual, not historical activity service",
+    "actual_is_hindsight": true,
+    "minute_counts_observed": false,
+    "train_load_observed": false,
+    "historical_queue_reconstruction": false
+  }
+}

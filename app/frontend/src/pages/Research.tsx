@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { DispatchComparison } from "@/components/DispatchComparison";
+import { DecisionReplay } from "@/components/DecisionReplay";
 import {
   Activity,
   TrainFront,
@@ -51,7 +52,7 @@ const format = (v: unknown) =>
   v == null
     ? "—"
     : Number(v).toLocaleString("zh-TW", { maximumFractionDigits: 2 });
-type Tab = "model" | "queue" | "operations" | "dispatch";
+type Tab = "model" | "queue" | "replay" | "operations" | "dispatch";
 
 function Stat({
   label,
@@ -85,7 +86,7 @@ export function ResearchPage() {
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const requestedTab = searchParams.get("tab");
-  const tab: Tab = requestedTab === "dispatch" || requestedTab === "queue" || requestedTab === "operations" ? requestedTab : "model";
+  const tab: Tab = requestedTab === "dispatch" || requestedTab === "queue" || requestedTab === "replay" || requestedTab === "operations" ? requestedTab : "model";
   const [event, setEvent] = useState("2024-08-10");
   useEffect(() => {
     const controller = new AbortController();
@@ -149,6 +150,7 @@ export function ResearchPage() {
             [
               { id: "model", label: "預測結果", icon: Activity },
               { id: "queue", label: "候車情境", icon: Clock3 },
+              { id: "replay", label: "單場案例", icon: Activity },
               { id: "operations", label: "班表與調度", icon: TrainFront },
               { id: "dispatch", label: "增減班比較", icon: Activity },
             ] as const
@@ -178,6 +180,7 @@ export function ResearchPage() {
       </div>
       {tab === "model" && <Model data={data} event={event} />}
       {tab === "queue" && <Queue data={data} event={event} />}
+      {tab === "replay" && <DecisionReplay data={data} event={event} />}
       {tab === "operations" && <Operations data={data} />}
       {tab === "dispatch" && <DispatchComparison />}
       <div className="research-links">
