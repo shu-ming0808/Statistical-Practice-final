@@ -5,10 +5,10 @@ import {dispatchSlotLabel, selectDispatch, selectDispatchTradeoff} from '../src/
 const data=JSON.parse(readFileSync(new URL('../public/data/dispatch.json',import.meta.url),'utf8'));
 const diagnostics=JSON.parse(readFileSync(new URL('../public/data/dispatch-diagnostics.json',import.meta.url),'utf8'));
 
-test('published tradeoff has six consistent points for every event, including two reduction-only probes',()=>{
+test('published tradeoff has all selected weights and two reduction-only probes for every event',()=>{
   for(const event of new Set(data.comparison.map(r=>r.event_date))){
     const points=selectDispatchTradeoff(data,event,diagnostics);
-    assert.equal(points.length,6,event);
+    assert.equal(points.length,data.waiting_weights.length+3,event);
     assert.ok(points.every(p=>p.event_date===event));
     for(const point of points){
       const source=diagnostics.tradeoff_points.find(p=>p.event_date===event && p.kind===point.kind &&
@@ -164,11 +164,12 @@ test('reduction probes stay separate from adopted preferences and preserve incom
     {...base,kind:'current',scenario_id:'diagnostic-current',mean_wait:999},
   ]};
   const points=selectDispatchTradeoff(data,event,diagnostics);
-  assert.equal(points.length,6);
-  assert.deepEqual(points.slice(0,4),selectDispatchTradeoff(data,event));
-  assert.ok(points.slice(4).every(p=>p.waiting_weight===null && p.kind==='reduction_probe'));
-  assert.equal(points[4].operating_change_twd,-100000);
-  assert.equal(points[5].unserved_mean,12);
-  assert.equal(selectDispatchTradeoff(data,event,{...diagnostics,schema_version:999}).length,4);
-  assert.equal(selectDispatchTradeoff(data,event,{...diagnostics,tradeoff_points:[{...base,max_train_load:3000}]}).length,4);
+  const adopted=data.waiting_weights.length+1;
+  assert.equal(points.length,adopted+2);
+  assert.deepEqual(points.slice(0,adopted),selectDispatchTradeoff(data,event));
+  assert.ok(points.slice(adopted).every(p=>p.waiting_weight===null && p.kind==='reduction_probe'));
+  assert.equal(points[adopted].operating_change_twd,-100000);
+  assert.equal(points[adopted+1].unserved_mean,12);
+  assert.equal(selectDispatchTradeoff(data,event,{...diagnostics,schema_version:999}).length,adopted);
+  assert.equal(selectDispatchTradeoff(data,event,{...diagnostics,tradeoff_points:[{...base,max_train_load:3000}]}).length,adopted);
 });

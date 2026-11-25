@@ -142,7 +142,12 @@ def export(output=None):
     data=json.loads((source/'public_summary.json').read_text('utf-8'))
     if not data['no_wait_threshold'] or data['decision_window']!='18:00–23:00':
         raise ValueError('Unexpected dispatch contract')
-    if len(data['comparison'])!=24: raise ValueError('Expected eight events and three weights')
+    events={row['event_date'] for row in data['comparison']}
+    if len(events)!=8: raise ValueError('Expected eight dispatch events')
+    expected={(event,weight) for event in events for weight in data['waiting_weights']}
+    actual={(row['event_date'],row['waiting_weight']) for row in data['comparison']}
+    if actual!=expected or len(data['comparison'])!=len(expected):
+        raise ValueError('Incomplete event-by-weight dispatch comparison')
     validate_slot_counts(data)
     validate_candidate_families(data)
     shutil.copyfile(source/'public_summary.json',dest/'dispatch.json')

@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-29T02:39:50.626698+00:00",
-  "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
-  "diagnostic_fingerprint": "fef0af02ad231f74273823c916358e45d83a714b3de346b5f163d537907e084e",
+  "generated_at": "2026-11-25T14:57:23.398467+00:00",
+  "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
+  "diagnostic_fingerprint": "b078a294cd12f14487e8c69d19d16054a1289a8e4cc92a0110a9786bf9d51c04",
   "input_hashes": {
     "configs/forecast.json": "d284a9445d10b8c2ad6218914f26caa6544db08d546b638b411a57fa1233abb3",
     ".local/forecast/analysis_input.csv": "2db20f52a107db121d0c02bdf1f721933473c5e09378f623b991a1d1f2e13435",
@@ -47,9 +47,16 @@
     "platform_access_minutes": 5,
     "capacity_persons": 2220,
     "waiting_weights": [
+      0.25,
       0.5,
+      0.75,
       1,
-      2
+      1.25,
+      1.5,
+      1.75,
+      2,
+      2.25,
+      2.5
     ],
     "time_value_per_minute": 3.2666666666666666,
     "variable_cost_per_train_km": 128.05,
@@ -111,12 +118,12 @@
   "events": [
     {
       "event_date": "2024-07-31",
-      "seconds": 16.82,
+      "seconds": 15.03,
       "donor_events": [
         "2024-07-17"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -128,21 +135,28 @@
         "cancel_d1_97"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_142",
         "0.5": "cancel_d1_142",
+        "0.75": "cancel_d1_142",
         "1": "cancel_d1_142",
-        "2": "cancel_d1_142"
+        "1.25": "cancel_d1_142",
+        "1.5": "cancel_d1_142",
+        "1.75": "cancel_d1_142",
+        "2": "cancel_d1_142",
+        "2.25": "cancel_d1_142",
+        "2.5": "cancel_d1_142"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2024-08-10",
-      "seconds": 15.06,
+      "seconds": 11.71,
       "donor_events": [
         "2024-07-17",
         "2024-07-31"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -154,22 +168,29 @@
         "cancel_d1_358"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_358",
         "0.5": "cancel_d1_358",
+        "0.75": "cancel_d1_358",
         "1": "cancel_d1_358",
-        "2": "cancel_d1_358"
+        "1.25": "cancel_d1_358",
+        "1.5": "cancel_d1_358",
+        "1.75": "cancel_d1_358",
+        "2": "cancel_d1_358",
+        "2.25": "cancel_d1_358",
+        "2.5": "cancel_d1_358"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2025-08-06",
-      "seconds": 15.95,
+      "seconds": 14.29,
       "donor_events": [
         "2024-07-17",
         "2024-07-31",
         "2024-08-10"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -181,15 +202,22 @@
         "cancel_d1_97"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_142",
         "0.5": "cancel_d1_142",
+        "0.75": "cancel_d1_142",
         "1": "cancel_d1_142",
-        "2": "cancel_d1_142"
+        "1.25": "cancel_d1_142",
+        "1.5": "cancel_d1_142",
+        "1.75": "cancel_d1_142",
+        "2": "cancel_d1_142",
+        "2.25": "cancel_d1_142",
+        "2.5": "cancel_d1_142"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2025-08-20",
-      "seconds": 16.46,
+      "seconds": 13.7,
       "donor_events": [
         "2024-07-17",
         "2024-07-31",
@@ -197,7 +225,7 @@
         "2025-08-06"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -209,15 +237,22 @@
         "cancel_d1_97"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_142",
         "0.5": "cancel_d1_142",
+        "0.75": "cancel_d1_142",
         "1": "cancel_d1_142",
-        "2": "cancel_d1_142"
+        "1.25": "cancel_d1_142",
+        "1.5": "cancel_d1_142",
+        "1.75": "cancel_d1_142",
+        "2": "cancel_d1_142",
+        "2.25": "cancel_d1_142",
+        "2.5": "cancel_d1_142"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2025-08-30",
-      "seconds": 13.17,
+      "seconds": 11.47,
       "donor_events": [
         "2024-07-17",
         "2024-07-31",
@@ -226,7 +261,7 @@
         "2025-08-20"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -238,15 +273,22 @@
         "cancel_d1_358"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_358",
         "0.5": "cancel_d1_358",
+        "0.75": "cancel_d1_358",
         "1": "cancel_d1_358",
-        "2": "cancel_d1_358"
+        "1.25": "cancel_d1_358",
+        "1.5": "cancel_d1_358",
+        "1.75": "cancel_d1_358",
+        "2": "cancel_d1_358",
+        "2.25": "cancel_d1_358",
+        "2.5": "cancel_d1_358"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2026-07-25",
-      "seconds": 10.61,
+      "seconds": 10.81,
       "donor_events": [
         "2024-07-17",
         "2024-07-31",
@@ -256,7 +298,7 @@
         "2025-08-30"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -268,15 +310,22 @@
         "cancel_d1_358"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_358",
         "0.5": "cancel_d1_358",
+        "0.75": "cancel_d1_358",
         "1": "cancel_d1_358",
-        "2": "cancel_d1_358"
+        "1.25": "cancel_d1_358",
+        "1.5": "cancel_d1_358",
+        "1.75": "cancel_d1_358",
+        "2": "cancel_d1_358",
+        "2.25": "cancel_d1_358",
+        "2.5": "cancel_d1_358"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2026-08-05",
-      "seconds": 14.43,
+      "seconds": 14.34,
       "donor_events": [
         "2024-07-17",
         "2024-07-31",
@@ -287,7 +336,7 @@
         "2026-07-25"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -299,15 +348,22 @@
         "cancel_d1_149"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_142",
         "0.5": "cancel_d1_142",
+        "0.75": "cancel_d1_142",
         "1": "cancel_d1_142",
-        "2": "cancel_d1_142"
+        "1.25": "cancel_d1_142",
+        "1.5": "cancel_d1_142",
+        "1.75": "cancel_d1_142",
+        "2": "cancel_d1_142",
+        "2.25": "cancel_d1_142",
+        "2.5": "cancel_d1_142"
       },
       "evaluation_used_for_selection": false
     },
     {
       "event_date": "2026-08-15",
-      "seconds": 10.96,
+      "seconds": 10.53,
       "donor_events": [
         "2024-07-17",
         "2024-07-31",
@@ -319,7 +375,7 @@
         "2026-08-05"
       ],
       "baseline_matches_published": true,
-      "source_fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761",
+      "source_fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e",
       "fixed_patterns": [
         "fixed_8",
         "fixed_10"
@@ -331,9 +387,16 @@
         "cancel_d1_358"
       ],
       "training_selected_single_cancels": {
+        "0.25": "cancel_d1_358",
         "0.5": "cancel_d1_358",
+        "0.75": "cancel_d1_358",
         "1": "cancel_d1_358",
-        "2": "cancel_d1_358"
+        "1.25": "cancel_d1_358",
+        "1.5": "cancel_d1_358",
+        "1.75": "cancel_d1_358",
+        "2": "cancel_d1_358",
+        "2.25": "cancel_d1_358",
+        "2.5": "cancel_d1_358"
       },
       "evaluation_used_for_selection": false
     }

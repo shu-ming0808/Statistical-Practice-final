@@ -18,19 +18,25 @@ def report():
     cancellations=pd.read_csv(out/'selected_removals.csv'); audit=json.loads((out/'audit.json').read_text('utf-8'))
     loads=pd.read_csv(ROOT/'result/green_load_profile/beimen_load_profile.csv')
     events=sorted(points.event_date.unique())
-    if len(events)!=8 or len(points)!=48: raise ValueError('Render only the complete eight-event diagnostic run')
+    weights=sorted(points.loc[points.kind=='current','waiting_weight'].unique())
+    if len(events)!=8 or len(points)!=8*(len(weights)+3): raise ValueError('Incomplete eight-event diagnostic run')
     plt.rcParams.update({'font.family':['Microsoft JhengHei','DejaVu Sans'],'axes.unicode_minus':False,'figure.dpi':150})
-    labels={'baseline':'原班表','current_0.5':'λ=0.5','current_1':'λ=1','current_2':'λ=2','fixed_8':'8 分配置','fixed_10':'10 分配置'}
-    colors={'baseline':'#56565c','current_0.5':'#a0b2ad','current_1':'#557a70','current_2':'#25493f','fixed_8':'#b07c52','fixed_10':'#956744'}
+    labels={'baseline':'原班表','fixed_8':'8 分配置','fixed_10':'10 分配置'}
+    colors={'baseline':'#56565c','fixed_8':'#b07c52','fixed_10':'#956744'}
+    for w in weights:
+        key=f'current_{w:g}'
+        labels[key]=f'λ={w:g}'
+        colors[key]=plt.cm.Greens(0.35+0.55*(w-min(weights))/(max(weights)-min(weights)))
     fig,axes=plt.subplots(4,2,figsize=(13,14),layout='constrained')
     for ax,event in zip(axes.ravel(),events):
         rows=points[points.event_date==event]
         for r in rows.itertuples():
             probe=r.kind=='reduction_probe'; color=colors[r.scenario_id]
             ax.scatter(r.operating_change_twd/10000,r.mean_wait,s=60,facecolors='white' if probe else color,edgecolors=color,linewidths=1.5,marker='D' if probe else 'o')
-            ax.annotate(labels[r.scenario_id],(r.operating_change_twd/10000,r.mean_wait),xytext=(6,7),textcoords='offset points',fontsize=9,color=color)
+            if r.kind!='current' or r.waiting_weight in (min(weights),1,max(weights)):
+                ax.annotate(labels[r.scenario_id],(r.operating_change_twd/10000,r.mean_wait),xytext=(6,7),textcoords='offset points',fontsize=8,color=color)
         ax.axvline(0,color='#c5c5c5',lw=.8);ax.set_title(event,loc='left',fontsize=12)
-        ax.set_xlim(-19,94);ax.set_ylim(2,11);ax.set_xlabel('相對原班表的可變支出差（萬元）');ax.set_ylabel('平均候車（分鐘）')
+        ax.set_xlim(-19,max(94,points.operating_change_twd.max()/10000+8));ax.set_ylim(2,11);ax.set_xlabel('相對原班表的可變支出差（萬元）');ax.set_ylabel('平均候車（分鐘）')
         ax.grid(axis='y',color='#eeeeee');ax.spines[['top','right']].set_visible(False)
     fig.suptitle('同一需求下的成本與候車取捨｜每場獨立 300 次模擬',fontsize=16)
     fig.supxlabel('空心菱形＝額外減班試算，未採用；各點是有限方案比較，不是全域最優前緣。',fontsize=11)
@@ -64,8 +70,8 @@ def report():
     threshold=float(drivers.cancel_break_even_person_minutes_lambda1.iloc[0]); saving=float(drivers.single_cancel_saving_twd.iloc[0]); costadd=float(drivers.single_add_cost_twd.iloc[0])
     selected=cancellations[cancellations.waiting_weight==1]
     break_min,break_max=selected.break_even_waiting_weight.min(),selected.break_even_waiting_weight.max()
-    lines=['# 為何增班卻沒有減班：成本、候車與逐班載量診斷','',
-      '**結論：減班方案能完成本次模擬疏運，但在目前時間價值與需求下，額外候車代價高於省下的營運費。另有候選初篩限制，不能證明所有減班組合都較差。**','',
+    lines=['# 不同候車權重下的增減班：成本、候車與逐班載量診斷','',
+      '**結論：λ=0.25 時八場合計選到取消 6 班；λ=1 時仍未選到取消班次。減班試算可完成本次模擬疏運，但通常拉長等待。候選初篩有限，不能證明所有方案的全域最優性。**','',
       '## 1. 直接檢查減班，而不只看最後入選方案','',
       '沿用原八場、18:00–23:00 決策窗、相同較早活動誤差與一般日 OD，以及原 200 訓練／300 評估亂數。新增固定 8／10 分鐘配置作診斷，窗外服務仍保護。方案的班距也檢查與窗外列車的間隔。這些是預先指定的額外試算，沒有按評估結果替換已採用班表。','',
       f'逐班取消共檢查 {int(drivers.cancellation_proposals.sum())} 個原班表服務，先以原 12 個訓練提案情境初篩，各 λ 保留前三名的聯集，再用完整 200 情境選擇，最後獨立 300 情境評估。沒有窮舉同時取消多班及所有重排組合。','']+table+['',
@@ -77,7 +83,7 @@ def report():
       '3. **原搜尋先按偏好初篩。** 原完整訓練候選都沒有取消服務；稀疏方案可能在 12 情境初篩階段被排除。這次強制留下 8／10 分鐘減班試算，才能看到省費用與增加等待的另一側。','',
       r'$$\Delta J=-c_{\mathrm{cancel}}+\lambda v\,\Delta W,\qquad v=196/60. $$','',
       r'$$\Delta W>0\ \Longrightarrow\ \lambda_{\mathrm{break-even}}=\frac{c_{\mathrm{cancel}}}{v\Delta W}. $$','',
-      f'各場經完整訓練選出的單班取消方案，其損益兩平 λ 約 {break_min:.3f}–{break_max:.3f}，低於現行最小值 0.5。這是依既定成本的局部診斷，不是建議事後把 λ 調低到一定能減班；λ 應反映明確的服務與支出偏好。',
+      f'各場經完整訓練選出的單班取消方案，其損益兩平 λ 約 {break_min:.3f}–{break_max:.3f}。這是依既定成本的局部診斷，不是建議事後把 λ 調低到一定能減班；λ 應反映明確的服務與支出偏好。',
       '所有被評估減班方案的未完成旅次、最大載量與班距見 CSV；模擬中能疏運，不代表已有實際備車、司機與折返可行性。','',
       '## 3. 固定 50% 可以怎麼改','',
       '**舊候車回放仍用固定剩餘空間情境，新版全線調度已用 OD 動態載客。** 剩餘空間 50% 與兩方向各 50% 是不同參數；新版用歷史 OD 起迄與假設路徑分配方向，再逐站先下後上。','',
@@ -98,8 +104,8 @@ def report():
       '## 參考資料','']+[f'- [{s["title"]}]({s["url"]})' for s in SOURCES]+['']
     (out/'report.md').write_text('\n'.join(lines),encoding='utf-8',newline='\n')
     readme=ROOT/'README.md';text=readme.read_text('utf-8');start='<!-- dispatch-diagnostics:start -->';end='<!-- dispatch-diagnostics:end -->'
-    content=['### 為什麼沒有減班？成本與等待的實際取捨','',
-      f'額外保留 8／10 分鐘配置，使用與原結果相同的獨立 300 次情境評估。**減班能完成本次模擬疏運，但會拉長等待；不是程式禁止減班。** 下表是八場合計，減班試算尚未採用。','']+table+['',
+    content=['### 不同候車權重下的增減班取捨','',
+      f'額外保留 8／10 分鐘配置，使用與原結果相同的獨立 300 次情境評估。**λ=0.25 時八場合計選到取消 6 班；λ=1 時未選到取消班次。** 下表是八場合計，8／10 分鐘減班試算尚未採用。','']+table+['',
       f'λ=1 時，取消一班省約 {saving:,.0f} 元，但只要多出 {threshold:,.0f} 人分鐘等待，候車時間成本就抵銷節省。背景組占模型旅次約 {background:.1%}；因此目標也在改善沿線一般乘客候車。原搜尋另有初篩限制，不能據此宣稱所有減班組合都不值得。','',
       '![成本與候車取捨](result/green_dispatch_diagnostics/figures/cost_wait_tradeoff.png)','',
       '### 到站列車不必固定假設 50%','',

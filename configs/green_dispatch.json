@@ -14,7 +14,7 @@
   "transfer_walk_minutes": 5,
   "platform_access_minutes": 5,
   "capacity_persons": 2220,
-  "waiting_weights": [0.5, 1, 2],
+  "waiting_weights": [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5],
   "time_value_per_minute": 3.2666666666666666,
   "variable_cost_per_train_km": 128.05,
   "service_km": 18.77,

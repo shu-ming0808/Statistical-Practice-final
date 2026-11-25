@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T17:02:09.248600+00:00",
+  "generated_at": "2026-11-25T14:54:14.373636+00:00",
   "config": {
     "seed": 20261027,
     "decision_start": "18:00",
@@ -17,9 +17,16 @@
     "platform_access_minutes": 5,
     "capacity_persons": 2220,
     "waiting_weights": [
+      0.25,
       0.5,
+      0.75,
       1,
-      2
+      1.25,
+      1.5,
+      1.75,
+      2,
+      2.25,
+      2.5
     ],
     "time_value_per_minute": 3.2666666666666666,
     "variable_cost_per_train_km": 128.05,
@@ -97,27 +104,41 @@
       "donor_events": [
         "2024-07-17"
       ],
-      "candidates_evaluated": 3772,
-      "proposal_plans": 352,
-      "retained_candidates": 43,
-      "slot_candidate_evaluations": 944,
-      "slot_proposal_plans": 12,
+      "candidates_evaluated": 10888,
+      "proposal_plans": 1059,
+      "retained_candidates": 90,
+      "slot_candidate_evaluations": 2302,
+      "slot_proposal_plans": 33,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 29
+        "0.25": 9,
+        "0.5": 14,
+        "0.75": 24,
+        "1": 24,
+        "1.25": 33,
+        "1.5": 44,
+        "1.75": 44,
+        "2": 51,
+        "2.25": 51,
+        "2.5": 51
       },
       "expanded_winners": {
-        "0.5": 35,
-        "1": 37,
-        "2": 42
+        "0.25": 9,
+        "0.5": 63,
+        "0.75": 24,
+        "1": 64,
+        "1.25": 72,
+        "1.5": 73,
+        "1.75": 77,
+        "2": 77,
+        "2.25": 83,
+        "2.5": 89
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 162.69,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 416.59,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "6663a6a3768567993a9cfba3217681afa7c8dbd57bffcf801095ad1b0c688454",
@@ -153,27 +174,41 @@
         "2024-07-17",
         "2024-07-31"
       ],
-      "candidates_evaluated": 3836,
-      "proposal_plans": 295,
-      "retained_candidates": 50,
-      "slot_candidate_evaluations": 942,
-      "slot_proposal_plans": 19,
+      "candidates_evaluated": 11046,
+      "proposal_plans": 718,
+      "retained_candidates": 113,
+      "slot_candidate_evaluations": 3018,
+      "slot_proposal_plans": 55,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 30
+        "0.25": 10,
+        "0.5": 20,
+        "0.75": 30,
+        "1": 40,
+        "1.25": 47,
+        "1.5": 52,
+        "1.75": 58,
+        "2": 58,
+        "2.25": 72,
+        "2.5": 72
       },
       "expanded_winners": {
-        "0.5": 33,
-        "1": 37,
-        "2": 49
+        "0.25": 74,
+        "0.5": 77,
+        "0.75": 81,
+        "1": 85,
+        "1.25": 47,
+        "1.5": 88,
+        "1.75": 95,
+        "2": 103,
+        "2.25": 103,
+        "2.5": 112
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 133.5,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 339.79,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "0ab16bbea476f388971ca95830839ddd6245cab6274d4d6ae840be3d7a03060d",
@@ -209,27 +244,41 @@
         "2024-07-31",
         "2024-08-10"
       ],
-      "candidates_evaluated": 3914,
-      "proposal_plans": 349,
-      "retained_candidates": 45,
-      "slot_candidate_evaluations": 947,
-      "slot_proposal_plans": 14,
+      "candidates_evaluated": 10731,
+      "proposal_plans": 968,
+      "retained_candidates": 91,
+      "slot_candidate_evaluations": 2782,
+      "slot_proposal_plans": 37,
       "original_winners": {
-        "0.5": 10,
-        "1": 19,
-        "2": 30
+        "0.25": 10,
+        "0.5": 16,
+        "0.75": 25,
+        "1": 25,
+        "1.25": 33,
+        "1.5": 45,
+        "1.75": 45,
+        "2": 45,
+        "2.25": 48,
+        "2.5": 56
       },
       "expanded_winners": {
-        "0.5": 35,
-        "1": 39,
-        "2": 44
+        "0.25": 10,
+        "0.5": 61,
+        "0.75": 63,
+        "1": 66,
+        "1.25": 74,
+        "1.5": 76,
+        "1.75": 75,
+        "2": 85,
+        "2.25": 87,
+        "2.5": 87
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 174.44,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 408.13,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "0ab16bbea476f388971ca95830839ddd6245cab6274d4d6ae840be3d7a03060d",
@@ -266,27 +315,41 @@
         "2024-08-10",
         "2025-08-06"
       ],
-      "candidates_evaluated": 3856,
-      "proposal_plans": 343,
-      "retained_candidates": 45,
-      "slot_candidate_evaluations": 941,
-      "slot_proposal_plans": 14,
+      "candidates_evaluated": 10584,
+      "proposal_plans": 971,
+      "retained_candidates": 105,
+      "slot_candidate_evaluations": 2921,
+      "slot_proposal_plans": 49,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 30
+        "0.25": 10,
+        "0.5": 27,
+        "0.75": 27,
+        "1": 27,
+        "1.25": 36,
+        "1.5": 46,
+        "1.75": 46,
+        "2": 45,
+        "2.25": 49,
+        "2.5": 57
       },
       "expanded_winners": {
-        "0.5": 35,
-        "1": 40,
-        "2": 44
+        "0.25": 10,
+        "0.5": 74,
+        "0.75": 27,
+        "1": 77,
+        "1.25": 86,
+        "1.5": 88,
+        "1.75": 87,
+        "2": 92,
+        "2.25": 104,
+        "2.5": 104
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 175.35,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 340.79,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "080685d8b290ff64500a41af335b1efd832acf28165e77e153cfda3b252c8bc2",
@@ -326,27 +389,41 @@
         "2025-08-06",
         "2025-08-20"
       ],
-      "candidates_evaluated": 3439,
-      "proposal_plans": 285,
-      "retained_candidates": 50,
-      "slot_candidate_evaluations": 939,
-      "slot_proposal_plans": 19,
+      "candidates_evaluated": 9858,
+      "proposal_plans": 667,
+      "retained_candidates": 104,
+      "slot_candidate_evaluations": 2819,
+      "slot_proposal_plans": 57,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 30
+        "0.25": 8,
+        "0.5": 20,
+        "0.75": 30,
+        "1": 40,
+        "1.25": 43,
+        "1.5": 53,
+        "1.75": 53,
+        "2": 63,
+        "2.25": 63,
+        "2.5": 63
       },
       "expanded_winners": {
-        "0.5": 35,
-        "1": 20,
-        "2": 49
+        "0.25": 8,
+        "0.5": 68,
+        "0.75": 74,
+        "1": 40,
+        "1.25": 43,
+        "1.5": 85,
+        "1.75": 90,
+        "2": 91,
+        "2.25": 99,
+        "2.5": 103
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 125.06,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 251.44,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "336efe17095badc6e50379df9087c813b823245a222f221ab4af1d4310a814a4",
@@ -383,27 +460,41 @@
         "2025-08-20",
         "2025-08-30"
       ],
-      "candidates_evaluated": 4022,
-      "proposal_plans": 267,
-      "retained_candidates": 43,
-      "slot_candidate_evaluations": 947,
-      "slot_proposal_plans": 12,
+      "candidates_evaluated": 11676,
+      "proposal_plans": 693,
+      "retained_candidates": 100,
+      "slot_candidate_evaluations": 3008,
+      "slot_proposal_plans": 47,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 30
+        "0.25": 10,
+        "0.5": 20,
+        "0.75": 30,
+        "1": 30,
+        "1.25": 40,
+        "1.5": 40,
+        "1.75": 46,
+        "2": 55,
+        "2.25": 55,
+        "2.5": 59
       },
       "expanded_winners": {
-        "0.5": 33,
-        "1": 37,
-        "2": 42
+        "0.25": 60,
+        "0.5": 63,
+        "0.75": 72,
+        "1": 76,
+        "1.25": 78,
+        "1.5": 79,
+        "1.75": 82,
+        "2": 87,
+        "2.25": 92,
+        "2.5": 99
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 102.16,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 227.23,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "4dc2e1a4df2d1d74d5690f184964541c2e8c8ac3ed8eae234fd423f9e6464f6a",
@@ -443,27 +534,41 @@
         "2025-08-30",
         "2026-07-25"
       ],
-      "candidates_evaluated": 3813,
-      "proposal_plans": 330,
-      "retained_candidates": 44,
-      "slot_candidate_evaluations": 940,
-      "slot_proposal_plans": 13,
+      "candidates_evaluated": 10713,
+      "proposal_plans": 981,
+      "retained_candidates": 95,
+      "slot_candidate_evaluations": 2672,
+      "slot_proposal_plans": 49,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 30
+        "0.25": 10,
+        "0.5": 15,
+        "0.75": 25,
+        "1": 25,
+        "1.25": 33,
+        "1.5": 45,
+        "1.75": 45,
+        "2": 54,
+        "2.25": 54,
+        "2.5": 54
       },
       "expanded_winners": {
-        "0.5": 35,
-        "1": 39,
-        "2": 43
+        "0.25": 60,
+        "0.5": 65,
+        "0.75": 67,
+        "1": 69,
+        "1.25": 79,
+        "1.5": 82,
+        "1.75": 84,
+        "2": 87,
+        "2.25": 90,
+        "2.5": 93
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 175.55,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 399.88,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     },
     {
       "od_sha256": "3c50050cdafa04647770fafe63047abb12a14570c513136c0d03ad5e85d7b5a4",
@@ -505,27 +610,41 @@
         "2026-07-25",
         "2026-08-05"
       ],
-      "candidates_evaluated": 4094,
-      "proposal_plans": 275,
-      "retained_candidates": 48,
-      "slot_candidate_evaluations": 944,
-      "slot_proposal_plans": 17,
+      "candidates_evaluated": 11610,
+      "proposal_plans": 729,
+      "retained_candidates": 112,
+      "slot_candidate_evaluations": 2938,
+      "slot_proposal_plans": 44,
       "original_winners": {
-        "0.5": 10,
-        "1": 20,
-        "2": 30
+        "0.25": 10,
+        "0.5": 20,
+        "0.75": 35,
+        "1": 25,
+        "1.25": 46,
+        "1.5": 46,
+        "1.75": 59,
+        "2": 59,
+        "2.25": 59,
+        "2.5": 71
       },
       "expanded_winners": {
-        "0.5": 37,
-        "1": 42,
-        "2": 47
+        "0.25": 73,
+        "0.5": 80,
+        "0.75": 81,
+        "1": 84,
+        "1.25": 87,
+        "1.5": 88,
+        "1.75": 93,
+        "2": 98,
+        "2.25": 104,
+        "2.5": 111
       },
       "original_winners_preserved": true,
       "training_draws": 200,
       "evaluation_draws": 300,
       "chosen_from_training": true,
-      "seconds": 129.72,
-      "fingerprint": "880055a71ddf51cd6b2de850fea2958c2b451549e4ba35e7e5f7202590f6f761"
+      "seconds": 307.56,
+      "fingerprint": "f3a599a5b5267b83a77220b1efecf7a7e680957085739fcc2eb6b921dedf330e"
     }
   ],
   "input_hashes": {

@@ -42,7 +42,7 @@ def read_rows(path,fields):
 def validate_points(rows,main):
     comparisons={(r['event_date'],r['waiting_weight']):r for r in main['comparison']}
     events={key[0] for key in comparisons}; seen=set()
-    expected={ (e,s) for e in events for s in ('baseline','current_0.5','current_1','current_2','fixed_8','fixed_10') }
+    expected={ (e,s) for e in events for s in (['baseline']+[f'current_{w:g}' for w in main['waiting_weights']]+['fixed_8','fixed_10']) }
     for r in rows:
         key=r['event_date'],r['scenario_id']
         if key not in expected or key in seen: raise ValueError('Unknown or duplicate tradeoff point')
