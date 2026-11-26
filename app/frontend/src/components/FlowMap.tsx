@@ -6,6 +6,7 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { Expand, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { STATIONS, VENUE, MAP_STYLE, type LngLat } from "@/data/geography";
+import type { MinuteFlow } from "@/lib/minute-flow";
 
 // MapLibre 6 needs its worker bundled separately by Vite, including shared imports.
 maplibregl.setWorkerUrl(workerUrl);
@@ -17,6 +18,7 @@ interface Props {
   density: number;
   opacity: number;
   labels: boolean;
+  flows: Record<string, MinuteFlow>;
 }
 const bounds: [[number, number], [number, number]] = [
   [121.5038, 25.048],
@@ -99,7 +101,7 @@ export function FlowMap(props: Props) {
           type: "FeatureCollection",
           features: STATIONS.map((s) => ({
             type: "Feature",
-            properties: { station: s.id, color: s.color },
+            properties: { station: s.id, color: latest.current.flows[s.id]?.color ?? "#71717a" },
             geometry: { type: "LineString", coordinates: s.route },
           })),
         },
@@ -235,19 +237,28 @@ export function FlowMap(props: Props) {
       2.9,
       1.6,
     ]);
-    const features = STATIONS.flatMap((s) =>
-      Array.from({ length: props.density }, (_, i) => ({
+    (instance.getSource("routes") as GeoJSONSource).setData({
+      type: "FeatureCollection",
+      features: STATIONS.map(s => ({
         type: "Feature" as const,
-        properties: { color: s.color, station: s.id },
+        properties: { station: s.id, color: props.flows[s.id]?.color ?? "#71717a" },
+        geometry: { type: "LineString" as const, coordinates: s.route },
+      })),
+    });
+    const features = STATIONS.flatMap((s) => {
+      const count = props.flows[s.id]?.count == null ? 0 : Math.max(2, Math.round(props.density * props.flows[s.id].intensity));
+      return Array.from({ length: count }, (_, i) => ({
+        type: "Feature" as const,
+        properties: { color: props.flows[s.id].color, station: s.id },
         geometry: {
           type: "Point" as const,
           coordinates: along(
             s.route,
-            (i / props.density + props.minute / 45) % 1,
+            (i / count + props.minute / 45) % 1,
           ),
         },
-      })),
-    );
+      }));
+    });
     (instance.getSource("particles") as GeoJSONSource).setData({
       type: "FeatureCollection",
       features,
@@ -259,6 +270,7 @@ export function FlowMap(props: Props) {
         STATIONS[i].id === props.selected,
       );
       element.classList.toggle("hide-label", !props.labels);
+      element.style.setProperty("--flow-color", props.flows[STATIONS[i].id]?.color ?? "#71717a");
     });
   }, [
     ready,
@@ -267,6 +279,7 @@ export function FlowMap(props: Props) {
     props.opacity,
     props.labels,
     props.selected,
+    props.flows,
   ]);
   return (
     <div className="map-stage">
@@ -307,7 +320,8 @@ export function FlowMap(props: Props) {
         <MapPin size={13} />
         <span>活動區 → 車站</span>
         <i />
-        <span>粒子不代表實際人數或足跡</span>
+        <span className="density-gradient" />
+        <span>藍＝低、紅＝高 · 分鐘估計，非實測足跡</span>
       </div>
     </div>
   );
@@ -340,15 +354,16 @@ function SchematicMap(props: Props) {
           <polyline
             points={s.route.map((p) => point(p).join(",")).join(" ")}
             fill="none"
-            stroke={s.color}
+            stroke={props.flows[s.id]?.color ?? "#71717a"}
             strokeWidth={s.id === props.selected ? 3 : 1.4}
             opacity={props.opacity}
           />
-          {Array.from({ length: props.density }, (_, i) => {
+          {Array.from({ length: props.flows[s.id]?.count == null ? 0 : Math.max(2, Math.round(props.density * props.flows[s.id].intensity)) }, (_, i) => {
+            const count = props.flows[s.id]?.count == null ? 0 : Math.max(2, Math.round(props.density * props.flows[s.id].intensity));
             const p = point(
-              along(s.route, (i / props.density + props.minute / 45) % 1),
+              along(s.route, (i / count + props.minute / 45) % 1),
             );
-            return <circle key={i} cx={p[0]} cy={p[1]} r="2" fill={s.color} />;
+            return <circle key={i} cx={p[0]} cy={p[1]} r="2" fill={props.flows[s.id].color} />;
           })}
           <g
             onClick={() => props.onSelect(s.id)}
@@ -363,7 +378,7 @@ function SchematicMap(props: Props) {
               cx={point(s.coordinates)[0]}
               cy={point(s.coordinates)[1]}
               r="7"
-              fill={s.color}
+              fill={props.flows[s.id]?.color ?? "#71717a"}
             />
             {props.labels && (
               <text

@@ -430,6 +430,13 @@ h3 {
   background: #515156;
   margin: 0 3px;
 }
+.map-legend .density-gradient {
+  width: 32px;
+  height: 7px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3b82f6, #ef4444);
+  margin: 0;
+}
 .map-loading,
 .tile-error {
   position: absolute;
@@ -478,15 +485,13 @@ h3 {
 .marker-dot {
   width: 11px;
   height: 11px;
-  background: #3b3b3f;
-  border: 2px solid #babac2;
+  background: var(--flow-color, #71717a);
+  border: 2px solid var(--flow-color, #71717a);
   border-radius: 50%;
   box-shadow: 0 0 0 4px #16161980;
 }
 .is-selected .marker-dot {
-  background: white;
-  border-color: white;
-  box-shadow: 0 0 0 5px #fafafa20;
+  box-shadow: 0 0 0 5px #fafafa30;
 }
 .marker-label {
   font-size: 12px;
@@ -624,6 +629,10 @@ h3 {
   gap: 8px;
 }
 .station-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  white-space: normal;
   text-align: left;
   padding: 13px 14px 11px;
   background: #19191b;

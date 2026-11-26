@@ -33,13 +33,13 @@ import {
   STATIC_MODE,
   completeTotal,
   csvUrl,
-  hourOf,
   numberText,
   type EventRecord,
   type FlowResponse,
   type FlowRow,
 } from "@/lib/api";
 import { STATIONS, SOURCE_LINKS } from "@/data/geography";
+import { minuteFlows } from "@/lib/minute-flow";
 const FlowMap = lazy(() =>
   import("@/components/FlowMap").then((module) => ({
     default: module.FlowMap,
@@ -203,11 +203,8 @@ function Workspace() {
   }, [minute]);
   const retry = () => setRevision((n) => n + 1);
   const currentEvent = events.find((e) => e.event_date === date);
-  const currentHour = 18 + Math.floor(minute / 60);
+  const flow = minuteFlows(rows, minute);
   const station = STATIONS.find((s) => s.id === selected) || STATIONS[0];
-  const currentRow = rows.find(
-    (r) => r.station === selected && hourOf(r.hour_start) === currentHour,
-  );
   const totals = STATIONS.map((s) =>
     completeTotal(
       rows.filter((r) => r.station === s.id),
@@ -420,22 +417,10 @@ function Workspace() {
                           note="18–24 時，全體旅客，非活動人數"
                         />
                         <Metric
-                          label={`${station.name}・${currentHour} 時進站`}
-                          value={
-                            loading
-                              ? "…"
-                              : numberText(
-                                  currentRow?.origin_complete
-                                    ? currentRow.origin_count
-                                    : null,
-                                )
-                          }
+                          label={`${station.name}・${timeText(minute)} 進站推估`}
+                          value={loading ? "…" : numberText(flow[selected]?.count)}
                           suffix="人次"
-                          note={
-                            STATIC_MODE
-                              ? "公開快照・原始時段彙整"
-                              : "MySQL 原始時段彙整"
-                          }
+                          note="人次／分；小時觀測量依情境權重拆分"
                         />
                         <Metric
                           label="完整資料時段"
@@ -476,6 +461,7 @@ function Workspace() {
                               density={density}
                               opacity={opacity / 100}
                               labels={labels}
+                              flows={flow}
                             />
                           </Suspense>
                           <div className="timeline">
@@ -510,9 +496,7 @@ function Workspace() {
                                 <span className="current-time num">
                                   {timeText(minute)}
                                 </span>
-                                <span className="timeline-date">
-                                  台北時間 · 時間格播放
-                                </span>
+                                <span className="timeline-date">台北時間 · 分鐘情境播放</span>
                               </div>
                               <select
                                 className="speed-select"
@@ -559,34 +543,19 @@ function Workspace() {
                               <span className="eyebrow">DESTINATIONS</span>
                               <h2>周邊觀測車站</h2>
                             </div>
-                            <span className="small-tag">{currentHour}:00</span>
+                            <Badge variant="outline" className="small-tag">{timeText(minute)}</Badge>
                           </div>
                           <p className="destination-intro">
-                            選擇車站，查看路徑與該時段的真實進站人次。
+                            選擇車站，查看路徑與該分鐘推估進站人次。小時總量來自觀測，分鐘分布是情境假設。
                           </p>
                           <div className="station-list">
                             {STATIONS.map((s, i) => {
-                              const row = rows.find(
-                                (r) =>
-                                  r.station === s.id &&
-                                  hourOf(r.hour_start) === currentHour,
-                              );
-                              const count = row?.origin_complete
-                                ? row.origin_count
-                                : null;
-                              const max = Math.max(
-                                1,
-                                ...rows
-                                  .filter(
-                                    (r) =>
-                                      hourOf(r.hour_start) === currentHour &&
-                                      r.origin_complete,
-                                  )
-                                  .map((r) => r.origin_count || 0),
-                              );
+                              const estimate = flow[s.id];
+                              const count = estimate?.count ?? null;
                               return (
-                                <button
+                                <Button
                                   key={s.id}
+                                  variant="ghost"
                                   onClick={() => setSelected(s.id)}
                                   className={`station-card ${selected === s.id ? "is-selected" : ""}`}
                                 >
@@ -604,16 +573,17 @@ function Workspace() {
                                     <span className="num">
                                       {loading ? "…" : numberText(count)}
                                     </span>
-                                    <small>進站人次</small>
+                                    <small>人次／分 · 推估</small>
                                   </div>
                                   <div className="station-track">
                                     <span
                                       style={{
-                                        width: `${count == null ? 0 : (count / max) * 100}%`,
+                                        width: `${estimate ? estimate.intensity * 100 : 0}%`,
+                                        background: estimate?.color,
                                       }}
                                     />
                                   </div>
-                                </button>
+                                </Button>
                               );
                             })}
                           </div>
