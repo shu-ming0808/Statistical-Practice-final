@@ -115,10 +115,9 @@ def report():
       '[完整診斷與公式](result/green_dispatch_diagnostics/report.md)／[取捨數據](result/green_dispatch_diagnostics/tradeoff_points.csv)／[逐班載量](result/green_load_profile/beimen_load_profile.csv)','']
     content+=['參考：'+ '；'.join(f'[{s["title"]}]({s["url"]})' for s in SOURCES)+ '。','']
     block=start+'\n'+'\n'.join(content)+'\n'+end
-    if start in text: a=text.index(start);b=text.index(end,a)+len(end);text=text[:a]+block+text[b:]
-    else:
-        at=text.index('<!-- green-dispatch:end -->')+len('<!-- green-dispatch:end -->');text=text[:at]+'\n\n'+block+text[at:]
-    readme.write_text(text,encoding='utf-8',newline='\n')
+    if start in text:
+        a=text.index(start);b=text.index(end,a)+len(end);text=text[:a]+block+text[b:]
+        readme.write_text(text,encoding='utf-8',newline='\n')
     print(out/'report.md');print(totals.to_string(index=False));print('background share',background,'cancel break-even lambda',break_min,break_max)
 
 if __name__=='__main__':report()

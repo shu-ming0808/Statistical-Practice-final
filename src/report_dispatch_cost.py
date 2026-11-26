@@ -89,6 +89,8 @@ def detailed_results(cfg, out, chosen, candidates):
 
 def update_readme(path, body):
     text=path.read_text(encoding='utf-8')
+    if START not in text and END not in text:
+        return  # The root README is curated; historical results live in their own report.
     if text.count(START)!=1 or text.count(END)!=1 or text.index(START)>text.index(END):
         raise ValueError('README result markers missing or duplicated')
     a,b=text.split(START,1);_,c=b.split(END,1)

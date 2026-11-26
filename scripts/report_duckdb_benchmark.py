@@ -287,11 +287,9 @@ MySQL 沿用 128 MiB buffer pool，DuckDB 專案設定為 4 執行緒／2 GB；�
         _, after = rest.split(end_marker, 1)
         updated = before + compact.rstrip() + after
     else:
-        anchor = "## 候車與網站"
-        if original.count(anchor) != 1:
-            raise ValueError("README insertion anchor is ambiguous")
-        updated = original.replace(anchor, compact + anchor, 1)
-    root_readme.write_text(updated, encoding="utf-8")
+        updated = original  # The root README is curated; benchmark detail stays in OUT.
+    if updated != original:
+        root_readme.write_text(updated, encoding="utf-8")
     print(OUT / "README.md")
 
 

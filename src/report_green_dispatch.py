@@ -214,6 +214,6 @@ def report(out,cfg,update_readme=False):
         block=START+'\n'+content+'\n'+END
         if START in text:
             a=text.index(START);b=text.index(END,a)+len(END);text=text[:a]+block+text[b:]
+            path.write_text(text,encoding='utf-8')
         else:
-            index=text.index('## 快速開始');text=text[:index]+block+'\n\n'+text[index:]
-        path.write_text(text,encoding='utf-8')
+            print('README is curated; detailed results remain in result/green_dispatch/report.md')
