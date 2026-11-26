@@ -52,7 +52,7 @@ XGBoost 其餘設定為 min_child_weight=1、reg_lambda=1、reg_alpha=0、subsam
 
 加權後整體 MAE 相對未加權改善約 7.1%，**散場窗口低估卻增加**。2024/8/10 的最高峰實際 11,101、預測約 8,359，仍少估 2,742 人次。整體平均改善不能解讀為尖峰問題已解決。
 
-![最終模型的誤差分布與實際對照](result/forecast/figures/prediction_diagnostics.png)
+![Final model error distribution and predicted versus observed entries](docs/images/forecast_diagnostics_en.svg)
 
 負誤差表示低估；[九場逐時走勢](result/forecast/figures/hourly_profiles.png)可檢查峰值時間。曾比較只留部分車站、一般日增量、lag、融合及不同縮放；沒有取得足以取代目前 XGBoost 的一致改善。Lasso 的弱懲罰設定幾乎等於未篩變數，較強懲罰則使預測變差；隊友線性實驗屬未完整重現的探索性核對，詳見[獨立報告](result/linear_sensitivity/report.md)。輸入相關性與 VIF 只作診斷，不直接決定樹模型要刪哪些變數；[相關圖與定義](result/forecast/report.md)。
 
@@ -75,7 +75,7 @@ GAM 使用加法平滑與懲罰，資料支持不足的欄位維持線性；XGBo
 
 公開進出站資料最細是小時。對每小時預測人數先設分鐘權重 p，使各分鐘加總仍等於原小時預測；比較均勻、寬峰、集中峰及峰中心。進站後到月台另假設固定 5 分鐘。方向比例、分鐘形狀與北門前的列車剩餘空間均做情境分析，**不是量到的分鐘人流或候車時間**。列車以批次服務隊伍；同方向若有人跨班滯留，已用滿該班可用容量。
 
-![同一小時人流在不同分鐘形狀下的候車情境](result/queue_dispatch_v1/figures/arrival_queue_comparison.png)
+![Same hourly demand under different minute arrivals and queue outcomes](docs/images/minute_queue_en.svg)
 
 高運量六節編組的名目上限是 2,220 人，不能直接當北門可上車人數。全線調度使用歷史 OD、假設路徑與班表，逐站先下後上推估車上人數；仍缺與活動相符的逐班實測載量校準。[候車情境報告](result/queue_dispatch_v1/report.md) · [逐班剩餘空間](result/green_dispatch_diagnostics/figures/beimen_remaining_capacity.png) · [校準資料缺口](result/green_load_profile/calibration/report.md)
 
@@ -106,9 +106,9 @@ x 是有限候選班表，W 是模擬候車人分鐘，λ 是研究者設定的�
 
 因此 λ=1 的方案**多花營運費用換取較短候車**，不能稱作現金節省。低權重時才選到少量取消班次；背景旅次多且候選搜尋也偏向密班，兩者都可能推動增班。8／10 分鐘配置可減少支出，但目前只作診斷，未正式採用。
 
-![候車時間與可變營運成本的取捨](result/green_dispatch_diagnostics/figures/cost_wait_tradeoff.png)
+![Waiting time versus variable operating cost](docs/images/cost_wait_tradeoff_en.svg)
 
-![每 15 分鐘新班表與原班表的班數淨變化](result/green_dispatch/figures/slot_heatmap.png)
+![15-minute timetable departure count changes](docs/images/dispatch_heatmap_en.svg)
 
 熱圖橘色表示該時段班次較多、藍色較少；**移時也會形成一正一負兩格，藍格不等於取消一班**。[逐場結果與完整方法](result/green_dispatch/report.md) · [各權重與減班診斷](result/green_dispatch_diagnostics/report.md) · [逐班時刻](result/green_dispatch/timetable.csv) · [四站影響](result/green_dispatch/station_impacts.csv)
 
@@ -116,7 +116,7 @@ x 是有限候選班表，W 是模擬候車人分鐘，λ 是研究者設定的�
 
 ## 重現與網站更新
 
-私有逐列資料、模型與官方原檔保存在 .local/，不會推送到 GitHub。沒有這些檔案仍可查看 README、公開 PNG、報告與網站；重跑需由團隊私下取得相同快照，先核對雜湊。
+私有逐列資料、模型與官方原檔保存在 .local/，不會推送到 GitHub。沒有這些檔案仍可查看 README、公開英文 SVG 圖表、報告與網站；重跑需由團隊私下取得相同快照，先核對雜湊。README 圖表使用可縮放的 SVG，另有高解析度 PNG 備用；圖表可從公開結果以 `python scripts/render_readme_figures_en.py` 重畫。頁首 DEMO 是網站畫面截圖，仍是點陣圖。
 
 ~~~powershell
 uv sync --inexact --extra transit --group analysis
