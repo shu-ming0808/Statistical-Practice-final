@@ -75,7 +75,7 @@ function DispatchTradeoff({points, weight, onSelect}: {
           </tr>)}</tbody></table>
       </div>
       {points.some(p => p.unserved_mean > 0) && <p>褐色外框表示仍有未完成旅次，其等待只累計至共同終點，不能當成完整候車時間。</p>}
-      {!points.some(p => p.kind === "reduction_probe") && <p>減班試算尚未載入，目前顯示原班表與已發布的三種權重方案。</p>}
+      {!points.some(p => p.kind === "reduction_probe") && <p>減班試算尚未載入，目前顯示原班表與已發布的權重方案。</p>}
       {points.some(p => p.kind === "reduction_probe") && <>
         <p>減班試算能完成模型疏運，但會拉長等待。目前目標計算全線乘客的時間成本；八場背景旅次占約 85.9%，因此即使列車未滿，加密仍可能划算。λ＝1 時，取消一班省約 2,403 元，卻只能抵銷約 736 人分鐘的額外等待。原搜尋也有初篩限制，不能推論所有減班組合都較差。</p>
         <div className="dispatch-tradeoff-links">

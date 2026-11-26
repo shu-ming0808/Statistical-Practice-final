@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { numberText } from "@/lib/api";
+import type { DispatchData } from "@/lib/dispatch";
 import {
   departureTime,
   publicFile,
@@ -582,11 +583,31 @@ function Queue({ data, event }: { data: Research; event: string }) {
 function Operations({ data }: { data: Research }) {
   const [station, setStation] = useState("北門");
   const [line, setLine] = useState("G");
-  const [day, setDay] = useState("weekday");
+  const [day, setDay] = useState("activity");
+  const [dispatch, setDispatch] = useState<DispatchData | null>(null);
+  const [dispatchError, setDispatchError] = useState(false);
+  const [event, setEvent] = useState("2024-08-10");
+  const [weight, setWeight] = useState(1);
   const [source, setSource] = useState("");
   const [start, setStart] = useState(18);
   const [end, setEnd] = useState(25);
   const op = data.operations;
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(publicFile("dispatch.json"), { signal: controller.signal })
+      .then(r => { if (!r.ok) throw new Error("dispatch unavailable"); return r.json(); })
+      .then((value: DispatchData) => {
+        if (value.schema_version !== 1 || !value.no_wait_threshold) throw new Error("invalid dispatch snapshot");
+        setDispatch(value);
+      })
+      .catch(() => { if (!controller.signal.aborted) setDispatchError(true); });
+    return () => controller.abort();
+  }, []);
+  const eventDates = [...new Set(dispatch?.comparison.map(r => r.event_date) ?? [])];
+  const eventWeekday = new Date(`${event}T12:00:00Z`).getUTCDay();
+  const baselineDay = day === "activity"
+    ? eventWeekday === 6 ? "saturday" : eventWeekday === 0 ? "sunday_holiday" : "weekday"
+    : day;
   const stations = [...new Set(op.station_line.map((r) => r.station_label))];
   const lines = op.station_line
     .filter((r) => r.station_label === station)
@@ -599,10 +620,19 @@ function Operations({ data }: { data: Research }) {
   const departures = op.departure.filter(
     (r) =>
       r.source_id === table?.source_id &&
-      r.day_type === day &&
+      r.day_type === baselineDay &&
       +r.departure_minute >= start * 60 &&
       +r.departure_minute < end * 60,
   );
+  const eventComparison = dispatch?.comparison.find(r => r.event_date === event && r.waiting_weight === weight);
+  const greenEvent = day === "activity" && station === "北門" && line === "G";
+  const direction = table?.direction_text.includes("松山") ? "往松山" : "往新店";
+  const eventDepartures = greenEvent ? (dispatch?.timetable ?? [])
+    .filter(r => r.event_date === event && r.waiting_weight === weight && r.direction === direction && r.new_beimen)
+    .filter(r => { const hour = Number(r.new_beimen.slice(0, 2)); return hour >= start && hour < end; })
+    .sort((a, b) => a.new_beimen.localeCompare(b.new_beimen)) : [];
+  const directionChanges = greenEvent ? (dispatch?.timetable ?? [])
+    .filter(r => r.event_date === event && r.waiting_weight === weight && r.direction === direction && r.action !== "保留") : [];
   const paths = op.dispatch_path
     .filter((r) => r.station_label === station && r.line_code === line)
     .filter((r, i, all) => all.findIndex((a) => a.origin === r.origin) === i);
@@ -657,29 +687,43 @@ function Operations({ data }: { data: Research }) {
         <label className="research-filter">
           日型
           <select value={day} onChange={(e) => setDay(e.target.value)}>
+            <option value="activity">活動情境（一般表＋模擬調度）</option>
             <option value="weekday">平日</option>
             <option value="saturday">週六</option>
             <option value="sunday_holiday">週日／國定假日</option>
           </select>
         </label>
+        {day === "activity" && <label className="research-filter">活動日期
+          <select value={event} onChange={e => setEvent(e.target.value)}>
+            {eventDates.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </label>}
+        {day === "activity" && <label className="research-filter">候車成本權重 λ
+          <select value={weight} onChange={e => setWeight(Number(e.target.value))}>
+            {(dispatch?.waiting_weights ?? [1]).map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+        </label>}
       </div>
       <section className="panel research-panel">
         <div className="research-panel-head">
           <div>
-            <span className="eyebrow">OFFICIAL DEPARTURES</span>
-            <h2>{station} · 一般離站時刻表</h2>
+            <span className="eyebrow">{greenEvent ? "DISPATCH SCENARIO" : "OFFICIAL DEPARTURES"}</span>
+            <h2>{station} · {greenEvent ? "活動模擬班表" : "一般離站時刻表"}</h2>
           </div>
           {meta && (
             <a href={meta.source_url} target="_blank" rel="noreferrer">
-              官方 PDF
+              一般班表來源 PDF
               <ArrowUpRight size={15} />
             </a>
           )}
         </div>
         <p>
           生效：{meta?.effective_from} · 擷取：{meta?.retrieved_at_utc}{" "}
-          UTC。活動加班車與臨時營運異動另計。
+          UTC。{greenEvent ? "以下是以 2026-08-30 一般班表為基準的研究模擬，並非活動當日實際營運紀錄。" : "此處只顯示一般班表；調度模型只調整松山新店線，其他路線維持原表。"}
         </p>
+        {day === "activity" && <p>活動 {event} · 參照日型：{baselineDay === "weekday" ? "平日" : baselineDay === "saturday" ? "週六" : "週日"}（按星期選取；國定假日須另核對）。{greenEvent && eventComparison && `兩方向合計增 ${eventComparison.added}、減 ${eventComparison.removed}、移時 ${eventComparison.retimed} 班。`}</p>}
+        {greenEvent && dispatch && <p>目前方向 {direction}：新增 {directionChanges.filter(r => r.action === "增班").length} 班、取消 {directionChanges.filter(r => r.action === "取消").length} 班、移時 {directionChanges.filter(r => r.action === "移時").length} 班。<a href="#/research?tab=dispatch">查看完整增減班與候車比較</a></p>}
+        {day === "activity" && dispatchError && <p role="alert">活動班表快照載入失敗；下方不以一般表冒充模擬結果。</p>}
         <div className="research-time-range">
           <label>
             起始小時{" "}
@@ -709,10 +753,15 @@ function Operations({ data }: { data: Research }) {
               }
             />
           </label>
-          <span>24＝次日 00 時 · 結束時刻不含 · 共 {departures.length} 班</span>
+          <span>24＝次日 00 時 · 結束時刻不含 · 共 {greenEvent ? eventDepartures.length : departures.length} 班</span>
         </div>
         <div className="departure-grid">
-          {departures.map((r) => (
+          {greenEvent ? eventDepartures.map((r, i) => (
+            <div className={`departure-${r.action === "增班" ? "added" : r.action === "移時" ? "retimed" : "kept"}`} key={`${r.new_beimen}-${i}`}>
+              <strong className="num">{r.new_beimen.slice(0,5)}</strong>
+              <span>{r.action}{r.action === "移時" ? ` · 原 ${r.old_beimen.slice(0,5)}` : ""} · {direction}</span>
+            </div>
+          )) : departures.map((r) => (
             <div key={r.departure_minute}>
               <strong className="num">
                 {departureTime(+r.departure_minute)}
@@ -720,10 +769,14 @@ function Operations({ data }: { data: Research }) {
               <span>往{r.terminal}</span>
             </div>
           ))}
-          {!departures.length && <p>此篩選範圍無班次。</p>}
+          {!(greenEvent ? eventDepartures.length : departures.length) && <p>{greenEvent && !dispatch ? "正在載入活動模擬班表…" : "此篩選範圍無班次。"}</p>}
         </div>
+        {greenEvent && directionChanges.some(r => r.action === "取消") && <details>
+          <summary>查看此方向取消的原班次</summary>
+          <p>{directionChanges.filter(r => r.action === "取消").map(r => r.old_beimen.slice(0, 5)).join("、")}</p>
+        </details>}
         <ChartNote>
-          保留原表終點與區間車差異；原表畫線的班次已依終點解析。日型由你選擇，不會自動把活動日期當成一般平日。
+          {greenEvent ? "新增與移時僅是模型建議；取消的班次不列在新班表。完整逐班變更與成本等待比較請見「增減班比較」。" : "保留原表終點與區間車差異；原表畫線的班次已依終點解析。活動日欄位不等於已取得當天實際營運班表。"}
         </ChartNote>
       </section>
       <section className="panel research-panel">

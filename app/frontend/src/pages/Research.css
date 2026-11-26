@@ -265,6 +265,14 @@
   flex-direction: column;
   gap: 5px;
 }
+.departure-grid > .departure-added {
+  border-color: #678a78;
+  background: #1d2925;
+}
+.departure-grid > .departure-retimed {
+  border-color: #9a8067;
+  background: #29241f;
+}
 .departure-grid strong {
   font-size: 14px;
   font-weight: 500;
