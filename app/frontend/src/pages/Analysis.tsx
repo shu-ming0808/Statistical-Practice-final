@@ -422,7 +422,7 @@ export function Analysis({ date, rows, loading, error, retry }: AnalysisProps) {
             </div>
           </section>
           <p className="analysis-deferred-note">
-            本頁呈現逐時觀測；預測與候車成果請看「模型與候車」。
+            本頁呈現逐時觀測；預測與候車成果請看「研究成果」。
           </p>
         </>
       )}

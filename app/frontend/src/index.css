@@ -293,49 +293,6 @@ h3 {
   border-radius: 50%;
   background: #b6b6bc;
 }
-.metrics-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid #2b2b2e;
-  border-bottom: 1px solid #2b2b2e;
-  padding: 23px 0;
-  margin-bottom: 27px;
-}
-.metric {
-  padding: 0 24px;
-  border-right: 1px solid #2b2b2e;
-}
-.metric:first-child {
-  padding-left: 0;
-}
-.metric:last-child {
-  border-right: 0;
-}
-.metric-label {
-  font-size: 12px;
-  color: #9c9ca2;
-}
-.metric > div {
-  margin: 9px 0 7px;
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-}
-.metric strong {
-  font-size: 31px;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-}
-.metric-unit {
-  font-size: 12px;
-  color: #85858c;
-}
-.metric small {
-  font-size: 12px;
-  color: #73737a;
-  line-height: 1.7;
-}
 .map-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 274px;
@@ -860,6 +817,12 @@ h3 {
   color: #aaaab5;
   margin: 12px 0;
 }
+.source-panel .source-summary {
+  border-top: 1px solid #35353a;
+  padding-top: 12px;
+  color: #d0d0d5;
+  font-variant-numeric: tabular-nums;
+}
 .source-links {
   display: flex;
   gap: 20px;
@@ -922,12 +885,6 @@ h3 {
   .map-stage {
     height: 465px;
   }
-  .metric {
-    padding: 0 15px;
-  }
-  .metric strong {
-    font-size: 26px;
-  }
   .settings-panel {
     display: block;
   }
@@ -967,15 +924,6 @@ h3 {
 @media (max-width: 1000px) {
   .map-layout {
     grid-template-columns: minmax(0, 1fr) 225px;
-  }
-  .metrics-row {
-    gap: 10px;
-  }
-  .metric {
-    padding: 0 10px;
-  }
-  .metric small {
-    font-size: 12px;
   }
   .page-heading p {
     font-size: 12px;
@@ -1023,28 +971,6 @@ h3 {
   }
   .prototype-badge {
     display: none;
-  }
-  .metrics-row {
-    grid-template-columns: 1fr 1fr;
-    padding: 0;
-    gap: 0;
-    margin-bottom: 20px;
-  }
-  .metric {
-    padding: 18px 13px !important;
-    border-bottom: 1px solid #2b2b2e;
-  }
-  .metric:nth-child(2) {
-    border-right: 0;
-  }
-  .metric:nth-child(n + 3) {
-    border-bottom: 0;
-  }
-  .metric strong {
-    font-size: 27px;
-  }
-  .metric small {
-    font-size: 12px;
   }
   .map-layout {
     display: flex;
@@ -1232,15 +1158,22 @@ summary {
   .site-nav {
     grid-column: 1 / -1;
     grid-row: 2;
-    justify-content: space-between;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    gap: 0;
     margin-top: 10px;
   }
   .site-nav a {
     min-height: 48px;
-    font-size: 14px;
-    gap: 7px;
+    min-width: 0;
+    justify-content: center;
+    font-size: 12px;
+    gap: 5px;
+    padding-inline: 2px;
   }
+  .site-nav a svg { width: 14px; height: 14px; flex-shrink: 0; }
   .main-content {
     padding: 20px 16px 24px;
   }

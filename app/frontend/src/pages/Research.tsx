@@ -53,7 +53,7 @@ const format = (v: unknown) =>
   v == null
     ? "—"
     : Number(v).toLocaleString("zh-TW", { maximumFractionDigits: 2 });
-type Tab = "model" | "queue" | "replay" | "operations" | "dispatch";
+type Tab = "model" | "queue" | "dispatch";
 
 function Stat({
   label,
@@ -87,7 +87,17 @@ export function ResearchPage() {
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const requestedTab = searchParams.get("tab");
-  const tab: Tab = requestedTab === "dispatch" || requestedTab === "queue" || requestedTab === "replay" || requestedTab === "operations" ? requestedTab : "model";
+  const tab: Tab = requestedTab === "dispatch" || requestedTab === "operations"
+    ? "dispatch"
+    : requestedTab === "queue" || requestedTab === "replay"
+      ? "queue"
+      : "model";
+  const queueView = requestedTab === "replay" || searchParams.get("view") === "replay"
+    ? "replay"
+    : "scenarios";
+  const dispatchView = requestedTab === "operations" || searchParams.get("view") === "timetable"
+    ? "timetable"
+    : "comparison";
   const [event, setEvent] = useState("2024-08-10");
   useEffect(() => {
     const controller = new AbortController();
@@ -132,7 +142,7 @@ export function ResearchPage() {
       <div className="research-intro">
         <div>
           <h1>詳細預測資訊</h1>
-          <p>比較預測、候車與 18:00–23:00 增減班方案，查看四站相關旅次的轉乘影響。</p>
+          <p>從逐時預測，看到分鐘候車，再比較 18:00–23:00 班次方案。</p>
         </div>
         <Badge variant="outline">公開成果快照</Badge>
       </div>
@@ -151,9 +161,7 @@ export function ResearchPage() {
             [
               { id: "model", label: "預測結果", icon: Activity },
               { id: "queue", label: "候車情境", icon: Clock3 },
-              { id: "replay", label: "單場案例", icon: Activity },
-              { id: "operations", label: "班表與調度", icon: TrainFront },
-              { id: "dispatch", label: "增減班比較", icon: Activity },
+              { id: "dispatch", label: "班次決策", icon: TrainFront },
             ] as const
           ).map((t) => (
             <Button
@@ -168,7 +176,7 @@ export function ResearchPage() {
             </Button>
           ))}
         </div>
-        {tab !== "operations" && tab !== "dispatch" && (
+        {tab !== "dispatch" && (
           <label className="research-filter">
             驗證場次
             <select value={event} onChange={(e) => setEvent(e.target.value)}>
@@ -180,10 +188,32 @@ export function ResearchPage() {
         )}
       </div>
       {tab === "model" && <Model data={data} event={event} />}
-      {tab === "queue" && <Queue data={data} event={event} />}
-      {tab === "replay" && <DecisionReplay data={data} event={event} />}
-      {tab === "operations" && <Operations data={data} />}
-      {tab === "dispatch" && <DispatchComparison />}
+      {tab === "queue" && <>
+        <div className="research-subnav" role="group" aria-label="候車內容">
+          <Button variant={queueView === "scenarios" ? "secondary" : "ghost"}
+            aria-pressed={queueView === "scenarios"} onClick={() => setSearchParams({tab: "queue"})}>
+            情境比較
+          </Button>
+          <Button variant={queueView === "replay" ? "secondary" : "ghost"}
+            aria-pressed={queueView === "replay"} onClick={() => setSearchParams({tab: "queue", view: "replay"})}>
+            單場回放
+          </Button>
+        </div>
+        {queueView === "scenarios" ? <Queue data={data} event={event} /> : <DecisionReplay data={data} event={event} />}
+      </>}
+      {tab === "dispatch" && <>
+        <div className="research-subnav" role="group" aria-label="班次內容">
+          <Button variant={dispatchView === "comparison" ? "secondary" : "ghost"}
+            aria-pressed={dispatchView === "comparison"} onClick={() => setSearchParams({tab: "dispatch"})}>
+            方案成效
+          </Button>
+          <Button variant={dispatchView === "timetable" ? "secondary" : "ghost"}
+            aria-pressed={dispatchView === "timetable"} onClick={() => setSearchParams({tab: "dispatch", view: "timetable"})}>
+            時刻與調度資料
+          </Button>
+        </div>
+        {dispatchView === "comparison" ? <DispatchComparison /> : <Operations data={data} />}
+      </>}
       <div className="research-links">
         <a
           href={GITHUB + "result/forecast/report.md"}
@@ -377,7 +407,7 @@ function Queue({ data, event }: { data: Research; event: string }) {
             官方整列容量上限參考值 2,220 人（370 ×
             6）。下方採「下車後仍可再載的空間」，不是把全列容量都留給北門。
           </p>
-          <p>本頁的剩餘空間 50% 與雙向各 50% 是兩個不同假設。新版全線模型用 OD 分配方向並累計沿途上下車，請見<a href="#/research?tab=dispatch">增減班比較與逐班載量</a>。</p>
+          <p>本頁的剩餘空間 50% 與雙向各 50% 是兩個不同假設。新版全線模型用 OD 分配方向並累計沿途上下車，請見<a href="#/research?tab=dispatch">班次決策與逐班載量</a>。</p>
         </div>
       </div>
       <div className="research-controls panel">
@@ -776,7 +806,7 @@ function Operations({ data }: { data: Research }) {
           <p>{directionChanges.filter(r => r.action === "取消").map(r => r.old_beimen.slice(0, 5)).join("、")}</p>
         </details>}
         <ChartNote>
-          {greenEvent ? "新增與移時僅是模型建議；取消的班次不列在新班表。完整逐班變更與成本等待比較請見「增減班比較」。" : "保留原表終點與區間車差異；原表畫線的班次已依終點解析。活動日欄位不等於已取得當天實際營運班表。"}
+          {greenEvent ? "新增與移時僅是模型建議；取消的班次不列在新班表。完整逐班變更與成本等待比較請見「班次決策」。" : "保留原表終點與區間車差異；原表畫線的班次已依終點解析。活動日欄位不等於已取得當天實際營運班表。"}
         </ChartNote>
       </section>
       <section className="panel research-panel">

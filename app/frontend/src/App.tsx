@@ -250,7 +250,7 @@ function Workspace() {
             </NavLink>
             <NavLink to="/research">
               <Layers2 size={17} />
-              模型與候車
+              研究成果
             </NavLink>
           </nav>
           <div className="site-tools">
@@ -322,6 +322,14 @@ function Workspace() {
                 人流來自已整理的北捷逐時
                 OD。目的站人次沿用來源資料的時間格，尚未確認為實際出站時間。地圖是活動代表位置與車站入口；路徑與粒子是未經校準的示意，不代表實際足跡、導航或人數。底圖需連網載入。
               </p>
+              {!researchPage && (
+                <p className="source-summary">
+                  觀測範圍：4 站、18:00–24:00。四站進站合計：
+                  {loading ? "載入中" : `${numberText(combined)} 人次`}；完整資料時段：
+                  {loading ? "載入中" : `${completeBins}／24`}。
+                  缺值不視為零，合計包含一般旅客，並非活動參加人數。
+                </p>
+              )}
               <div className="source-links">
                 {SOURCE_LINKS.map((l) => (
                   <a key={l.url} href={l.url} target="_blank" rel="noreferrer">
@@ -403,32 +411,6 @@ function Workspace() {
                     </Suspense>
                   ) : (
                     <>
-                      <div className="metrics-row">
-                        <Metric
-                          label="觀測車站"
-                          value="04"
-                          suffix="站"
-                          note="北門 · 大橋頭 · 雙連 · 民權西路"
-                        />
-                        <Metric
-                          label="四站進站合計"
-                          value={loading ? "…" : numberText(combined)}
-                          suffix="人次"
-                          note="18–24 時，全體旅客，非活動人數"
-                        />
-                        <Metric
-                          label={`${station.name}・${timeText(minute)} 進站推估`}
-                          value={loading ? "…" : numberText(flow[selected]?.count)}
-                          suffix="人次"
-                          note="人次／分；小時觀測量依情境權重拆分"
-                        />
-                        <Metric
-                          label="完整資料時段"
-                          value={loading ? "…" : `${completeBins} / 24`}
-                          suffix="筆"
-                          note="4 站 × 6 小時；缺值不視為零"
-                        />
-                      </div>
                       <div className="map-layout">
                         <section
                           className="map-panel panel"
@@ -661,7 +643,7 @@ function Workspace() {
                       <div className="bottom-note">
                         <SlidersHorizontal size={15} />
                         <span>
-                          本頁為路徑示意；預測與候車情境請看「模型與候車」。路徑不是實測足跡。
+                          本頁為路徑示意；預測、候車與班次比較請看「研究成果」。路徑不是實測足跡。
                         </span>
                         <a
                           download={`四站人流-${date}.csv`}
@@ -734,28 +716,6 @@ function Workspace() {
           </footer>
         </main>
       </div>
-    </div>
-  );
-}
-function Metric({
-  label,
-  value,
-  suffix,
-  note,
-}: {
-  label: string;
-  value: string;
-  suffix: string;
-  note: string;
-}) {
-  return (
-    <div className="metric">
-      <span className="metric-label">{label}</span>
-      <div>
-        <strong className="num">{value}</strong>
-        <span className="metric-unit">{suffix}</span>
-      </div>
-      <small>{note}</small>
     </div>
   );
 }

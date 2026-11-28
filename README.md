@@ -4,7 +4,7 @@
 
 *DEMO 展示範例：點圖進入網站。畫面中的列車位置與候車人數是模型回放，不是即時監測或活動當日實測。*
 
-[公開網站](https://shu-ming0808.github.io/Statistical-Practice-final/) · [詳細預測與活動模擬班表](https://shu-ming0808.github.io/Statistical-Practice-final/#/research) · [增減班比較](https://shu-ming0808.github.io/Statistical-Practice-final/#/research?tab=dispatch) · [英文研究論文 PDF](output/pdf/Dadaocheng_Metro_Demand_and_Timetable_Research_Manuscript.pdf)
+[公開網站](https://shu-ming0808.github.io/Statistical-Practice-final/) · [詳細預測與活動模擬班表](https://shu-ming0808.github.io/Statistical-Practice-final/#/research) · [班次決策](https://shu-ming0808.github.io/Statistical-Practice-final/#/research?tab=dispatch) · [英文研究論文 PDF](output/pdf/Dadaocheng_Metro_Demand_and_Timetable_Research_Manuscript.pdf)
 
 ## 研究問題與資料
 
