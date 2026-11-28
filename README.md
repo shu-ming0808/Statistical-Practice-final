@@ -63,7 +63,7 @@ Ridge 用標準化設計向量 z（含車站、時段與交互作用）：
 $$
 (\hat\beta_0,\hat\beta)
 =\arg\min_{\beta_0,\beta}
-\left\{\frac1n\sum_i(y_i-\beta_0-z_i^\top\beta)^2+\lambda\|\beta\|_2^2\right\},
+\left(\frac1n\sum_i(y_i-\beta_0-z_i^\top\beta)^2+\lambda\lVert\beta\rVert_2^2\right),
 \qquad \hat y=\max(0,\hat\beta_0+z^\top\hat\beta).
 $$
 
@@ -89,8 +89,8 @@ GAM 使用加法平滑與懲罰，資料支持不足的欄位維持線性；XGBo
 
 $$
 \min_{x\in\mathcal P}
-\left\{\Delta C_{\mathrm{op}}(x)
-+\lambda\frac{196}{60}\frac1S\sum_{s=1}^{S}W_s(x)\right\}.
+\left(\Delta C_{\mathrm{op}}(x)
++\lambda\frac{196}{60}\frac1S\sum_{s=1}^{S}W_s(x)\right).
 $$
 
 x 是有限候選班表，W 是模擬候車人分鐘，λ 是研究者設定的偏好；196/60 元／人分鐘由 2026 最低時薪換算，**不是實測候車價值**。營運成本用 128.05 元／列車公里代理及 18.77 km 全線長度；新增服務另假設一次同長空車回送，取消服務只扣可避免的單程成本，未涵蓋真實整備、司機與機廠限制。每組以 200 次訓練情境選班表，再用 300 次獨立情境評估。原班表包含在候選內；找到的是有限候選中的較佳方案，沒有全域最優保證。
